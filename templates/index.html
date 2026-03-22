@@ -335,6 +335,59 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 .job-position { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
 .job-meta { font-size: 11px; color: var(--text3); }
 
+/* ── Fitness ── */
+.session-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: var(--surface);
+    transition: all 0.2s;
+}
+.session-card.done {
+    border-color: rgba(52,199,157,0.3);
+    background: rgba(52,199,157,0.05);
+}
+.session-top { display: flex; align-items: center; gap: 12px; }
+.session-check {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--border2); cursor: pointer;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; background: transparent; color: transparent;
+}
+.session-check.checked {
+    background: var(--accent2); border-color: var(--accent2); color: #fff;
+}
+.session-name { font-size: 14px; font-weight: 500; flex: 1; }
+.session-note {
+    width: 100%; margin-top: 10px; background: transparent;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 8px 10px; font-size: 12px; color: var(--text2);
+    font-family: inherit; resize: none; outline: none;
+}
+.session-note:focus { border-color: var(--accent); }
+.nutr-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+    border-left: 3px solid;
+}
+.nutr-value { font-family: 'Outfit'; font-size: 24px; font-weight: 700; }
+.nutr-label { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.weight-bar {
+    border-radius: 4px; display: flex; align-items: flex-end;
+    justify-content: center; padding-bottom: 4px; min-height: 20px;
+}
+.phase-btn {
+    flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 6px; font-size: 12px; color: var(--text2);
+    background: transparent; cursor: pointer; text-align: center;
+    font-family: inherit; transition: all 0.15s;
+}
+.phase-btn.active {
+    border-color: var(--accent); color: var(--accent);
+    background: var(--accent-glow);
+}
+
 /* ── Learning Plan ── */
 .quarter-card {
     background: var(--surface);
@@ -494,6 +547,9 @@ textarea.form-input { resize: vertical; min-height: 80px; }
             <span class="nav-icon">&#9733;</span> Job Applications
             <span class="nav-badge" id="jobs-badge">0</span>
         </div>
+        <div class="nav-item" onclick="navigate('fitness')">
+            <span class="nav-icon">&#9883;</span> Fitness
+        </div>
         <div class="nav-item" onclick="navigate('learning')">
             <span class="nav-icon">&#9655;</span> Learning Plan
             <span class="nav-badge" id="learning-badge">0%</span>
@@ -614,6 +670,23 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     </div>
     <div class="stats-grid" id="jobs-stats"></div>
     <div class="pipeline" id="jobs-pipeline"></div>
+</div>
+
+<!-- ═══════════════════ FITNESS ═══════════════════ -->
+<div id="sec-fitness" class="section">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div class="page-title">Training Log</div>
+            <div class="page-subtitle" id="fit-phase-sub">3-month transformation</div>
+        </div>
+        <div style="display:flex;gap:6px;" id="fit-tabs">
+            <button class="btn btn-accent" onclick="setFitTab('tracker')">Weekly Log</button>
+            <button class="btn" onclick="setFitTab('nutrition')">Nutrition</button>
+            <button class="btn" onclick="setFitTab('progress')">Progress</button>
+        </div>
+    </div>
+    <div class="stats-grid" id="fit-stats"></div>
+    <div id="fit-content"></div>
 </div>
 
 <!-- ═══════════════════ LEARNING PLAN ═══════════════════ -->
@@ -1264,6 +1337,208 @@ async function saveJob(e, id) {
     closeModal(); loadJobs();
 }
 
+// ── Fitness ──
+const FIT_SESSIONS = ['Mon — Upper Strength', 'Tue — HIIT + Core', 'Wed — Lower Strength', 'Thu — Cardio + Mobility', 'Fri — Full Body Circuit'];
+const FIT_PHASES = ['Phase 1 — Foundation', 'Phase 2 — Build', 'Phase 3 — Peak'];
+let fitTab = 'tracker';
+let fitWeekOffset = 0;
+
+function getFitWeekKey(offset = 0) {
+    const d = new Date();
+    d.setDate(d.getDate() - d.getDay() + 1 + offset * 7);
+    return `w${d.getFullYear()}_${String(d.getMonth()+1).padStart(2,'0')}_${String(d.getDate()).padStart(2,'0')}`;
+}
+function getFitWeekLabel(offset = 0) {
+    const d = new Date();
+    d.setDate(d.getDate() - d.getDay() + 1 + offset * 7);
+    const end = new Date(d); end.setDate(d.getDate() + 4);
+    const fmt = dt => dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return `${fmt(d)} – ${fmt(end)}`;
+}
+
+function setFitTab(t) {
+    fitTab = t;
+    document.querySelectorAll('#fit-tabs .btn').forEach((b, i) => {
+        b.classList.toggle('btn-accent', ['tracker','nutrition','progress'][i] === t);
+    });
+    loadFitness();
+}
+
+async function loadFitness() {
+    const [profile, weightLog] = await Promise.all([api('fitness/profile'), api('fitness/weight')]);
+    const weekKey = getFitWeekKey(fitWeekOffset);
+    const sessions = await api('fitness/sessions/' + weekKey);
+    const doneSessions = Object.values(sessions).filter(v => v?.done).length;
+
+    document.getElementById('fit-phase-sub').textContent = '3-month transformation · ' + FIT_PHASES[profile.phase || 0];
+
+    document.getElementById('fit-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Sessions</div><div class="stat-value">${doneSessions}<span style="font-size:16px;color:var(--text3)"> / 5</span></div><div class="stat-sub">${Math.round(doneSessions/5*100)}% this week</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Last Weight</div><div class="stat-value" style="color:var(--accent2)">${weightLog.length ? weightLog[weightLog.length-1].kg : '—'}<span style="font-size:14px"> kg</span></div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Entries</div><div class="stat-value" style="color:var(--accent3)">${weightLog.length}</div><div class="stat-sub">weight logs</div></div>
+    `;
+
+    if (fitTab === 'tracker') renderFitTracker(sessions, doneSessions, weekKey);
+    else if (fitTab === 'nutrition') renderFitNutrition(profile);
+    else renderFitProgress(weightLog);
+}
+
+function renderFitTracker(sessions, doneSessions, weekKey) {
+    const label = fitWeekOffset === 0 ? 'This week' : fitWeekOffset === -1 ? 'Last week' : getFitWeekLabel(fitWeekOffset);
+    let html = `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <button class="btn btn-sm" onclick="fitWeekOffset--;loadFitness()">&#8592;</button>
+            <span style="flex:1;font-size:14px;font-weight:500;">${label} · ${getFitWeekLabel(fitWeekOffset)}</span>
+            ${fitWeekOffset < 0 ? '<button class="btn btn-sm" onclick="fitWeekOffset++;loadFitness()">&#8594;</button>' : ''}
+        </div>
+        <div class="progress-bar" style="margin-bottom:20px;"><div class="progress-fill" style="width:${doneSessions/5*100}%;background:var(--accent2);"></div></div>`;
+
+    FIT_SESSIONS.forEach((name, idx) => {
+        const d = sessions[idx] || {};
+        html += `<div class="session-card ${d.done ? 'done' : ''}">
+            <div class="session-top">
+                <div class="session-check ${d.done ? 'checked' : ''}" onclick="toggleFitSession('${weekKey}',${idx},${!d.done})">&#10003;</div>
+                <span class="session-name" style="${d.done ? 'text-decoration:line-through;opacity:0.5' : ''}">${name}</span>
+            </div>
+            <textarea class="session-note" rows="1" placeholder="Notes — weights, reps, how you felt..."
+                onblur="updateFitNote('${weekKey}',${idx},this.value)">${d.note || ''}</textarea>
+        </div>`;
+    });
+    document.getElementById('fit-content').innerHTML = html;
+}
+
+function renderFitNutrition(profile) {
+    let html = `
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-header"><div class="card-title">Your Profile</div></div>
+            <div class="form-row" style="margin-bottom:12px;">
+                <div class="form-group"><label class="form-label">Weight (kg)</label>
+                    <input class="form-input" type="number" id="fp-weight" value="${profile.weight||''}" placeholder="75" onchange="saveFitProfile()"></div>
+                <div class="form-group"><label class="form-label">Height (cm)</label>
+                    <input class="form-input" type="number" id="fp-height" value="${profile.height||''}" placeholder="178" onchange="saveFitProfile()"></div>
+            </div>
+            <div class="form-row" style="margin-bottom:12px;">
+                <div class="form-group"><label class="form-label">Age</label>
+                    <input class="form-input" type="number" id="fp-age" value="${profile.age||''}" placeholder="24" onchange="saveFitProfile()"></div>
+                <div class="form-group"><label class="form-label">Sex</label>
+                    <select class="form-input" id="fp-sex" onchange="saveFitProfile()">
+                        <option value="male" ${profile.sex==='male'?'selected':''}>Male</option>
+                        <option value="female" ${profile.sex==='female'?'selected':''}>Female</option>
+                    </select></div>
+            </div>
+            <div class="form-group"><label class="form-label">Activity Level</label>
+                <select class="form-input" id="fp-activity" onchange="saveFitProfile()">
+                    <option value="sedentary" ${profile.activity==='sedentary'?'selected':''}>Sedentary — desk job, no walks</option>
+                    <option value="light" ${profile.activity==='light'?'selected':''}>Light — occasional walks</option>
+                    <option value="moderate" ${profile.activity==='moderate'?'selected':''}>Moderate — active lifestyle</option>
+                    <option value="active" ${profile.activity==='active'?'selected':''}>Active — physical job too</option>
+                </select></div>
+        </div>
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-header"><div class="card-title">Current Phase</div></div>
+            <div style="display:flex;gap:8px;">
+                ${FIT_PHASES.map((p,i) => `<button class="phase-btn ${profile.phase===i?'active':''}" onclick="saveFitPhase(${i})">${p}</button>`).join('')}
+            </div>
+        </div>`;
+
+    const w = parseFloat(profile.weight), h = parseFloat(profile.height), a = parseFloat(profile.age);
+    if (w && h && a) {
+        const bmr = profile.sex === 'male' ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161;
+        const mults = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725 };
+        const tdee = Math.round(bmr * (mults[profile.activity] || 1.55));
+        const target = tdee - 350;
+        const protein = Math.round(w * 1.9);
+        const carbs = Math.round((target * 0.4) / 4);
+        const fats = Math.round((target * 0.3) / 9);
+
+        html += `<div class="card"><div class="card-header"><div class="card-title">Daily Targets</div></div>
+            <div class="grid-2" style="margin-bottom:12px;">
+                <div class="nutr-card" style="border-left-color:#378ADD"><div class="nutr-value">${target} kcal</div><div class="nutr-label">Target calories (deficit)</div></div>
+                <div class="nutr-card" style="border-left-color:#1D9E75"><div class="nutr-value">${protein} g</div><div class="nutr-label">Protein minimum</div></div>
+                <div class="nutr-card" style="border-left-color:#BA7517"><div class="nutr-value">${carbs} g</div><div class="nutr-label">Carbohydrates</div></div>
+                <div class="nutr-card" style="border-left-color:#D4537E"><div class="nutr-value">${fats} g</div><div class="nutr-label">Fats</div></div>
+            </div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.7;">TDEE: ${tdee} kcal/day · Deficit: ~${tdee-target} kcal · Expected fat loss: ~0.3–0.4 kg/week</div>
+        </div>`;
+    } else {
+        html += '<div class="empty-state"><div class="empty-state-text">Fill in your profile to see daily targets</div></div>';
+    }
+    document.getElementById('fit-content').innerHTML = html;
+}
+
+function renderFitProgress(weightLog) {
+    let html = `
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-header"><div class="card-title">Log Weight</div></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input class="form-input" type="number" step="0.1" id="new-weight-val" placeholder="74.5" style="width:120px;">
+                <button class="btn btn-accent" onclick="logWeight()">Log Today</button>
+            </div>
+        </div>`;
+
+    if (weightLog.length > 0) {
+        const vals = weightLog.map(e => e.kg);
+        const minW = Math.min(...vals) - 0.5, maxW = Math.max(...vals) + 0.5;
+        const recent = weightLog.slice(-21);
+        const diff = weightLog.length > 1 ? (vals[vals.length-1] - vals[0]).toFixed(1) : 0;
+        const diffColor = diff < 0 ? 'var(--accent2)' : 'var(--text2)';
+        const arrow = diff < 0 ? '↓' : diff > 0 ? '↑' : '→';
+
+        html += `<div class="card" style="margin-bottom:20px;">
+            <div class="card-header"><div class="card-title">Weight Trend · last ${recent.length} entries</div></div>
+            <div style="display:flex;gap:4px;align-items:flex-end;margin-bottom:12px;">
+                ${recent.map(e => {
+                    const pct = maxW > minW ? (e.kg - minW) / (maxW - minW) : 0.5;
+                    const h = Math.max(20, Math.round(pct * 80));
+                    const hue = Math.round((1 - pct) * 140);
+                    return `<div style="flex:1;text-align:center;">
+                        <div class="weight-bar" style="height:${h}px;background:hsl(${hue},60%,50%)">
+                            <span style="font-size:9px;color:#fff;font-weight:500;">${e.kg}</span>
+                        </div>
+                        <div style="font-size:9px;color:var(--text3);margin-top:3px;">${fmtDate(e.date).split(',')[0].split(' ')[0]}</div>
+                    </div>`;
+                }).join('')}
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);">
+                <span>Start: ${vals[0]} kg</span>
+                ${weightLog.length > 1 ? `<span style="color:${diffColor};font-weight:600;">${arrow} ${Math.abs(diff)} kg total</span>` : ''}
+            </div>
+        </div>`;
+    } else {
+        html += '<div class="empty-state"><div class="empty-state-icon">&#9883;</div><div class="empty-state-text">No weight entries yet — log your first one above</div></div>';
+    }
+    document.getElementById('fit-content').innerHTML = html;
+}
+
+async function toggleFitSession(weekKey, idx, done) {
+    await api('fitness/sessions/' + weekKey + '/' + idx, 'POST', { done });
+    loadFitness();
+}
+async function updateFitNote(weekKey, idx, note) {
+    await api('fitness/sessions/' + weekKey + '/' + idx, 'POST', { note });
+}
+async function saveFitProfile() {
+    await api('fitness/profile', 'PUT', {
+        weight: document.getElementById('fp-weight').value,
+        height: document.getElementById('fp-height').value,
+        age: document.getElementById('fp-age').value,
+        sex: document.getElementById('fp-sex').value,
+        activity: document.getElementById('fp-activity').value,
+    });
+    loadFitness();
+}
+async function saveFitPhase(phase) {
+    await api('fitness/profile', 'PUT', { phase });
+    loadFitness();
+}
+async function logWeight() {
+    const v = document.getElementById('new-weight-val').value;
+    if (!v || isNaN(parseFloat(v))) return;
+    await api('fitness/weight', 'POST', { kg: parseFloat(v) });
+    document.getElementById('new-weight-val').value = '';
+    loadFitness();
+}
+
 // ── Learning Plan ──
 let learningView = 'roadmap';
 let dailyDate = new Date().toISOString().split('T')[0];
@@ -1455,6 +1730,7 @@ const loaders = {
     quran: loadQuran,
     projects: loadProjects,
     jobs: loadJobs,
+    fitness: loadFitness,
     learning: loadLearning
 };
 

@@ -109,6 +109,29 @@ class DailyTask(db.Model):
     time_slot = db.Column(db.String(10), default='')
     sort_order = db.Column(db.Integer, default=0)
 
+# ── Fitness Models ──────────────────────────────────────────────────────────
+
+class FitnessProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    weight = db.Column(db.Float, default=0)
+    height = db.Column(db.Float, default=0)
+    age = db.Column(db.Integer, default=0)
+    sex = db.Column(db.String(10), default='male')
+    activity = db.Column(db.String(20), default='moderate')
+    phase = db.Column(db.Integer, default=0)
+
+class FitnessSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    week_key = db.Column(db.String(20))
+    session_index = db.Column(db.Integer)
+    done = db.Column(db.Boolean, default=False)
+    note = db.Column(db.Text, default='')
+
+class WeightEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, default=date.today)
+    kg = db.Column(db.Float)
+
 class JobApplication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company = db.Column(db.String(100))
@@ -444,6 +467,86 @@ def delete_job(id):
     db.session.delete(j)
     db.session.commit()
     return '', 204
+
+# ── Fitness Routes ─────────────────────────────────────────────────────────
+
+@app.route('/api/fitness/profile', methods=['GET'])
+def get_fitness_profile():
+    p = FitnessProfile.query.first()
+    if not p:
+        p = FitnessProfile()
+        db.session.add(p)
+        db.session.commit()
+    return jsonify({'weight': p.weight, 'height': p.height, 'age': p.age, 'sex': p.sex, 'activity': p.activity, 'phase': p.phase})
+
+@app.route('/api/fitness/profile', methods=['PUT'])
+def update_fitness_profile():
+    p = FitnessProfile.query.first()
+    if not p:
+        p = FitnessProfile()
+        db.session.add(p)
+    d = request.json
+    for k in ['weight', 'height', 'age', 'sex', 'activity', 'phase']:
+        if k in d:
+            val = d[k]
+            if k in ('weight', 'height'):
+                val = float(val) if val else 0
+            elif k == 'age':
+                val = int(val) if val else 0
+            elif k == 'phase':
+                val = int(val)
+            setattr(p, k, val)
+    db.session.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/fitness/sessions/<week_key>', methods=['GET'])
+def get_fitness_sessions(week_key):
+    sessions = FitnessSession.query.filter_by(week_key=week_key).all()
+    result = {}
+    for s in sessions:
+        result[str(s.session_index)] = {'done': s.done, 'note': s.note or ''}
+    return jsonify(result)
+
+@app.route('/api/fitness/sessions/<week_key>/<int:idx>', methods=['POST'])
+def toggle_fitness_session(week_key, idx):
+    d = request.json
+    s = FitnessSession.query.filter_by(week_key=week_key, session_index=idx).first()
+    if not s:
+        s = FitnessSession(week_key=week_key, session_index=idx)
+        db.session.add(s)
+    if 'done' in d:
+        s.done = d['done']
+    if 'note' in d:
+        s.note = d['note']
+    db.session.commit()
+    return jsonify({'done': s.done, 'note': s.note})
+
+@app.route('/api/fitness/weight', methods=['GET'])
+def get_weight_log():
+    entries = WeightEntry.query.order_by(WeightEntry.date).all()
+    return jsonify([{'date': e.date.isoformat(), 'kg': e.kg} for e in entries])
+
+@app.route('/api/fitness/weight', methods=['POST'])
+def add_weight_entry():
+    d = request.json
+    e = WeightEntry(kg=float(d['kg']), date=date.fromisoformat(d['date']) if d.get('date') else date.today())
+    db.session.add(e)
+    db.session.commit()
+    return jsonify({'id': e.id, 'date': e.date.isoformat(), 'kg': e.kg}), 201
+
+@app.route('/api/fitness/weight/<int:wid>', methods=['DELETE'])
+def delete_weight_entry(wid):
+    e = WeightEntry.query.get_or_404(wid)
+    db.session.delete(e)
+    db.session.commit()
+    return '', 204
+
+@app.route('/api/fitness/stats')
+def fitness_stats():
+    p = FitnessProfile.query.first()
+    entries = WeightEntry.query.order_by(WeightEntry.date).all()
+    last_weight = entries[-1].kg if entries else None
+    return jsonify({'last_weight': last_weight, 'total_entries': len(entries), 'phase': p.phase if p else 0})
 
 # ── Learning Plan Routes ───────────────────────────────────────────────────
 
