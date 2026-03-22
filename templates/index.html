@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Second Brain</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+    --bg: #06060b;
+    --bg2: #0c0c14;
+    --surface: rgba(16, 16, 28, 0.85);
+    --surface2: rgba(24, 24, 40, 0.7);
+    --surface3: rgba(32, 32, 52, 0.5);
+    --glass: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.1);
+    --accent: #d4a24e;
+    --accent-glow: rgba(212,162,78,0.15);
+    --accent2: #34c79d;
+    --accent3: #636cf1;
+    --accent4: #e05c7a;
+    --text: #e2dfd8;
+    --text2: #8a877e;
+    --text3: #5a584f;
+    --danger: #e05252;
+    --success: #34c79d;
+    --warning: #e8a849;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+h1,h2,h3,h4,h5 { font-family: 'Outfit', sans-serif; font-weight: 600; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+input,select,textarea,button { font-family: inherit; }
+
+/* ── Sidebar ── */
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: transform 0.3s;
+}
+.logo { display: flex; align-items: center; gap: 12px; padding: 0 8px; margin-bottom: 32px; }
+.logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), #b8832e);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: #0a0a0f;
+    font-family: 'Outfit';
+}
+.logo-text { font-family: 'Outfit'; font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.logo-sub { font-size: 11px; color: var(--text3); font-weight: 400; letter-spacing: 1px; text-transform: uppercase; }
+
+.nav-section { margin-bottom: 24px; }
+.nav-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text3); padding: 0 12px; margin-bottom: 8px;
+}
+.nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: all 0.15s;
+    color: var(--text2); font-size: 14px; font-weight: 500;
+    margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px solid rgba(212,162,78,0.15);
+}
+.nav-icon { font-size: 18px; width: 24px; text-align: center; }
+.nav-badge {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    background: var(--surface3); padding: 2px 8px; border-radius: 10px;
+    color: var(--text2);
+}
+
+/* ── Main Content ── */
+.main {
+    flex: 1;
+    margin-left: 260px;
+    padding: 32px 40px;
+    min-height: 100vh;
+    background: var(--bg);
+}
+.page-header {
+    margin-bottom: 32px;
+}
+.page-title {
+    font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+    margin-bottom: 4px;
+}
+.page-subtitle { color: var(--text2); font-size: 14px; }
+
+/* ── Cards ── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(20px);
+}
+.card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+}
+.card-title { font-size: 14px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
+
+/* ── Stat Cards ── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+}
+.stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+}
+.stat-card[data-color="teal"]::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+.stat-card[data-color="purple"]::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+.stat-card[data-color="pink"]::before { background: linear-gradient(90deg, var(--accent4), transparent); }
+.stat-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-value { font-family: 'Outfit'; font-size: 28px; font-weight: 700; letter-spacing: -1px; }
+.stat-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+/* ── Grid Layouts ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+    text-align: left; padding: 12px 16px;
+    font-size: 11px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+}
+td {
+    padding: 12px 16px; font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+}
+tr:hover td { color: var(--text); background: var(--glass); }
+
+/* ── Buttons ── */
+.btn {
+    padding: 8px 16px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text);
+    transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { background: var(--surface3); border-color: var(--border2); }
+.btn-accent {
+    background: var(--accent); color: #0a0a0f; border-color: var(--accent);
+    font-weight: 600;
+}
+.btn-accent:hover { background: #c49340; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-danger { color: var(--danger); }
+.btn-danger:hover { background: rgba(224,82,82,0.1); border-color: var(--danger); }
+.btn-icon {
+    width: 32px; height: 32px; padding: 0; display: flex;
+    align-items: center; justify-content: center; border-radius: 8px;
+}
+
+/* ── Forms ── */
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-input {
+    width: 100%; padding: 10px 14px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-size: 14px; outline: none; transition: border 0.15s;
+}
+.form-input:focus { border-color: var(--accent); }
+select.form-input { cursor: pointer; }
+textarea.form-input { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── Modal ── */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    z-index: 1000; display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px;
+    width: 90%; max-width: 520px; max-height: 85vh; overflow-y: auto;
+    box-shadow: var(--shadow);
+}
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+
+/* ── Tags / Badges ── */
+.badge {
+    display: inline-flex; padding: 3px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.badge-income { background: rgba(52,199,157,0.12); color: var(--accent2); }
+.badge-expense { background: rgba(224,82,82,0.12); color: var(--danger); }
+.badge-savings { background: rgba(212,162,78,0.12); color: var(--accent); }
+.badge-investment { background: rgba(99,108,241,0.12); color: var(--accent3); }
+.badge-applied { background: rgba(99,108,241,0.12); color: var(--accent3); }
+.badge-phone_screen { background: rgba(212,162,78,0.12); color: var(--accent); }
+.badge-interview { background: rgba(52,199,157,0.12); color: var(--accent2); }
+.badge-offer { background: rgba(52,199,157,0.2); color: #2ae6a8; }
+.badge-rejected { background: rgba(224,82,82,0.12); color: var(--danger); }
+.badge-accepted { background: rgba(52,199,157,0.25); color: #2ae6a8; }
+.badge-active { background: rgba(52,199,157,0.12); color: var(--accent2); }
+.badge-paused { background: rgba(212,162,78,0.12); color: var(--accent); }
+.badge-completed { background: rgba(99,108,241,0.12); color: var(--accent3); }
+
+/* ── Quran Grid ── */
+.surah-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+}
+.surah-cell {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+}
+.surah-cell:hover { border-color: var(--border2); transform: translateY(-1px); }
+.surah-cell.read { border-color: rgba(52,199,157,0.3); }
+.surah-cell.read::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent2);
+}
+.surah-cell.memorized { border-color: rgba(212,162,78,0.3); }
+.surah-cell.memorized::before { background: var(--accent); }
+.surah-num { font-size: 10px; color: var(--text3); font-weight: 600; }
+.surah-name { font-size: 13px; font-weight: 500; margin: 2px 0; }
+.surah-ar { font-size: 14px; color: var(--text2); direction: rtl; }
+.surah-progress-bar {
+    height: 3px; background: var(--border); border-radius: 2px;
+    margin-top: 6px; overflow: hidden;
+}
+.surah-progress-fill { height: 100%; background: var(--accent2); border-radius: 2px; transition: width 0.3s; }
+
+/* ── Project Cards ── */
+.project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: all 0.15s;
+}
+.project-card:hover { border-color: var(--border2); }
+.project-color-bar { width: 100%; height: 3px; border-radius: 2px; margin-bottom: 14px; }
+.project-name { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.project-desc { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
+.project-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text3); margin-bottom: 14px; }
+.progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.task-list { margin-top: 14px; }
+.task-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0; font-size: 13px; color: var(--text2);
+}
+.task-item.done { text-decoration: line-through; color: var(--text3); }
+.task-check {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 2px solid var(--border2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; transition: all 0.15s; flex-shrink: 0;
+    background: transparent; color: transparent;
+}
+.task-check.checked { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.task-input {
+    flex: 1; background: none; border: none; border-bottom: 1px solid var(--border);
+    color: var(--text); padding: 4px 0; font-size: 13px; outline: none;
+}
+
+/* ── Job Pipeline ── */
+.pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.pipeline-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    min-height: 200px;
+}
+.pipeline-title {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text3); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+}
+.pipeline-count {
+    background: var(--surface3); padding: 1px 7px; border-radius: 8px;
+    font-size: 11px;
+}
+.job-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px;
+    margin-bottom: 8px; cursor: pointer; transition: all 0.15s;
+}
+.job-card:hover { border-color: var(--border2); }
+.job-company { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.job-position { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+.job-meta { font-size: 11px; color: var(--text3); }
+
+/* ── Learning Plan ── */
+.quarter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.quarter-header {
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.15s;
+    border-left: 4px solid;
+}
+.quarter-header:hover { background: var(--glass); }
+.quarter-name { font-size: 16px; font-weight: 600; }
+.quarter-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.quarter-progress { font-size: 13px; color: var(--text2); font-weight: 600; }
+.quarter-body { display: none; padding: 0 20px 20px; }
+.quarter-body.open { display: block; }
+.week-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+.week-header {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.15s;
+}
+.week-header:hover { background: var(--surface3); }
+.week-title { font-size: 14px; font-weight: 500; }
+.week-goal { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.week-tasks { display: none; padding: 8px 16px 12px; }
+.week-tasks.open { display: block; }
+.ltask-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text2);
+}
+.ltask-item.done { text-decoration: line-through; color: var(--text3); }
+.ltask-cat {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+.ltask-cat.weekday { background: rgba(99,108,241,0.12); color: var(--accent3); }
+.ltask-cat.weekend { background: rgba(212,162,78,0.12); color: var(--accent); }
+.daily-planner-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.daily-date-nav {
+    padding: 8px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.15s;
+}
+.daily-date-nav:hover { background: var(--surface3); }
+.daily-date-display {
+    font-family: 'Outfit';
+    font-size: 20px;
+    font-weight: 600;
+    min-width: 220px;
+    text-align: center;
+}
+
+/* ── Empty State ── */
+.empty-state {
+    text-align: center; padding: 48px 24px; color: var(--text3);
+}
+.empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state-text { font-size: 14px; }
+
+/* ── Section visibility ── */
+.section { display: none; }
+.section.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+    .pipeline { grid-template-columns: repeat(3, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: none; }
+    .main { margin-left: 0; padding: 20px 16px; }
+    .pipeline { grid-template-columns: 1fr 1fr; }
+    .surah-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .mobile-toggle {
+        display: flex !important;
+        position: fixed; top: 16px; left: 16px; z-index: 101;
+        width: 40px; height: 40px; border-radius: 10px;
+        background: var(--surface); border: 1px solid var(--border);
+        align-items: center; justify-content: center;
+        cursor: pointer; font-size: 18px;
+    }
+}
+.mobile-toggle { display: none; }
+</style>
+</head>
+<body>
+
+<div class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</div>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon">SB</div>
+        <div>
+            <div class="logo-text">Second Brain</div>
+            <div class="logo-sub">Command Center</div>
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" onclick="navigate('dashboard')">
+            <span class="nav-icon">&#9632;</span> Dashboard
+        </div>
+    </div>
+    <div class="nav-section">
+        <div class="nav-label">Modules</div>
+        <div class="nav-item" onclick="navigate('finances')">
+            <span class="nav-icon">&#9830;</span> Finances
+        </div>
+        <div class="nav-item" onclick="navigate('quran')">
+            <span class="nav-icon">&#9789;</span> Quran
+        </div>
+        <div class="nav-item" onclick="navigate('projects')">
+            <span class="nav-icon">&#9881;</span> Projects
+        </div>
+        <div class="nav-item" onclick="navigate('jobs')">
+            <span class="nav-icon">&#9733;</span> Job Applications
+            <span class="nav-badge" id="jobs-badge">0</span>
+        </div>
+        <div class="nav-item" onclick="navigate('learning')">
+            <span class="nav-icon">&#9655;</span> Learning Plan
+            <span class="nav-badge" id="learning-badge">0%</span>
+        </div>
+    </div>
+</aside>
+
+<!-- ── Main Content ── -->
+<main class="main">
+
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div id="sec-dashboard" class="section active">
+    <div class="page-header">
+        <div class="page-title">Dashboard</div>
+        <div class="page-subtitle" id="dash-date"></div>
+    </div>
+    <div class="stats-grid" id="dash-stats"></div>
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header"><div class="card-title">Recent Transactions</div></div>
+            <div id="dash-recent-tx"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><div class="card-title">Quick Actions</div></div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn" onclick="navigate('finances'); setTimeout(()=>openModal('transaction'),100)">&#43; Add Transaction</button>
+                <button class="btn" onclick="navigate('quran'); setTimeout(()=>openModal('reading'),100)">&#43; Log Quran Reading</button>
+                <button class="btn" onclick="navigate('projects'); setTimeout(()=>openModal('project'),100)">&#43; New Project</button>
+                <button class="btn" onclick="navigate('jobs'); setTimeout(()=>openModal('job'),100)">&#43; Add Job Application</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════ FINANCES ═══════════════════ -->
+<div id="sec-finances" class="section">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div class="page-title">Finances</div>
+            <div class="page-subtitle">Track your money flow</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button class="btn" onclick="openModal('account')">&#43; Account</button>
+            <button class="btn btn-accent" onclick="openModal('transaction')">&#43; Transaction</button>
+        </div>
+    </div>
+    <div class="stats-grid" id="fin-stats"></div>
+    <div id="fin-accounts" style="margin-bottom:24px;"></div>
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header"><div class="card-title">Spending by Category</div></div>
+            <div style="max-height:300px;display:flex;justify-content:center;"><canvas id="chart-category"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><div class="card-title">Income vs Expenses</div></div>
+            <div style="max-height:300px;"><canvas id="chart-monthly"></canvas></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Transactions</div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Account</th><th></th></tr></thead>
+                <tbody id="tx-table"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════ QURAN ═══════════════════ -->
+<div id="sec-quran" class="section">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div class="page-title">Quran Tracker</div>
+            <div class="page-subtitle">Your journey through the Holy Quran</div>
+        </div>
+        <button class="btn btn-accent" onclick="openModal('reading')">&#43; Log Reading</button>
+    </div>
+    <div class="stats-grid" id="quran-stats"></div>
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-header"><div class="card-title">Surah Progress</div></div>
+        <div class="surah-grid" id="surah-grid"></div>
+    </div>
+    <div class="card">
+        <div class="card-header"><div class="card-title">Reading Log</div></div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Date</th><th>Surah</th><th>Ayahs</th><th>Duration</th><th>Type</th><th>Notes</th><th></th></tr></thead>
+                <tbody id="log-table"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════ PROJECTS ═══════════════════ -->
+<div id="sec-projects" class="section">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div class="page-title">Projects</div>
+            <div class="page-subtitle">Manage your work</div>
+        </div>
+        <button class="btn btn-accent" onclick="openModal('project')">&#43; New Project</button>
+    </div>
+    <div class="stats-grid" id="proj-stats"></div>
+    <div class="grid-2" id="proj-grid"></div>
+</div>
+
+<!-- ═══════════════════ JOBS ═══════════════════ -->
+<div id="sec-jobs" class="section">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div class="page-title">Job Applications</div>
+            <div class="page-subtitle">Track your career moves</div>
+        </div>
+        <button class="btn btn-accent" onclick="openModal('job')">&#43; Add Application</button>
+    </div>
+    <div class="stats-grid" id="jobs-stats"></div>
+    <div class="pipeline" id="jobs-pipeline"></div>
+</div>
+
+<!-- ═══════════════════ LEARNING PLAN ═══════════════════ -->
+<div id="sec-learning" class="section">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div class="page-title">2026 Learning Plan</div>
+            <div class="page-subtitle">Trimestrial AI Security Roadmap</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button class="btn" onclick="learningView='roadmap';loadLearning()">Roadmap</button>
+            <button class="btn" onclick="learningView='daily';loadLearning()">Daily Planner</button>
+        </div>
+    </div>
+    <div class="stats-grid" id="learning-stats"></div>
+    <div id="learning-content"></div>
+</div>
+
+</main>
+
+<!-- ── Modal ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// ── State ──
+let chartCat = null, chartMonthly = null;
+let allSurahs = [];
+
+// ── Navigation ──
+function navigate(section) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-' + section).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    event?.target?.closest?.('.nav-item')?.classList.add('active') ||
+        document.querySelector(`.nav-item[onclick*="${section}"]`)?.classList.add('active');
+    document.querySelector('.sidebar').classList.remove('open');
+    loaders[section]?.();
+}
+
+// ── API ──
+async function api(path, method = 'GET', body = null) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch('/api/' + path, opts);
+    if (r.status === 204) return null;
+    return r.json();
+}
+
+// ── Modal ──
+function openModal(type, data = null) {
+    const el = document.getElementById('modal-content');
+    el.innerHTML = modalForms[type](data);
+    document.getElementById('modal-overlay').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+}
+
+// ── Format ──
+function fmtMoney(n) { return (n || 0).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'; }
+
+// ── Dashboard ──
+async function loadDashboard() {
+    const d = await api('dashboard');
+    document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('dash-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Net Worth</div><div class="stat-value">${fmtMoney(d.finance.net_worth)} EUR</div><div class="stat-sub">Savings: ${fmtMoney(d.finance.savings)}</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Income</div><div class="stat-value" style="color:var(--accent2)">${fmtMoney(d.finance.income)}</div><div class="stat-sub">Expenses: ${fmtMoney(d.finance.expenses)}</div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Quran</div><div class="stat-value" style="color:var(--accent3)">${d.quran.completed}/114</div><div class="stat-sub">Surahs completed</div></div>
+        <div class="stat-card" data-color="pink"><div class="stat-label">Projects</div><div class="stat-value" style="color:var(--accent4)">${d.projects.active}</div><div class="stat-sub">Active &middot; ${d.projects.completed} done</div></div>
+        <div class="stat-card"><div class="stat-label">Job Hunt</div><div class="stat-value">${d.jobs.active}</div><div class="stat-sub">${d.jobs.offers} offers &middot; ${d.jobs.total} total</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Learning Plan</div><div class="stat-value" style="color:var(--accent2)">${d.learning.total ? Math.round(d.learning.done/d.learning.total*100) : 0}%</div><div class="stat-sub">${d.learning.done}/${d.learning.total} tasks done</div></div>
+    `;
+    const txHtml = d.recent_transactions.length ? d.recent_transactions.map(t => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+            <div><span class="badge badge-${t.type}">${t.type}</span> <span style="margin-left:8px;">${t.description || t.category}</span></div>
+            <div style="font-weight:600;color:${t.type==='income'?'var(--accent2)':'var(--text)'}">${t.type==='income'?'+':'-'}${fmtMoney(t.amount)}</div>
+        </div>
+    `).join('') : '<div class="empty-state"><div class="empty-state-text">No transactions yet</div></div>';
+    document.getElementById('dash-recent-tx').innerHTML = txHtml;
+}
+
+// ── Finances ──
+async function loadFinances() {
+    const [txs, accounts, stats] = await Promise.all([api('transactions'), api('accounts'), api('finance/stats')]);
+    const totalBal = accounts.reduce((s, a) => s + a.balance, 0);
+    const income = txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    document.getElementById('fin-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Total Balance</div><div class="stat-value">${fmtMoney(totalBal)} EUR</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Total Income</div><div class="stat-value" style="color:var(--accent2)">+${fmtMoney(income)}</div></div>
+        <div class="stat-card" data-color="pink"><div class="stat-label">Total Expenses</div><div class="stat-value" style="color:var(--danger)">-${fmtMoney(expense)}</div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Investments</div><div class="stat-value" style="color:var(--accent3)">${fmtMoney(accounts.filter(a=>a.type==='investment').reduce((s,a)=>s+a.balance,0))}</div></div>
+    `;
+    // Accounts
+    document.getElementById('fin-accounts').innerHTML = accounts.length ? `<div style="display:flex;gap:12px;flex-wrap:wrap;">${accounts.map(a => `
+        <div class="card" style="flex:1;min-width:180px;border-top:3px solid ${a.color};padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:start;">
+                <div>
+                    <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">${a.type}</div>
+                    <div style="font-size:16px;font-weight:600;margin:4px 0;">${a.name}</div>
+                    <div style="font-family:Outfit;font-size:22px;font-weight:700;">${fmtMoney(a.balance)} ${a.currency}</div>
+                </div>
+                <button class="btn btn-icon btn-sm btn-danger" onclick="deleteAccount(${a.id})">&#10005;</button>
+            </div>
+        </div>
+    `).join('')}</div>` : '';
+    // Transactions table
+    document.getElementById('tx-table').innerHTML = txs.length ? txs.map(t => `
+        <tr>
+            <td>${fmtDate(t.date)}</td>
+            <td><span class="badge badge-${t.type}">${t.type}</span></td>
+            <td>${t.category||'-'}</td>
+            <td>${t.description||'-'}</td>
+            <td style="font-weight:600;color:${t.type==='income'?'var(--accent2)':'var(--text)'}">${t.type==='income'?'+':'-'}${fmtMoney(t.amount)}</td>
+            <td>${t.account||'-'}</td>
+            <td><button class="btn btn-icon btn-sm btn-danger" onclick="deleteTx(${t.id})">&#10005;</button></td>
+        </tr>
+    `).join('') : '<tr><td colspan="7" class="empty-state"><div class="empty-state-text">No transactions</div></td></tr>';
+    // Charts
+    renderCharts(stats);
+}
+
+function renderCharts(stats) {
+    const catCtx = document.getElementById('chart-category');
+    const monthCtx = document.getElementById('chart-monthly');
+    if (chartCat) chartCat.destroy();
+    if (chartMonthly) chartMonthly.destroy();
+    const catLabels = Object.keys(stats.by_category);
+    const catData = Object.values(stats.by_category);
+    const colors = ['#d4a24e','#34c79d','#636cf1','#e05c7a','#8b5cf6','#06b6d4','#f97316','#ec4899'];
+    if (catLabels.length) {
+        chartCat = new Chart(catCtx, {
+            type: 'doughnut',
+            data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: colors.slice(0, catLabels.length), borderWidth: 0 }] },
+            options: {
+                responsive: true, maintainAspectRatio: true,
+                plugins: { legend: { position: 'bottom', labels: { color: '#8a877e', font: { family: 'DM Sans', size: 12 }, padding: 16 } } },
+                cutout: '65%'
+            }
+        });
+    }
+    if (stats.monthly.labels.length) {
+        chartMonthly = new Chart(monthCtx, {
+            type: 'bar',
+            data: {
+                labels: stats.monthly.labels,
+                datasets: [
+                    { label: 'Income', data: stats.monthly.income, backgroundColor: 'rgba(52,199,157,0.7)', borderRadius: 4 },
+                    { label: 'Expenses', data: stats.monthly.expenses, backgroundColor: 'rgba(224,82,82,0.7)', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: true,
+                plugins: { legend: { labels: { color: '#8a877e', font: { family: 'DM Sans', size: 12 } } } },
+                scales: {
+                    x: { ticks: { color: '#5a584f' }, grid: { color: 'rgba(255,255,255,0.03)' } },
+                    y: { ticks: { color: '#5a584f' }, grid: { color: 'rgba(255,255,255,0.03)' } }
+                }
+            }
+        });
+    }
+}
+
+async function deleteTx(id) { await api('transactions/' + id, 'DELETE'); loadFinances(); }
+async function deleteAccount(id) { await api('accounts/' + id, 'DELETE'); loadFinances(); }
+
+// ── Quran ──
+async function loadQuran() {
+    const [surahs, logs] = await Promise.all([api('quran/surahs'), api('quran/log')]);
+    allSurahs = surahs;
+    const completed = surahs.filter(s => s.completed).length;
+    const memorized = surahs.filter(s => s.memorized).length;
+    const totalAyahs = surahs.reduce((s, su) => s + su.total_ayahs, 0);
+    const readAyahs = surahs.reduce((s, su) => s + su.ayahs_read, 0);
+    const juzDone = new Set(surahs.filter(s => s.completed).map(s => s.juz)).size;
+    document.getElementById('quran-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Surahs Read</div><div class="stat-value">${completed}<span style="font-size:16px;color:var(--text3)"> / 114</span></div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Ayahs Read</div><div class="stat-value" style="color:var(--accent2)">${readAyahs.toLocaleString()}<span style="font-size:14px;color:var(--text3)"> / ${totalAyahs.toLocaleString()}</span></div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Memorized</div><div class="stat-value" style="color:var(--accent3)">${memorized}</div></div>
+        <div class="stat-card"><div class="stat-label">Juz Covered</div><div class="stat-value">${juzDone}<span style="font-size:16px;color:var(--text3)"> / 30</span></div></div>
+    `;
+    document.getElementById('surah-grid').innerHTML = surahs.map(s => {
+        const pct = s.total_ayahs ? Math.round(s.ayahs_read / s.total_ayahs * 100) : 0;
+        const cls = s.memorized ? 'memorized' : s.completed ? 'read' : '';
+        return `<div class="surah-cell ${cls}" onclick="openSurahModal(${s.surah_number})">
+            <div class="surah-num">${s.surah_number}</div>
+            <div class="surah-name">${s.surah_name}</div>
+            <div class="surah-ar">${s.surah_name_ar}</div>
+            <div class="surah-progress-bar"><div class="surah-progress-fill" style="width:${pct}%"></div></div>
+        </div>`;
+    }).join('');
+    document.getElementById('log-table').innerHTML = logs.length ? logs.map(l => `
+        <tr>
+            <td>${fmtDate(l.date)}</td>
+            <td>${l.surah_name} (${l.surah_number})</td>
+            <td>${l.from_ayah} - ${l.to_ayah}</td>
+            <td>${l.duration ? l.duration + ' min' : '-'}</td>
+            <td><span class="badge badge-${l.type === 'memorization' ? 'savings' : 'active'}">${l.type}</span></td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${l.notes||'-'}</td>
+            <td><button class="btn btn-icon btn-sm btn-danger" onclick="deleteLog(${l.id})">&#10005;</button></td>
+        </tr>
+    `).join('') : '<tr><td colspan="7" class="empty-state"><div class="empty-state-text">No readings logged</div></td></tr>';
+}
+
+async function deleteLog(id) { await api('quran/log/' + id, 'DELETE'); loadQuran(); }
+
+function openSurahModal(num) {
+    const s = allSurahs.find(su => su.surah_number === num);
+    if (!s) return;
+    const pct = s.total_ayahs ? Math.round(s.ayahs_read / s.total_ayahs * 100) : 0;
+    document.getElementById('modal-content').innerHTML = `
+        <div class="modal-title">${s.surah_number}. ${s.surah_name} <span style="color:var(--text3);font-size:18px;">${s.surah_name_ar}</span></div>
+        <div style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:6px;"><span>Progress</span><span>${s.ayahs_read}/${s.total_ayahs} ayahs (${pct}%)</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--accent2);"></div></div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Ayahs Read</label>
+            <input type="number" class="form-input" id="surah-ayahs" value="${s.ayahs_read}" min="0" max="${s.total_ayahs}">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+                    <input type="checkbox" id="surah-completed" ${s.completed?'checked':''} style="width:18px;height:18px;accent-color:var(--accent2);"> Completed
+                </label>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+                    <input type="checkbox" id="surah-memorized" ${s.memorized?'checked':''} style="width:18px;height:18px;accent-color:var(--accent);"> Memorized
+                </label>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="saveSurah(${num})">Save</button>
+        </div>
+    `;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function saveSurah(num) {
+    await api('quran/surahs/' + num, 'PUT', {
+        ayahs_read: parseInt(document.getElementById('surah-ayahs').value),
+        completed: document.getElementById('surah-completed').checked,
+        memorized: document.getElementById('surah-memorized').checked
+    });
+    closeModal(); loadQuran();
+}
+
+// ── Projects ──
+async function loadProjects() {
+    const projects = await api('projects');
+    const active = projects.filter(p => p.status === 'active').length;
+    const completed = projects.filter(p => p.status === 'completed').length;
+    document.getElementById('proj-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Total Projects</div><div class="stat-value">${projects.length}</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Active</div><div class="stat-value" style="color:var(--accent2)">${active}</div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--accent3)">${completed}</div></div>
+    `;
+    document.getElementById('proj-grid').innerHTML = projects.length ? projects.map(p => {
+        const taskHtml = (p.tasks || []).map(t => `
+            <div class="task-item ${t.completed?'done':''}">
+                <div class="task-check ${t.completed?'checked':''}" onclick="toggleTask(${t.id},${!t.completed})">&#10003;</div>
+                <span style="flex:1">${t.title}</span>
+                <button class="btn btn-icon btn-sm btn-danger" style="width:24px;height:24px;font-size:10px;" onclick="deleteTask(${t.id})">&#10005;</button>
+            </div>
+        `).join('');
+        return `<div class="project-card">
+            <div class="project-color-bar" style="background:${p.color}"></div>
+            <div style="display:flex;justify-content:space-between;align-items:start;">
+                <div class="project-name">${p.name}</div>
+                <div style="display:flex;gap:4px;">
+                    <button class="btn btn-icon btn-sm" onclick="openModal('project',${JSON.stringify(p).replace(/"/g,'&quot;')})">&#9998;</button>
+                    <button class="btn btn-icon btn-sm btn-danger" onclick="deleteProject(${p.id})">&#10005;</button>
+                </div>
+            </div>
+            <div class="project-desc">${p.description||''}</div>
+            <div class="project-meta">
+                <span class="badge badge-${p.status}">${p.status}</span>
+                ${p.deadline ? '<span>Due: ' + fmtDate(p.deadline) + '</span>' : ''}
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px;"><span>Progress</span><span>${p.progress}%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${p.progress}%;background:${p.color};"></div></div>
+            <div class="task-list">${taskHtml}</div>
+            <div style="margin-top:10px;display:flex;gap:6px;">
+                <input type="text" class="task-input" placeholder="Add task..." id="task-input-${p.id}" onkeydown="if(event.key==='Enter')addTask(${p.id})">
+                <button class="btn btn-sm" onclick="addTask(${p.id})">Add</button>
+            </div>
+        </div>`;
+    }).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">&#9881;</div><div class="empty-state-text">No projects yet. Create one!</div></div>';
+}
+
+async function addTask(projectId) {
+    const input = document.getElementById('task-input-' + projectId);
+    if (!input.value.trim()) return;
+    await api('projects/' + projectId + '/tasks', 'POST', { title: input.value.trim() });
+    input.value = '';
+    loadProjects();
+}
+async function toggleTask(id, completed) { await api('tasks/' + id, 'PUT', { completed }); loadProjects(); }
+async function deleteTask(id) { await api('tasks/' + id, 'DELETE'); loadProjects(); }
+async function deleteProject(id) { if (confirm('Delete this project?')) { await api('projects/' + id, 'DELETE'); loadProjects(); } }
+
+// ── Jobs ──
+const JOB_STATUSES = ['applied', 'phone_screen', 'interview', 'offer', 'rejected'];
+const JOB_LABELS = { applied: 'Applied', phone_screen: 'Phone Screen', interview: 'Interview', offer: 'Offer', rejected: 'Rejected' };
+
+async function loadJobs() {
+    const jobs = await api('jobs');
+    document.getElementById('jobs-badge').textContent = jobs.filter(j => !['rejected','accepted'].includes(j.status)).length;
+    const active = jobs.filter(j => !['rejected','accepted'].includes(j.status)).length;
+    const offers = jobs.filter(j => j.status === 'offer').length;
+    document.getElementById('jobs-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Total Applications</div><div class="stat-value">${jobs.length}</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Active</div><div class="stat-value" style="color:var(--accent2)">${active}</div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Interviews</div><div class="stat-value" style="color:var(--accent3)">${jobs.filter(j=>j.status==='interview').length}</div></div>
+        <div class="stat-card"><div class="stat-label">Offers</div><div class="stat-value" style="color:var(--accent)">${offers}</div></div>
+    `;
+    document.getElementById('jobs-pipeline').innerHTML = JOB_STATUSES.map(status => {
+        const filtered = jobs.filter(j => j.status === status);
+        return `<div class="pipeline-col">
+            <div class="pipeline-title">${JOB_LABELS[status]} <span class="pipeline-count">${filtered.length}</span></div>
+            ${filtered.length ? filtered.map(j => `
+                <div class="job-card" onclick="openModal('job',${JSON.stringify(j).replace(/"/g,'&quot;')})">
+                    <div class="job-company">${j.company}</div>
+                    <div class="job-position">${j.position}</div>
+                    <div class="job-meta">${j.location||'Remote'} ${j.salary_min ? '&middot; ' + fmtMoney(j.salary_min) + (j.salary_max ? ' - ' + fmtMoney(j.salary_max) : '') : ''}</div>
+                </div>
+            `).join('') : '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px;">No applications</div>'}
+        </div>`;
+    }).join('');
+}
+
+async function deleteJob(id) { if (confirm('Delete this application?')) { await api('jobs/' + id, 'DELETE'); closeModal(); loadJobs(); } }
+
+// ── Modal Forms ──
+const modalForms = {
+    transaction: (data) => `
+        <div class="modal-title">${data ? 'Edit' : 'Add'} Transaction</div>
+        <form onsubmit="saveTx(event, ${data?.id || 'null'})">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-input" id="f-tx-type" required>
+                        <option value="income" ${data?.type==='income'?'selected':''}>Income</option>
+                        <option value="expense" ${data?.type==='expense'?'selected':''}>Expense</option>
+                        <option value="savings" ${data?.type==='savings'?'selected':''}>Savings</option>
+                        <option value="investment" ${data?.type==='investment'?'selected':''}>Investment</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <input type="number" step="0.01" class="form-input" id="f-tx-amount" value="${data?.amount||''}" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <input type="text" class="form-input" id="f-tx-cat" value="${data?.category||''}" placeholder="e.g. Food, Rent, Salary...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="f-tx-date" value="${data?.date||new Date().toISOString().split('T')[0]}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <input type="text" class="form-input" id="f-tx-desc" value="${data?.description||''}" placeholder="What was this for?">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Account</label>
+                <input type="text" class="form-input" id="f-tx-acct" value="${data?.account||''}" placeholder="Account name">
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save</button>
+            </div>
+        </form>
+    `,
+    account: () => `
+        <div class="modal-title">Add Account</div>
+        <form onsubmit="saveAccount(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="f-acct-name" required placeholder="e.g. Main Checking">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-input" id="f-acct-type">
+                        <option value="checking">Checking</option>
+                        <option value="savings">Savings</option>
+                        <option value="investment">Investment</option>
+                        <option value="crypto">Crypto</option>
+                        <option value="cash">Cash</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Balance</label>
+                    <input type="number" step="0.01" class="form-input" id="f-acct-bal" value="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Currency</label>
+                    <input type="text" class="form-input" id="f-acct-cur" value="EUR">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Color</label>
+                <input type="color" id="f-acct-color" value="#d4a24e" style="width:50px;height:35px;border:none;background:none;cursor:pointer;">
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save</button>
+            </div>
+        </form>
+    `,
+    reading: () => `
+        <div class="modal-title">Log Quran Reading</div>
+        <form onsubmit="saveReading(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Surah</label>
+                    <select class="form-input" id="f-read-surah" required>
+                        ${allSurahs.map(s => `<option value="${s.surah_number}">${s.surah_number}. ${s.surah_name}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-input" id="f-read-type">
+                        <option value="reading">Reading</option>
+                        <option value="memorization">Memorization</option>
+                        <option value="revision">Revision</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">From Ayah</label>
+                    <input type="number" class="form-input" id="f-read-from" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">To Ayah</label>
+                    <input type="number" class="form-input" id="f-read-to" value="1" min="1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="f-read-date" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Duration (min)</label>
+                    <input type="number" class="form-input" id="f-read-dur" placeholder="e.g. 30">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="f-read-notes" placeholder="Reflections, observations..."></textarea>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save</button>
+            </div>
+        </form>
+    `,
+    project: (data) => `
+        <div class="modal-title">${data ? 'Edit' : 'New'} Project</div>
+        <form onsubmit="saveProject(event, ${data?.id || 'null'})">
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="f-proj-name" value="${data?.name||''}" required placeholder="Project name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-input" id="f-proj-desc" placeholder="What's this about?">${data?.description||''}</textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-input" id="f-proj-status">
+                        <option value="active" ${data?.status==='active'?'selected':''}>Active</option>
+                        <option value="paused" ${data?.status==='paused'?'selected':''}>Paused</option>
+                        <option value="completed" ${data?.status==='completed'?'selected':''}>Completed</option>
+                        <option value="archived" ${data?.status==='archived'?'selected':''}>Archived</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Deadline</label>
+                    <input type="date" class="form-input" id="f-proj-deadline" value="${data?.deadline||''}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Color</label>
+                <input type="color" id="f-proj-color" value="${data?.color||'#d4a24e'}" style="width:50px;height:35px;border:none;background:none;cursor:pointer;">
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save</button>
+            </div>
+        </form>
+    `,
+    job: (data) => `
+        <div class="modal-title">${data ? 'Edit' : 'Add'} Application</div>
+        <form onsubmit="saveJob(event, ${data?.id || 'null'})">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Company</label>
+                    <input type="text" class="form-input" id="f-job-company" value="${data?.company||''}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Position</label>
+                    <input type="text" class="form-input" id="f-job-position" value="${data?.position||''}" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-input" id="f-job-status">
+                        <option value="applied" ${data?.status==='applied'?'selected':''}>Applied</option>
+                        <option value="phone_screen" ${data?.status==='phone_screen'?'selected':''}>Phone Screen</option>
+                        <option value="interview" ${data?.status==='interview'?'selected':''}>Interview</option>
+                        <option value="offer" ${data?.status==='offer'?'selected':''}>Offer</option>
+                        <option value="rejected" ${data?.status==='rejected'?'selected':''}>Rejected</option>
+                        <option value="accepted" ${data?.status==='accepted'?'selected':''}>Accepted</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" id="f-job-loc" value="${data?.location||''}" placeholder="City or Remote">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Salary Min</label>
+                    <input type="number" class="form-input" id="f-job-salmin" value="${data?.salary_min||''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Salary Max</label>
+                    <input type="number" class="form-input" id="f-job-salmax" value="${data?.salary_max||''}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Date Applied</label>
+                    <input type="date" class="form-input" id="f-job-date" value="${data?.date_applied||new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact</label>
+                    <input type="text" class="form-input" id="f-job-contact" value="${data?.contact||''}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">URL</label>
+                <input type="url" class="form-input" id="f-job-url" value="${data?.url||''}" placeholder="Job posting link">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="f-job-notes">${data?.notes||''}</textarea>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                ${data ? `<button type="button" class="btn btn-danger" onclick="deleteJob(${data.id})">Delete</button>` : ''}
+                <div style="flex:1"></div>
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save</button>
+            </div>
+        </form>
+    `
+};
+
+// ── Save Handlers ──
+async function saveTx(e, id) {
+    e.preventDefault();
+    const body = {
+        type: document.getElementById('f-tx-type').value,
+        amount: document.getElementById('f-tx-amount').value,
+        category: document.getElementById('f-tx-cat').value,
+        date: document.getElementById('f-tx-date').value,
+        description: document.getElementById('f-tx-desc').value,
+        account: document.getElementById('f-tx-acct').value
+    };
+    await api('transactions' + (id ? '/' + id : ''), id ? 'PUT' : 'POST', body);
+    closeModal(); loadFinances();
+}
+
+async function saveAccount(e) {
+    e.preventDefault();
+    await api('accounts', 'POST', {
+        name: document.getElementById('f-acct-name').value,
+        type: document.getElementById('f-acct-type').value,
+        balance: document.getElementById('f-acct-bal').value,
+        currency: document.getElementById('f-acct-cur').value,
+        color: document.getElementById('f-acct-color').value
+    });
+    closeModal(); loadFinances();
+}
+
+async function saveReading(e) {
+    e.preventDefault();
+    const surahNum = parseInt(document.getElementById('f-read-surah').value);
+    const s = allSurahs.find(su => su.surah_number === surahNum);
+    await api('quran/log', 'POST', {
+        surah_number: surahNum,
+        surah_name: s ? s.surah_name : '',
+        from_ayah: document.getElementById('f-read-from').value,
+        to_ayah: document.getElementById('f-read-to').value,
+        date: document.getElementById('f-read-date').value,
+        duration: document.getElementById('f-read-dur').value,
+        type: document.getElementById('f-read-type').value,
+        notes: document.getElementById('f-read-notes').value
+    });
+    closeModal(); loadQuran();
+}
+
+async function saveProject(e, id) {
+    e.preventDefault();
+    const body = {
+        name: document.getElementById('f-proj-name').value,
+        description: document.getElementById('f-proj-desc').value,
+        status: document.getElementById('f-proj-status').value,
+        deadline: document.getElementById('f-proj-deadline').value,
+        color: document.getElementById('f-proj-color').value
+    };
+    await api('projects' + (id ? '/' + id : ''), id ? 'PUT' : 'POST', body);
+    closeModal(); loadProjects();
+}
+
+async function saveJob(e, id) {
+    e.preventDefault();
+    const body = {
+        company: document.getElementById('f-job-company').value,
+        position: document.getElementById('f-job-position').value,
+        status: document.getElementById('f-job-status').value,
+        location: document.getElementById('f-job-loc').value,
+        salary_min: document.getElementById('f-job-salmin').value,
+        salary_max: document.getElementById('f-job-salmax').value,
+        date_applied: document.getElementById('f-job-date').value,
+        contact: document.getElementById('f-job-contact').value,
+        url: document.getElementById('f-job-url').value,
+        notes: document.getElementById('f-job-notes').value
+    };
+    await api('jobs' + (id ? '/' + id : ''), id ? 'PUT' : 'POST', body);
+    closeModal(); loadJobs();
+}
+
+// ── Learning Plan ──
+let learningView = 'roadmap';
+let dailyDate = new Date().toISOString().split('T')[0];
+
+async function loadLearning() {
+    const stats = await api('learning/stats');
+    const pct = stats.total ? Math.round(stats.done / stats.total * 100) : 0;
+    document.getElementById('learning-badge').textContent = pct + '%';
+
+    const startDate = new Date('2026-01-01');
+    const now = new Date();
+    const diffDays = Math.max(0, Math.floor((now - startDate) / (1000*60*60*24)));
+    const currentWeek = Math.min(52, Math.floor(diffDays / 7) + 1);
+
+    document.getElementById('learning-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Overall Progress</div><div class="stat-value">${pct}%</div><div class="stat-sub">${stats.done} / ${stats.total} tasks</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Current Week</div><div class="stat-value" style="color:var(--accent2)">${currentWeek}<span style="font-size:16px;color:var(--text3)"> / 52</span></div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Day</div><div class="stat-value" style="color:var(--accent3)">${Math.min(365, diffDays + 1)}<span style="font-size:16px;color:var(--text3)"> / 365</span></div></div>
+        <div class="stat-card" data-color="pink"><div class="stat-label">Tasks Remaining</div><div class="stat-value" style="color:var(--accent4)">${stats.total - stats.done}</div></div>
+    `;
+
+    if (learningView === 'roadmap') {
+        await renderRoadmap(stats);
+    } else {
+        await renderDailyPlanner();
+    }
+}
+
+async function renderRoadmap(stats) {
+    const roadmap = await api('learning/roadmap');
+    let html = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:24px;">';
+    for (const bp of stats.by_phase) {
+        const ppct = bp.total ? Math.round(bp.done / bp.total * 100) : 0;
+        html += `<div class="card" style="border-top:3px solid ${bp.color};padding:16px;">
+            <div style="font-size:13px;font-weight:600;">${bp.name}</div>
+            <div style="font-family:Outfit;font-size:24px;font-weight:700;margin:6px 0;">${ppct}%</div>
+            <div style="font-size:12px;color:var(--text3);">${bp.done}/${bp.total} tasks</div>
+            <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" style="width:${ppct}%;background:${bp.color};"></div></div>
+        </div>`;
+    }
+    html += '</div>';
+
+    for (const phase of roadmap) {
+        const phaseTasks = phase.weeks.reduce((s,w) => s + w.tasks.length, 0);
+        const phaseDone = phase.weeks.reduce((s,w) => s + w.tasks.filter(t=>t.completed).length, 0);
+        const ppct = phaseTasks ? Math.round(phaseDone / phaseTasks * 100) : 0;
+        html += `<div class="quarter-card">
+            <div class="quarter-header" style="border-left-color:${phase.color}" onclick="this.nextElementSibling.classList.toggle('open')">
+                <div><div class="quarter-name">${phase.name}</div><div class="quarter-desc">${phase.description}</div></div>
+                <div class="quarter-progress">${ppct}% (${phaseDone}/${phaseTasks})</div>
+            </div>
+            <div class="quarter-body">`;
+        for (const week of phase.weeks) {
+            const wDone = week.tasks.filter(t=>t.completed).length;
+            const wTotal = week.tasks.length;
+            const wpct = wTotal ? Math.round(wDone/wTotal*100) : 0;
+            html += `<div class="week-card">
+                <div class="week-header" onclick="this.nextElementSibling.classList.toggle('open')">
+                    <div><div class="week-title">W${week.week_number} - ${week.title}</div><div class="week-goal">${week.goal||''}</div></div>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="font-size:12px;color:var(--text3);">${wDone}/${wTotal}</div>
+                        <div class="progress-bar" style="width:60px;"><div class="progress-fill" style="width:${wpct}%;background:${phase.color};"></div></div>
+                    </div>
+                </div>
+                <div class="week-tasks">`;
+            for (const task of week.tasks) {
+                html += `<div class="ltask-item ${task.completed?'done':''}">
+                    <div class="task-check ${task.completed?'checked':''}" onclick="toggleLearningTask(${task.id})" style="cursor:pointer;">&#10003;</div>
+                    <span class="ltask-cat ${task.category}">${task.category}</span>
+                    <span style="flex:1">${task.description}</span>
+                    <button class="btn btn-icon btn-sm btn-danger" style="width:22px;height:22px;font-size:9px;" onclick="deleteLearningTask(${task.id})">&#10005;</button>
+                </div>`;
+            }
+            html += `<div style="margin-top:8px;display:flex;gap:6px;">
+                <input type="text" class="task-input" placeholder="Add task..." id="lt-input-${week.id}" onkeydown="if(event.key==='Enter')addLearningTask(${week.id})">
+                <select class="form-input" style="width:100px;padding:4px 6px;font-size:12px;" id="lt-cat-${week.id}">
+                    <option value="weekday">Weekday</option><option value="weekend">Weekend</option>
+                </select>
+                <button class="btn btn-sm" onclick="addLearningTask(${week.id})">Add</button>
+            </div></div></div>`;
+        }
+        html += '</div></div>';
+    }
+    document.getElementById('learning-content').innerHTML = html;
+}
+
+async function renderDailyPlanner() {
+    const plan = await api('learning/daily/' + dailyDate);
+    const d = new Date(dailyDate + 'T00:00:00');
+    const dateStr = d.toLocaleDateString('en', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    let html = `
+        <div class="daily-planner-header">
+            <button class="daily-date-nav" onclick="shiftDay(-1)">&larr;</button>
+            <div class="daily-date-display">${dateStr}</div>
+            <button class="daily-date-nav" onclick="shiftDay(1)">&rarr;</button>
+            <button class="btn btn-sm" onclick="dailyDate=new Date().toISOString().split('T')[0];loadLearning()">Today</button>
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Daily Tasks</div></div>`;
+    if (plan.tasks.length) {
+        for (const t of plan.tasks) {
+            html += `<div class="ltask-item ${t.completed?'done':''}">
+                <div class="task-check ${t.completed?'checked':''}" onclick="toggleDailyTask(${t.id})" style="cursor:pointer;">&#10003;</div>
+                ${t.time_slot ? '<span style="font-size:11px;color:var(--text3);min-width:50px;">'+t.time_slot+'</span>' : ''}
+                <span style="flex:1">${t.description}</span>
+                <button class="btn btn-icon btn-sm btn-danger" style="width:22px;height:22px;font-size:9px;" onclick="deleteDailyTask(${t.id})">&#10005;</button>
+            </div>`;
+        }
+    } else {
+        html += '<div class="empty-state"><div class="empty-state-text">No tasks for this day</div></div>';
+    }
+    html += `<div style="margin-top:12px;display:flex;gap:6px;">
+                <input type="time" class="form-input" style="width:90px;padding:6px;" id="dt-time">
+                <input type="text" class="task-input" placeholder="Add daily task..." id="dt-input" onkeydown="if(event.key==='Enter')addDailyPlanTask()">
+                <button class="btn btn-sm" onclick="addDailyPlanTask()">Add</button>
+            </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-title">Notes & Energy</div></div>
+                <div class="form-group">
+                    <label class="form-label">Energy Level</label>
+                    <div style="display:flex;gap:8px;">
+                        ${[1,2,3,4,5].map(i => `<button class="btn btn-sm ${plan.energy_level===i?'btn-accent':''}" onclick="setEnergy(${i})" style="width:36px;">${i}</button>`).join('')}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-input" id="daily-notes" rows="6" onblur="saveDailyNotes()" placeholder="Reflections, wins, blockers...">${plan.notes||''}</textarea>
+                </div>
+            </div>
+        </div>`;
+    document.getElementById('learning-content').innerHTML = html;
+}
+
+function shiftDay(delta) {
+    const d = new Date(dailyDate + 'T00:00:00');
+    d.setDate(d.getDate() + delta);
+    dailyDate = d.toISOString().split('T')[0];
+    loadLearning();
+}
+
+async function toggleLearningTask(id) {
+    await api('learning/tasks/' + id + '/toggle', 'POST');
+    loadLearning();
+}
+async function deleteLearningTask(id) {
+    await api('learning/tasks/' + id, 'DELETE');
+    loadLearning();
+}
+async function addLearningTask(weekId) {
+    const input = document.getElementById('lt-input-' + weekId);
+    const cat = document.getElementById('lt-cat-' + weekId);
+    if (!input.value.trim()) return;
+    await api('learning/tasks', 'POST', { week_id: weekId, category: cat.value, description: input.value.trim() });
+    input.value = '';
+    loadLearning();
+}
+async function toggleDailyTask(id) {
+    await api('learning/daily/tasks/' + id + '/toggle', 'POST');
+    loadLearning();
+}
+async function deleteDailyTask(id) {
+    await api('learning/daily/tasks/' + id, 'DELETE');
+    loadLearning();
+}
+async function addDailyPlanTask() {
+    const input = document.getElementById('dt-input');
+    const time = document.getElementById('dt-time');
+    if (!input.value.trim()) return;
+    await api('learning/daily/' + dailyDate + '/tasks', 'POST', { description: input.value.trim(), time_slot: time.value || '' });
+    input.value = '';
+    time.value = '';
+    loadLearning();
+}
+async function setEnergy(level) {
+    await api('learning/daily/' + dailyDate, 'PUT', { energy_level: level, notes: document.getElementById('daily-notes')?.value || '' });
+    loadLearning();
+}
+async function saveDailyNotes() {
+    const notes = document.getElementById('daily-notes')?.value || '';
+    await api('learning/daily/' + dailyDate, 'PUT', { notes });
+}
+
+// ── Loaders Map ──
+const loaders = {
+    dashboard: loadDashboard,
+    finances: loadFinances,
+    quran: loadQuran,
+    projects: loadProjects,
+    jobs: loadJobs,
+    learning: loadLearning
+};
+
+// ── Init ──
+loadDashboard();
+// Pre-fetch surahs for the reading form
+api('quran/surahs').then(s => allSurahs = s);
+</script>
+</body>
+</html>

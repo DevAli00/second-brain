@@ -1,0 +1,14 @@
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.DS_Store

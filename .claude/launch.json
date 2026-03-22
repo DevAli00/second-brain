@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "second-brain",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["app.py"],
+      "port": 5555,
+      "cwd": "/Users/alielboury/Mini_projects/second-brain"
+    }
+  ]
+}
