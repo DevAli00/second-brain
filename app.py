@@ -146,6 +146,18 @@ class JobApplication(db.Model):
     date_applied = db.Column(db.Date, default=date.today)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Book(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200))
+    author = db.Column(db.String(200), default='')
+    quarter = db.Column(db.Integer, default=1)
+    category = db.Column(db.String(50), default='security')
+    status = db.Column(db.String(20), default='to_read')
+    notes = db.Column(db.Text, default='')
+    rating = db.Column(db.Integer, default=0)
+    sort_order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 def to_dict(obj, fields):
@@ -169,6 +181,7 @@ LWEEK_FIELDS = ['id','phase_id','week_number','title','goal']
 LTASK_FIELDS = ['id','week_id','category','description','completed','notes','completed_at']
 DAILY_PLAN_FIELDS = ['id','date','notes','energy_level']
 DAILY_TASK_FIELDS = ['id','daily_plan_id','description','completed','time_slot','sort_order']
+BOOK_FIELDS = ['id','title','author','quarter','category','status','notes','rating','sort_order','created_at']
 
 # ── Routes ──────────────────────────────────────────────────────────────────
 
@@ -669,6 +682,50 @@ def delete_daily_task(task_id):
     db.session.commit()
     return '', 204
 
+# ── Learning Plan Reset ────────────────────────────────────────────────────
+
+@app.route('/api/learning/reset', methods=['POST'])
+def reset_learning_progress():
+    LearningTask.query.update({LearningTask.completed: False, LearningTask.completed_at: None})
+    DailyTask.query.delete()
+    DailyPlan.query.delete()
+    db.session.commit()
+    return jsonify({'ok': True})
+
+# ── Books / Reading List ───────────────────────────────────────────────────
+
+@app.route('/api/books')
+def get_books():
+    books = Book.query.order_by(Book.quarter, Book.sort_order, Book.id).all()
+    return jsonify([to_dict(b, BOOK_FIELDS) for b in books])
+
+@app.route('/api/books', methods=['POST'])
+def add_book():
+    d = request.json
+    b = Book(title=d['title'], author=d.get('author',''), quarter=d.get('quarter',1),
+             category=d.get('category','security'), status=d.get('status','to_read'),
+             notes=d.get('notes',''), rating=d.get('rating',0))
+    db.session.add(b)
+    db.session.commit()
+    return jsonify({'id': b.id})
+
+@app.route('/api/books/<int:bid>', methods=['PUT'])
+def update_book(bid):
+    b = Book.query.get_or_404(bid)
+    d = request.json
+    for k in ('title','author','quarter','category','status','notes','rating','sort_order'):
+        if k in d:
+            setattr(b, k, d[k])
+    db.session.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/books/<int:bid>', methods=['DELETE'])
+def delete_book(bid):
+    b = Book.query.get_or_404(bid)
+    db.session.delete(b)
+    db.session.commit()
+    return '', 204
+
 # ── Seed Quran Data ─────────────────────────────────────────────────────────
 
 SURAHS = [
@@ -1004,9 +1061,36 @@ def seed_learning_plan():
         db.session.add(LearningTask(week_id=wid, category=cat, description=desc))
     db.session.commit()
 
+def seed_books():
+    if Book.query.count() > 0:
+        return
+    books = [
+        ("The Web Application Hacker's Handbook","Dafydd Stuttard & Marcus Pinto",1,"security"),
+        ("Penetration Testing","Georgia Weidman",1,"security"),
+        ("Black Hat Python","Justin Seitz & Tim Arnold",1,"programming"),
+        ("Automate the Boring Stuff with Python","Al Sweigart",1,"programming"),
+        ("Adversarial Machine Learning","Joseph & Nelson & Rubinstein & Tygar",2,"ai_security"),
+        ("Not with a Bug, But with a Sticker","Ram Shankar Siva Kumar & Hyrum Anderson",2,"ai_security"),
+        ("Deep Learning","Ian Goodfellow, Yoshua Bengio & Aaron Courville",2,"ai_ml"),
+        ("Hands-On Machine Learning","Aurelien Geron",2,"ai_ml"),
+        ("AI and Machine Learning for Coders","Laurence Moroney",2,"ai_ml"),
+        ("The Art of Software Security Assessment","Dowd, McDonald & Schuh",3,"security"),
+        ("Practical Deep Learning for Cloud, Mobile & Edge","Anirudh Koul et al.",3,"ai_ml"),
+        ("Building Secure & Reliable Systems","Google SRE Team",3,"security"),
+        ("Writing for Computer Science","Justin Zobel",3,"research"),
+        ("The PhD Application Handbook","Peter Bentley",4,"career"),
+        ("Cracking the Coding Interview","Gayle McDowell",4,"career"),
+        ("Security Engineering","Ross Anderson",4,"security"),
+        ("Designing Data-Intensive Applications","Martin Kleppmann",4,"programming"),
+    ]
+    for i, (title, author, quarter, category) in enumerate(books):
+        db.session.add(Book(title=title, author=author, quarter=quarter, category=category, sort_order=i))
+    db.session.commit()
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         seed_quran()
         seed_learning_plan()
+        seed_books()
     app.run(debug=True, port=5555, host='0.0.0.0')
