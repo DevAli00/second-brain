@@ -1643,26 +1643,46 @@ async function loadLearning() {
 
 async function renderRoadmap(stats) {
     const roadmap = await api('learning/roadmap');
-    let html = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:24px;">';
-    for (const bp of stats.by_phase) {
-        const ppct = bp.total ? Math.round(bp.done / bp.total * 100) : 0;
-        html += `<div class="card" style="border-top:3px solid ${bp.color};padding:16px;">
-            <div style="font-size:13px;font-weight:600;">${bp.name}</div>
-            <div style="font-family:Outfit;font-size:24px;font-weight:700;margin:6px 0;">${ppct}%</div>
-            <div style="font-size:12px;color:var(--text3);">${bp.done}/${bp.total} tasks</div>
-            <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" style="width:${ppct}%;background:${bp.color};"></div></div>
+    let html = '';
+
+    // Phase summary cards
+    if (stats.by_phase.length) {
+        const cols = Math.min(stats.by_phase.length, 4);
+        html += `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:12px;margin-bottom:24px;">`;
+        for (const bp of stats.by_phase) {
+            const ppct = bp.total ? Math.round(bp.done / bp.total * 100) : 0;
+            html += `<div class="card" style="border-top:3px solid ${bp.color};padding:16px;">
+                <div style="font-size:13px;font-weight:600;">${bp.name}</div>
+                <div style="font-family:Outfit;font-size:24px;font-weight:700;margin:6px 0;">${ppct}%</div>
+                <div style="font-size:12px;color:var(--text3);">${bp.done}/${bp.total} tasks</div>
+                <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" style="width:${ppct}%;background:${bp.color};"></div></div>
+            </div>`;
+        }
+        html += '</div>';
+    }
+
+    if (!roadmap.length) {
+        html += `<div class="empty-state" style="padding:60px 24px;">
+            <div class="empty-state-icon">📋</div>
+            <div class="empty-state-text">Your learning plan is empty.<br>Start by adding a quarter or section.</div>
         </div>`;
     }
-    html += '</div>';
 
     for (const phase of roadmap) {
         const phaseTasks = phase.weeks.reduce((s,w) => s + w.tasks.length, 0);
         const phaseDone = phase.weeks.reduce((s,w) => s + w.tasks.filter(t=>t.completed).length, 0);
         const ppct = phaseTasks ? Math.round(phaseDone / phaseTasks * 100) : 0;
         html += `<div class="quarter-card">
-            <div class="quarter-header" style="border-left-color:${phase.color}" onclick="this.nextElementSibling.classList.toggle('open')">
-                <div><div class="quarter-name">${phase.name}</div><div class="quarter-desc">${phase.description}</div></div>
-                <div class="quarter-progress">${ppct}% (${phaseDone}/${phaseTasks})</div>
+            <div class="quarter-header" style="border-left-color:${phase.color}">
+                <div style="flex:1;cursor:pointer;" onclick="this.closest('.quarter-header').nextElementSibling.classList.toggle('open')">
+                    <div class="quarter-name">${phase.name}</div>
+                    <div class="quarter-desc">${phase.description}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="quarter-progress">${ppct}% (${phaseDone}/${phaseTasks})</div>
+                    <button class="btn btn-icon btn-sm" style="width:24px;height:24px;font-size:10px;" onclick="event.stopPropagation();editPhase(${phase.id},'${phase.name.replace(/'/g,"\\'")}','${(phase.description||'').replace(/'/g,"\\'")}','${phase.color}')" title="Edit">&#9998;</button>
+                    <button class="btn btn-icon btn-sm btn-danger" style="width:24px;height:24px;font-size:10px;" onclick="event.stopPropagation();deletePhase(${phase.id})" title="Delete">&#10005;</button>
+                </div>
             </div>
             <div class="quarter-body">`;
         for (const week of phase.weeks) {
@@ -1670,11 +1690,15 @@ async function renderRoadmap(stats) {
             const wTotal = week.tasks.length;
             const wpct = wTotal ? Math.round(wDone/wTotal*100) : 0;
             html += `<div class="week-card">
-                <div class="week-header" onclick="this.nextElementSibling.classList.toggle('open')">
-                    <div><div class="week-title">W${week.week_number} - ${week.title}</div><div class="week-goal">${week.goal||''}</div></div>
-                    <div style="display:flex;align-items:center;gap:12px;">
+                <div class="week-header">
+                    <div style="flex:1;cursor:pointer;" onclick="this.closest('.week-header').nextElementSibling.classList.toggle('open')">
+                        <div class="week-title">W${week.week_number} - ${week.title}</div>
+                        <div class="week-goal">${week.goal||''}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
                         <div style="font-size:12px;color:var(--text3);">${wDone}/${wTotal}</div>
                         <div class="progress-bar" style="width:60px;"><div class="progress-fill" style="width:${wpct}%;background:${phase.color};"></div></div>
+                        <button class="btn btn-icon btn-sm btn-danger" style="width:20px;height:20px;font-size:9px;" onclick="event.stopPropagation();deleteWeek(${week.id})" title="Delete week">&#10005;</button>
                     </div>
                 </div>
                 <div class="week-tasks">`;
@@ -1694,8 +1718,26 @@ async function renderRoadmap(stats) {
                 <button class="btn btn-sm" onclick="addLearningTask(${week.id})">Add</button>
             </div></div></div>`;
         }
+        // Add week button inside quarter
+        html += `<div style="margin-top:8px;display:flex;gap:6px;">
+            <input type="text" class="task-input" placeholder="New week title..." id="wk-input-${phase.id}" onkeydown="if(event.key==='Enter')addWeek(${phase.id})">
+            <input type="text" class="task-input" style="width:160px;" placeholder="Goal (optional)" id="wk-goal-${phase.id}">
+            <button class="btn btn-sm" onclick="addWeek(${phase.id})">+ Week</button>
+        </div>`;
         html += '</div></div>';
     }
+
+    // Add quarter button
+    html += `<div class="card" style="padding:20px;margin-top:16px;">
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Add a Quarter / Section</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="text" class="task-input" style="flex:2;min-width:180px;" placeholder="Title (e.g. Q1: Foundation)" id="phase-name-input">
+            <input type="text" class="task-input" style="flex:2;min-width:180px;" placeholder="Description (optional)" id="phase-desc-input">
+            <input type="color" id="phase-color-input" value="#2e86c1" style="width:40px;height:34px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;">
+            <button class="btn" onclick="addPhase()">+ Add</button>
+        </div>
+    </div>`;
+
     document.getElementById('learning-content').innerHTML = html;
 }
 
@@ -1797,6 +1839,64 @@ async function saveDailyNotes() {
     await api('learning/daily/' + dailyDate, 'PUT', { notes });
 }
 
+// ── Phase / Week CRUD ──
+async function addPhase() {
+    const name = document.getElementById('phase-name-input').value.trim();
+    if (!name) return;
+    await api('learning/phases', 'POST', {
+        name,
+        description: document.getElementById('phase-desc-input').value.trim(),
+        color: document.getElementById('phase-color-input').value
+    });
+    loadLearning();
+}
+
+function editPhase(id, name, desc, color) {
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <h3>Edit Section</h3>
+        <div class="form-grid">
+            <div class="form-group" style="grid-column:span 2"><label>Name</label><input id="ep-name" class="form-input" value="${name}"></div>
+            <div class="form-group"><label>Description</label><input id="ep-desc" class="form-input" value="${desc}"></div>
+            <div class="form-group"><label>Color</label><input type="color" id="ep-color" value="${color}" style="width:100%;height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);"></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn" onclick="savePhaseEdit(${id})">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function savePhaseEdit(id) {
+    await api('learning/phases/' + id, 'PUT', {
+        name: document.getElementById('ep-name').value.trim(),
+        description: document.getElementById('ep-desc').value.trim(),
+        color: document.getElementById('ep-color').value
+    });
+    closeModal();
+    loadLearning();
+}
+
+async function deletePhase(id) {
+    if (!confirm('Delete this entire section and all its weeks/tasks?')) return;
+    await api('learning/phases/' + id, 'DELETE');
+    loadLearning();
+}
+
+async function addWeek(phaseId) {
+    const title = document.getElementById('wk-input-' + phaseId).value.trim();
+    if (!title) return;
+    const goal = document.getElementById('wk-goal-' + phaseId).value.trim();
+    await api('learning/weeks', 'POST', { phase_id: phaseId, title, goal });
+    loadLearning();
+}
+
+async function deleteWeek(id) {
+    if (!confirm('Delete this week and all its tasks?')) return;
+    await api('learning/weeks/' + id, 'DELETE');
+    loadLearning();
+}
+
 // ── Loaders Map ──
 const loaders = {
     dashboard: loadDashboard,
@@ -1809,10 +1909,10 @@ const loaders = {
     books: loadBooks
 };
 
-// ── Reset Learning Progress ──
+// ── Reset Learning (delete everything) ──
 async function resetLearningProgress() {
-    if (!confirm('Reset ALL learning progress? This will:\n\n• Uncheck all tasks\n• Delete all daily plans\n\nBooks and roadmap structure are kept. Cannot be undone.')) return;
-    if (!confirm('Are you sure? Last chance to cancel.')) return;
+    if (!confirm('DELETE everything in the learning plan?\n\n• All quarters, weeks, and tasks\n• All daily plans\n\nThis cannot be undone.')) return;
+    if (!confirm('Are you absolutely sure?')) return;
     await api('learning/reset', 'POST');
     loadLearning();
 }

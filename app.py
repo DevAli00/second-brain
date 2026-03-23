@@ -597,6 +597,63 @@ def get_learning_stats():
         by_week.append({'week_number': w.week_number, 'title': w.title, 'total': wt, 'done': wd})
     return jsonify({'total': total, 'done': done, 'by_phase': by_phase, 'by_week': by_week})
 
+# ── Learning Phases CRUD ──
+
+@app.route('/api/learning/phases', methods=['POST'])
+def add_learning_phase():
+    d = request.json
+    p = LearningPhase(name=d['name'], description=d.get('description',''), color=d.get('color','#1a5276'))
+    db.session.add(p)
+    db.session.commit()
+    return jsonify(to_dict(p, LPHASE_FIELDS)), 201
+
+@app.route('/api/learning/phases/<int:pid>', methods=['PUT'])
+def update_learning_phase(pid):
+    p = LearningPhase.query.get_or_404(pid)
+    d = request.json
+    for k in ['name','description','color']:
+        if k in d: setattr(p, k, d[k])
+    db.session.commit()
+    return jsonify(to_dict(p, LPHASE_FIELDS))
+
+@app.route('/api/learning/phases/<int:pid>', methods=['DELETE'])
+def delete_learning_phase(pid):
+    p = LearningPhase.query.get_or_404(pid)
+    for w in LearningWeek.query.filter_by(phase_id=pid).all():
+        LearningTask.query.filter_by(week_id=w.id).delete()
+    LearningWeek.query.filter_by(phase_id=pid).delete()
+    db.session.delete(p)
+    db.session.commit()
+    return '', 204
+
+# ── Learning Weeks CRUD ──
+
+@app.route('/api/learning/weeks', methods=['POST'])
+def add_learning_week():
+    d = request.json
+    max_wn = db.session.query(db.func.max(LearningWeek.week_number)).scalar() or 0
+    w = LearningWeek(phase_id=d['phase_id'], week_number=max_wn+1, title=d['title'], goal=d.get('goal',''))
+    db.session.add(w)
+    db.session.commit()
+    return jsonify(to_dict(w, LWEEK_FIELDS)), 201
+
+@app.route('/api/learning/weeks/<int:wid>', methods=['PUT'])
+def update_learning_week(wid):
+    w = LearningWeek.query.get_or_404(wid)
+    d = request.json
+    for k in ['title','goal','phase_id']:
+        if k in d: setattr(w, k, d[k])
+    db.session.commit()
+    return jsonify(to_dict(w, LWEEK_FIELDS))
+
+@app.route('/api/learning/weeks/<int:wid>', methods=['DELETE'])
+def delete_learning_week(wid):
+    LearningTask.query.filter_by(week_id=wid).delete()
+    w = LearningWeek.query.get_or_404(wid)
+    db.session.delete(w)
+    db.session.commit()
+    return '', 204
+
 @app.route('/api/learning/tasks/<int:task_id>/toggle', methods=['POST'])
 def toggle_learning_task(task_id):
     t = LearningTask.query.get_or_404(task_id)
@@ -686,9 +743,11 @@ def delete_daily_task(task_id):
 
 @app.route('/api/learning/reset', methods=['POST'])
 def reset_learning_progress():
-    LearningTask.query.update({LearningTask.completed: False, LearningTask.completed_at: None})
     DailyTask.query.delete()
     DailyPlan.query.delete()
+    LearningTask.query.delete()
+    LearningWeek.query.delete()
+    LearningPhase.query.delete()
     db.session.commit()
     return jsonify({'ok': True})
 
@@ -1091,6 +1150,5 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         seed_quran()
-        seed_learning_plan()
         seed_books()
     app.run(debug=True, port=5555, host='0.0.0.0')
