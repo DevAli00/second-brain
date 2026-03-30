@@ -132,6 +132,21 @@ class WeightEntry(db.Model):
     date = db.Column(db.Date, default=date.today)
     kg = db.Column(db.Float)
 
+class Budget(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50), unique=True)
+    monthly_limit = db.Column(db.Float, default=0)
+    color = db.Column(db.String(7), default='#e8a849')
+
+class SavingsGoal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    target = db.Column(db.Float, default=0)
+    current = db.Column(db.Float, default=0)
+    deadline = db.Column(db.Date)
+    color = db.Column(db.String(7), default='#34c79d')
+    notes = db.Column(db.Text, default='')
+
 class JobApplication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company = db.Column(db.String(100))
@@ -171,6 +186,8 @@ def to_dict(obj, fields):
 
 TX_FIELDS = ['id','type','category','amount','description','date','account']
 ACCT_FIELDS = ['id','name','type','balance','currency','color']
+BUDGET_FIELDS = ['id','category','monthly_limit','color']
+GOAL_FIELDS = ['id','name','target','current','deadline','color','notes']
 SURAH_FIELDS = ['id','surah_number','surah_name','surah_name_ar','total_ayahs','ayahs_read','completed','memorized','juz','last_read']
 LOG_FIELDS = ['id','date','surah_number','surah_name','from_ayah','to_ayah','duration','type','notes']
 PROJ_FIELDS = ['id','name','description','status','progress','deadline','color','created_at']
@@ -321,6 +338,123 @@ def finance_stats():
             'expenses': [monthly[m]['expense'] for m in sorted_months]
         }
     })
+
+# ── Budget CRUD ─────────────────────────────────────────────────────────────
+
+@app.route('/api/budgets', methods=['GET'])
+def get_budgets():
+    from sqlalchemy import func, extract
+    budgets = Budget.query.order_by(Budget.category).all()
+    now = date.today()
+    result = []
+    for b in budgets:
+        spent = db.session.query(func.sum(Transaction.amount)).filter(
+            Transaction.type == 'expense',
+            Transaction.category == b.category,
+            extract('year', Transaction.date) == now.year,
+            extract('month', Transaction.date) == now.month
+        ).scalar() or 0.0
+        d = to_dict(b, BUDGET_FIELDS)
+        d['spent'] = spent
+        d['remaining'] = max(0, b.monthly_limit - spent)
+        d['pct'] = round((spent / b.monthly_limit * 100) if b.monthly_limit else 0, 1)
+        result.append(d)
+    return jsonify(result)
+
+@app.route('/api/budgets', methods=['POST'])
+def add_budget():
+    d = request.json
+    existing = Budget.query.filter_by(category=d['category']).first()
+    if existing:
+        existing.monthly_limit = float(d['monthly_limit'])
+        existing.color = d.get('color', existing.color)
+        db.session.commit()
+        b = existing
+    else:
+        b = Budget(category=d['category'], monthly_limit=float(d['monthly_limit']), color=d.get('color','#e8a849'))
+        db.session.add(b)
+        db.session.commit()
+    return jsonify(to_dict(b, BUDGET_FIELDS)), 201
+
+@app.route('/api/budgets/<int:id>', methods=['PUT'])
+def update_budget(id):
+    b = Budget.query.get_or_404(id)
+    d = request.json
+    for k in ['category','monthly_limit','color']:
+        if k in d:
+            setattr(b, k, float(d[k]) if k == 'monthly_limit' else d[k])
+    db.session.commit()
+    return jsonify(to_dict(b, BUDGET_FIELDS))
+
+@app.route('/api/budgets/<int:id>', methods=['DELETE'])
+def delete_budget(id):
+    b = Budget.query.get_or_404(id)
+    db.session.delete(b)
+    db.session.commit()
+    return '', 204
+
+# ── Monthly Summary ──────────────────────────────────────────────────────────
+
+@app.route('/api/finance/monthly/<int:year>/<int:month>')
+def monthly_summary(year: int, month: int):
+    from sqlalchemy import extract, func
+    txs = Transaction.query.filter(
+        extract('year', Transaction.date) == year,
+        extract('month', Transaction.date) == month
+    ).order_by(Transaction.date.desc()).all()
+    income = sum(t.amount for t in txs if t.type == 'income')
+    expenses = sum(t.amount for t in txs if t.type == 'expense')
+    by_cat: dict[str, float] = {}
+    for t in txs:
+        if t.type == 'expense':
+            by_cat[t.category] = by_cat.get(t.category, 0) + t.amount
+    savings_rate = round((income - expenses) / income * 100, 1) if income else 0
+    return jsonify({
+        'income': income,
+        'expenses': expenses,
+        'net': income - expenses,
+        'savings_rate': savings_rate,
+        'by_category': by_cat,
+        'transactions': [to_dict(t, TX_FIELDS) for t in txs]
+    })
+
+# ── Savings Goals CRUD ───────────────────────────────────────────────────────
+
+@app.route('/api/goals', methods=['GET'])
+def get_goals():
+    return jsonify([to_dict(g, GOAL_FIELDS) for g in SavingsGoal.query.order_by(SavingsGoal.id).all()])
+
+@app.route('/api/goals', methods=['POST'])
+def add_goal():
+    d = request.json
+    g = SavingsGoal(
+        name=d['name'], target=float(d['target']), current=float(d.get('current', 0)),
+        deadline=date.fromisoformat(d['deadline']) if d.get('deadline') else None,
+        color=d.get('color','#34c79d'), notes=d.get('notes','')
+    )
+    db.session.add(g)
+    db.session.commit()
+    return jsonify(to_dict(g, GOAL_FIELDS)), 201
+
+@app.route('/api/goals/<int:id>', methods=['PUT'])
+def update_goal(id):
+    g = SavingsGoal.query.get_or_404(id)
+    d = request.json
+    for k in ['name','color','notes']:
+        if k in d: setattr(g, k, d[k])
+    for k in ['target','current']:
+        if k in d: setattr(g, k, float(d[k]))
+    if 'deadline' in d and d['deadline']:
+        g.deadline = date.fromisoformat(d['deadline'])
+    db.session.commit()
+    return jsonify(to_dict(g, GOAL_FIELDS))
+
+@app.route('/api/goals/<int:id>', methods=['DELETE'])
+def delete_goal(id):
+    g = SavingsGoal.query.get_or_404(id)
+    db.session.delete(g)
+    db.session.commit()
+    return '', 204
 
 # ── Quran CRUD ──────────────────────────────────────────────────────────────
 

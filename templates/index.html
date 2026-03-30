@@ -307,6 +307,51 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     color: var(--text); padding: 4px 0; font-size: 13px; outline: none;
 }
 
+/* ── Finance Tabs ── */
+.fin-tab {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    padding: 8px 16px; font-size: 13px; font-weight: 500;
+    color: var(--text3); cursor: pointer; margin-bottom: -1px;
+    transition: all 0.15s;
+}
+.fin-tab:hover { color: var(--text2); }
+.fin-tab.active { color: var(--text); border-bottom-color: var(--accent2); }
+
+/* ── Budget Cards ── */
+.budget-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 10px;
+}
+.budget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.budget-cat { font-size: 14px; font-weight: 600; }
+.budget-amounts { font-size: 12px; color: var(--text3); }
+.budget-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 8px 0; }
+.budget-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+.budget-over { color: var(--danger); font-weight: 600; }
+
+/* ── Goal Cards ── */
+.goal-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 10px;
+}
+.goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.goal-name { font-size: 15px; font-weight: 600; }
+.goal-pct { font-size: 22px; font-weight: 700; }
+.goal-meta { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.goal-edit-input {
+    border: none; background: var(--surface2); border-radius: 6px;
+    padding: 4px 8px; color: var(--text); font-size: 13px; width: 80px;
+    outline: none; text-align: right;
+}
+
+/* ── Monthly Cashflow ── */
+.cashflow-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.cashflow-label { flex: 1; color: var(--text2); }
+.cashflow-amount { font-weight: 600; }
+
 /* ── Job Pipeline ── */
 .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .pipeline-col {
@@ -645,32 +690,92 @@ textarea.form-input { resize: vertical; min-height: 80px; }
             <div class="page-title">Finances</div>
             <div class="page-subtitle">Track your money flow</div>
         </div>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn" onclick="openModal('account')">&#43; Account</button>
+            <button class="btn" onclick="openModal('budget')">&#43; Budget</button>
+            <button class="btn" onclick="openModal('goal')">&#43; Goal</button>
             <button class="btn btn-accent" onclick="openModal('transaction')">&#43; Transaction</button>
         </div>
     </div>
-    <div class="stats-grid" id="fin-stats"></div>
-    <div id="fin-accounts" style="margin-bottom:24px;"></div>
-    <div class="grid-2">
-        <div class="card">
-            <div class="card-header"><div class="card-title">Spending by Category</div></div>
-            <div style="max-height:300px;display:flex;justify-content:center;"><canvas id="chart-category"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><div class="card-title">Income vs Expenses</div></div>
-            <div style="max-height:300px;"><canvas id="chart-monthly"></canvas></div>
+
+    <!-- Finance Tabs -->
+    <div class="fin-tabs" style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;">
+        <button class="fin-tab active" onclick="setFinTab('overview')" data-tab="overview">Overview</button>
+        <button class="fin-tab" onclick="setFinTab('monthly')" data-tab="monthly">Monthly</button>
+        <button class="fin-tab" onclick="setFinTab('budgets')" data-tab="budgets">Budgets</button>
+        <button class="fin-tab" onclick="setFinTab('goals')" data-tab="goals">Goals</button>
+        <button class="fin-tab" onclick="setFinTab('transactions')" data-tab="transactions">Transactions</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="fin-tab-overview" class="fin-tab-content">
+        <div class="stats-grid" id="fin-stats"></div>
+        <div id="fin-accounts" style="margin-bottom:24px;"></div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Spending by Category</div></div>
+                <div style="max-height:300px;display:flex;justify-content:center;"><canvas id="chart-category"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-title">Income vs Expenses</div></div>
+                <div style="max-height:300px;"><canvas id="chart-monthly"></canvas></div>
+            </div>
         </div>
     </div>
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">Transactions</div>
+
+    <!-- Monthly Tab -->
+    <div id="fin-tab-monthly" class="fin-tab-content" style="display:none;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+            <button class="btn" onclick="changeMonth(-1)">&#8592;</button>
+            <div id="monthly-label" style="font-size:16px;font-weight:600;min-width:120px;text-align:center;"></div>
+            <button class="btn" onclick="changeMonth(1)">&#8594;</button>
         </div>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Account</th><th></th></tr></thead>
-                <tbody id="tx-table"></tbody>
-            </table>
+        <div class="stats-grid" id="monthly-stats"></div>
+        <div class="grid-2" style="margin-top:16px;">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Spending Breakdown</div></div>
+                <div id="monthly-cat-list"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-title">Cashflow</div></div>
+                <div id="monthly-cashflow"></div>
+            </div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+            <div class="card-header"><div class="card-title">Transactions this month</div></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Account</th><th></th></tr></thead>
+                    <tbody id="monthly-tx-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budgets Tab -->
+    <div id="fin-tab-budgets" class="fin-tab-content" style="display:none;">
+        <div id="budgets-content"></div>
+    </div>
+
+    <!-- Goals Tab -->
+    <div id="fin-tab-goals" class="fin-tab-content" style="display:none;">
+        <div id="goals-content"></div>
+    </div>
+
+    <!-- Transactions Tab -->
+    <div id="fin-tab-transactions" class="fin-tab-content" style="display:none;">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+            <input id="tx-search" type="text" placeholder="Search transactions..." style="flex:1;min-width:160px;" oninput="filterTxTable()">
+            <select id="tx-filter-type" onchange="filterTxTable()"><option value="">All types</option><option value="income">Income</option><option value="expense">Expense</option><option value="transfer">Transfer</option></select>
+            <select id="tx-filter-cat" onchange="filterTxTable()"><option value="">All categories</option></select>
+        </div>
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Account</th><th></th></tr></thead>
+                    <tbody id="tx-table"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -871,18 +976,8 @@ async function loadFinances() {
             </div>
         </div>
     `).join('')}</div>` : '';
-    // Transactions table
-    document.getElementById('tx-table').innerHTML = txs.length ? txs.map(t => `
-        <tr>
-            <td>${fmtDate(t.date)}</td>
-            <td><span class="badge badge-${t.type}">${t.type}</span></td>
-            <td>${t.category||'-'}</td>
-            <td>${t.description||'-'}</td>
-            <td style="font-weight:600;color:${t.type==='income'?'var(--accent2)':'var(--text)'}">${t.type==='income'?'+':'-'}${fmtMoney(t.amount)}</td>
-            <td>${t.account||'-'}</td>
-            <td><button class="btn btn-icon btn-sm btn-danger" onclick="deleteTx(${t.id})">&#10005;</button></td>
-        </tr>
-    `).join('') : '<tr><td colspan="7" class="empty-state"><div class="empty-state-text">No transactions</div></td></tr>';
+    // Cache for transactions tab
+    allTxCache = txs;
     // Charts
     renderCharts(stats);
 }
@@ -928,8 +1023,254 @@ function renderCharts(stats) {
     }
 }
 
-async function deleteTx(id) { await api('transactions/' + id, 'DELETE'); loadFinances(); }
-async function deleteAccount(id) { await api('accounts/' + id, 'DELETE'); loadFinances(); }
+async function deleteTx(id) { if(!confirm('Delete transaction?')) return; await api('transactions/' + id, 'DELETE'); loadFinances(); }
+async function deleteAccount(id) { if(!confirm('Delete account?')) return; await api('accounts/' + id, 'DELETE'); loadFinances(); }
+
+// ── Finance Tabs ──
+let finTab = 'overview';
+let currentMonth = new Date().getMonth() + 1;
+let currentYear = new Date().getFullYear();
+let allTxCache = [];
+
+function setFinTab(tab) {
+    finTab = tab;
+    document.querySelectorAll('.fin-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.fin-tab-content').forEach(el => el.style.display = 'none');
+    document.getElementById('fin-tab-' + tab).style.display = '';
+    if (tab === 'monthly') loadMonthly();
+    else if (tab === 'budgets') loadBudgets();
+    else if (tab === 'goals') loadGoals();
+    else if (tab === 'transactions') renderTxTable(allTxCache);
+}
+
+// ── Monthly ──
+function changeMonth(delta) {
+    currentMonth += delta;
+    if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+    if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+    loadMonthly();
+}
+
+async function loadMonthly() {
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('monthly-label').textContent = `${monthNames[currentMonth-1]} ${currentYear}`;
+    const d = await api(`finance/monthly/${currentYear}/${currentMonth}`);
+    const savingsRate = d.savings_rate;
+    document.getElementById('monthly-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Income</div><div class="stat-value" style="color:var(--accent2)">+${fmtMoney(d.income)} EUR</div></div>
+        <div class="stat-card" data-color="pink"><div class="stat-label">Expenses</div><div class="stat-value" style="color:var(--danger)">-${fmtMoney(d.expenses)} EUR</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Net</div><div class="stat-value" style="color:${d.net>=0?'var(--accent2)':'var(--danger)'}>${d.net>=0?'+':''}${fmtMoney(d.net)} EUR</div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Savings Rate</div><div class="stat-value" style="color:var(--accent3)">${savingsRate}%</div></div>
+    `;
+    // Spending breakdown
+    const cats = Object.entries(d.by_category).sort((a,b)=>b[1]-a[1]);
+    const total = cats.reduce((s,[,v])=>s+v,0);
+    const colors = ['#d4a24e','#34c79d','#636cf1','#e05c7a','#8b5cf6','#06b6d4','#f97316','#ec4899','#14b8a6','#a78bfa'];
+    document.getElementById('monthly-cat-list').innerHTML = cats.length ? cats.map(([cat, amt], i) => {
+        const pct = total > 0 ? Math.round(amt/total*100) : 0;
+        return `
+            <div style="margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+                    <span style="color:var(--text2)">${cat||'Uncategorized'}</span>
+                    <span style="font-weight:600">${fmtMoney(amt)} EUR <span style="color:var(--text3);font-weight:400">(${pct}%)</span></span>
+                </div>
+                <div class="budget-bar"><div class="budget-bar-fill" style="width:${pct}%;background:${colors[i%colors.length]};"></div></div>
+            </div>`;
+    }).join('') : '<div class="empty-state"><div class="empty-state-text">No expenses this month</div></div>';
+    // Cashflow summary
+    document.getElementById('monthly-cashflow').innerHTML = `
+        <div class="cashflow-row"><span class="cashflow-label">💰 Total Income</span><span class="cashflow-amount" style="color:var(--accent2)">+${fmtMoney(d.income)} EUR</span></div>
+        <div class="cashflow-row"><span class="cashflow-label">💸 Total Expenses</span><span class="cashflow-amount" style="color:var(--danger)">-${fmtMoney(d.expenses)} EUR</span></div>
+        <div class="cashflow-row" style="border-bottom:none;"><span class="cashflow-label" style="font-weight:600">📊 Net Saved</span><span class="cashflow-amount" style="font-size:18px;color:${d.net>=0?'var(--accent2)':'var(--danger)'};">${d.net>=0?'+':''}${fmtMoney(d.net)} EUR</span></div>
+        ${d.income > 0 ? `<div style="margin-top:16px;padding:12px;background:var(--surface2);border-radius:8px;text-align:center;">
+            <div style="font-size:28px;font-weight:700;color:${savingsRate>=20?'var(--accent2)':savingsRate>=10?'var(--accent3)':'var(--danger)'};">${savingsRate}%</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px;">savings rate ${savingsRate>=20?'🟢 Great!':savingsRate>=10?'🟡 Okay':'🔴 Low'}</div>
+        </div>` : ''}
+    `;
+    // Transactions
+    document.getElementById('monthly-tx-table').innerHTML = d.transactions.length ? d.transactions.map(t => `
+        <tr>
+            <td>${fmtDate(t.date)}</td>
+            <td><span class="badge badge-${t.type}">${t.type}</span></td>
+            <td>${t.category||'-'}</td>
+            <td>${t.description||'-'}</td>
+            <td style="font-weight:600;color:${t.type==='income'?'var(--accent2)':'var(--text)'}">${t.type==='income'?'+':'-'}${fmtMoney(t.amount)}</td>
+            <td>${t.account||'-'}</td>
+            <td><button class="btn btn-icon btn-sm btn-danger" onclick="deleteTx(${t.id})">✕</button></td>
+        </tr>
+    `).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">No transactions this month</td></tr>';
+}
+
+// ── Budgets ──
+async function loadBudgets() {
+    const budgets = await api('budgets');
+    if (!budgets.length) {
+        document.getElementById('budgets-content').innerHTML = `
+            <div class="empty-state" style="padding:40px;">
+                <div class="empty-state-text">No budgets yet. Click "+ Budget" to set monthly limits per category.</div>
+            </div>`;
+        return;
+    }
+    const totalLimit = budgets.reduce((s,b)=>s+b.monthly_limit,0);
+    const totalSpent = budgets.reduce((s,b)=>s+b.spent,0);
+    let html = `
+        <div class="stats-grid" style="margin-bottom:20px;">
+            <div class="stat-card"><div class="stat-label">Total Budgeted</div><div class="stat-value">${fmtMoney(totalLimit)} EUR</div><div class="stat-sub">per month</div></div>
+            <div class="stat-card" data-color="pink"><div class="stat-label">Spent This Month</div><div class="stat-value" style="color:${totalSpent>totalLimit?'var(--danger)':'var(--text)'}">${fmtMoney(totalSpent)} EUR</div></div>
+            <div class="stat-card" data-color="teal"><div class="stat-label">Remaining</div><div class="stat-value" style="color:var(--accent2)">${fmtMoney(Math.max(0,totalLimit-totalSpent))} EUR</div></div>
+        </div>`;
+    budgets.forEach(b => {
+        const pct = Math.min(100, b.pct);
+        const over = b.spent > b.monthly_limit;
+        html += `
+            <div class="budget-card">
+                <div class="budget-header">
+                    <div>
+                        <div class="budget-cat">${b.category}</div>
+                        <div class="budget-amounts">${fmtMoney(b.spent)} EUR spent of ${fmtMoney(b.monthly_limit)} EUR</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="${over?'budget-over':''}" style="font-size:14px;font-weight:600;">${over?'OVER BUDGET':fmtMoney(b.remaining)+' left'}</span>
+                        <button class="btn btn-sm" onclick="openModal('budget',${JSON.stringify(b).replace(/"/g,'&quot;')})">Edit</button>
+                        <button class="btn btn-icon btn-sm btn-danger" onclick="deleteBudget(${b.id})">✕</button>
+                    </div>
+                </div>
+                <div class="budget-bar">
+                    <div class="budget-bar-fill" style="width:${pct}%;background:${over?'var(--danger)':b.color};"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);">
+                    <span>${b.pct}% used</span>
+                    <span>${fmtMoney(b.monthly_limit)} EUR limit</span>
+                </div>
+            </div>`;
+    });
+    document.getElementById('budgets-content').innerHTML = html;
+}
+
+async function saveBudget(e, id) {
+    e.preventDefault();
+    const body = {
+        category: document.getElementById('f-bgt-cat').value,
+        monthly_limit: document.getElementById('f-bgt-limit').value,
+        color: document.getElementById('f-bgt-color').value,
+    };
+    if (id) await api('budgets/' + id, 'PUT', body);
+    else await api('budgets', 'POST', body);
+    closeModal();
+    loadBudgets();
+}
+
+async function deleteBudget(id) {
+    if (!confirm('Delete this budget?')) return;
+    await api('budgets/' + id, 'DELETE');
+    loadBudgets();
+}
+
+// ── Savings Goals ──
+async function loadGoals() {
+    const goals = await api('goals');
+    if (!goals.length) {
+        document.getElementById('goals-content').innerHTML = `
+            <div class="empty-state" style="padding:40px;">
+                <div class="empty-state-text">No savings goals yet. Click "+ Goal" to create one.</div>
+            </div>`;
+        return;
+    }
+    const html = goals.map(g => {
+        const pct = g.target > 0 ? Math.min(100, Math.round(g.current / g.target * 100)) : 0;
+        const daysLeft = g.deadline ? Math.ceil((new Date(g.deadline) - new Date()) / 86400000) : null;
+        return `
+            <div class="goal-card">
+                <div class="goal-header">
+                    <div>
+                        <div class="goal-name">${g.name}</div>
+                        ${g.notes ? `<div class="goal-meta">${g.notes}</div>` : ''}
+                        ${daysLeft !== null ? `<div class="goal-meta">${daysLeft > 0 ? daysLeft + ' days left' : 'Deadline passed'} · ${fmtDate(g.deadline)}</div>` : ''}
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="goal-pct" style="color:${g.color}">${pct}%</div>
+                        <div class="goal-meta">${fmtMoney(g.current)} / ${fmtMoney(g.target)} EUR</div>
+                    </div>
+                </div>
+                <div class="budget-bar" style="height:10px;margin-bottom:12px;">
+                    <div class="budget-bar-fill" style="width:${pct}%;background:${g.color};"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:12px;color:var(--text3);">Update progress:</span>
+                    <input class="goal-edit-input" type="number" step="0.01" value="${g.current}" onchange="updateGoalCurrent(${g.id}, this.value)">
+                    <span style="font-size:12px;color:var(--text3);">EUR</span>
+                    <div style="flex:1;"></div>
+                    <button class="btn btn-sm" onclick="openModal('goal',${JSON.stringify(g).replace(/"/g,'&quot;')})">Edit</button>
+                    <button class="btn btn-icon btn-sm btn-danger" onclick="deleteGoal(${g.id})">✕</button>
+                </div>
+            </div>`;
+    }).join('');
+    document.getElementById('goals-content').innerHTML = html;
+}
+
+async function saveGoal(e, id) {
+    e.preventDefault();
+    const body = {
+        name: document.getElementById('f-goal-name').value,
+        target: document.getElementById('f-goal-target').value,
+        current: document.getElementById('f-goal-current').value,
+        deadline: document.getElementById('f-goal-deadline').value,
+        color: document.getElementById('f-goal-color').value,
+        notes: document.getElementById('f-goal-notes').value,
+    };
+    if (id) await api('goals/' + id, 'PUT', body);
+    else await api('goals', 'POST', body);
+    closeModal();
+    loadGoals();
+}
+
+async function updateGoalCurrent(id, val) {
+    await api('goals/' + id, 'PUT', { current: parseFloat(val) });
+    loadGoals();
+}
+
+async function deleteGoal(id) {
+    if (!confirm('Delete this goal?')) return;
+    await api('goals/' + id, 'DELETE');
+    loadGoals();
+}
+
+// ── Transactions filter ──
+function renderTxTable(txs) {
+    allTxCache = txs;
+    // Populate category filter
+    const cats = [...new Set(txs.map(t=>t.category).filter(Boolean))].sort();
+    const sel = document.getElementById('tx-filter-cat');
+    if (sel) {
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+    }
+    filterTxTable();
+}
+
+function filterTxTable() {
+    const search = (document.getElementById('tx-search')?.value||'').toLowerCase();
+    const type = document.getElementById('tx-filter-type')?.value||'';
+    const cat = document.getElementById('tx-filter-cat')?.value||'';
+    const filtered = allTxCache.filter(t =>
+        (!type || t.type === type) &&
+        (!cat || t.category === cat) &&
+        (!search || (t.description||'').toLowerCase().includes(search) || (t.category||'').toLowerCase().includes(search))
+    );
+    const tbody = document.getElementById('tx-table');
+    if (!tbody) return;
+    tbody.innerHTML = filtered.length ? filtered.map(t => `
+        <tr>
+            <td>${fmtDate(t.date)}</td>
+            <td><span class="badge badge-${t.type}">${t.type}</span></td>
+            <td>${t.category||'-'}</td>
+            <td>${t.description||'-'}</td>
+            <td style="font-weight:600;color:${t.type==='income'?'var(--accent2)':'var(--text)'}">${t.type==='income'?'+':'-'}${fmtMoney(t.amount)}</td>
+            <td>${t.account||'-'}</td>
+            <td><button class="btn btn-icon btn-sm btn-danger" onclick="deleteTx(${t.id})">✕</button></td>
+        </tr>
+    `).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">No transactions match</td></tr>';
+}
 
 // ── Quran ──
 async function loadQuran() {
@@ -1176,6 +1517,66 @@ const modalForms = {
             <div class="form-group">
                 <label class="form-label">Color</label>
                 <input type="color" id="f-acct-color" value="#d4a24e" style="width:50px;height:35px;border:none;background:none;cursor:pointer;">
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save</button>
+            </div>
+        </form>
+    `,
+    budget: (data) => `
+        <div class="modal-title">${data ? 'Edit' : 'Set'} Monthly Budget</div>
+        <form onsubmit="saveBudget(event, ${data?.id||'null'})">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <input type="text" class="form-input" id="f-bgt-cat" value="${data?.category||''}" placeholder="e.g. Food, Rent, Transport..." required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Monthly Limit (EUR)</label>
+                    <input type="number" step="0.01" class="form-input" id="f-bgt-limit" value="${data?.monthly_limit||''}" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Color</label>
+                <input type="color" id="f-bgt-color" value="${data?.color||'#e8a849'}" style="width:50px;height:35px;border:none;background:none;cursor:pointer;">
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save</button>
+            </div>
+        </form>
+    `,
+    goal: (data) => `
+        <div class="modal-title">${data ? 'Edit' : 'New'} Savings Goal</div>
+        <form onsubmit="saveGoal(event, ${data?.id||'null'})">
+            <div class="form-group">
+                <label class="form-label">Goal Name</label>
+                <input type="text" class="form-input" id="f-goal-name" value="${data?.name||''}" placeholder="e.g. Emergency Fund, Laptop, Vacation..." required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Target Amount (EUR)</label>
+                    <input type="number" step="0.01" class="form-input" id="f-goal-target" value="${data?.target||''}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current Amount (EUR)</label>
+                    <input type="number" step="0.01" class="form-input" id="f-goal-current" value="${data?.current||0}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Deadline (optional)</label>
+                    <input type="date" class="form-input" id="f-goal-deadline" value="${data?.deadline||''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Color</label>
+                    <input type="color" id="f-goal-color" value="${data?.color||'#34c79d'}" style="width:50px;height:35px;border:none;background:none;cursor:pointer;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <input type="text" class="form-input" id="f-goal-notes" value="${data?.notes||''}" placeholder="Why is this goal important?">
             </div>
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
                 <button type="button" class="btn" onclick="closeModal()">Cancel</button>
