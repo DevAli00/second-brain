@@ -31,6 +31,68 @@
     --radius-sm: 8px;
     --shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
+
+/* ── Light Mode ── */
+html[data-theme="light"] {
+    --bg: #f4f3f0;
+    --bg2: #ebe9e4;
+    --surface: rgba(255, 255, 254, 0.9);
+    --surface2: rgba(235, 233, 228, 0.8);
+    --surface3: rgba(220, 218, 212, 0.6);
+    --glass: rgba(0,0,0,0.02);
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --accent: #b8832e;
+    --accent-glow: rgba(184,131,46,0.12);
+    --accent2: #1fa87e;
+    --accent3: #4a53d4;
+    --accent4: #c73d5f;
+    --text: #1a1916;
+    --text2: #5c5950;
+    --text3: #9a9589;
+    --danger: #c73030;
+    --success: #1fa87e;
+    --warning: #c97a10;
+    --shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+html[data-theme="light"] body { background: var(--bg); }
+html[data-theme="light"] .sidebar { background: var(--bg2); }
+html[data-theme="light"] .main { background: var(--bg); }
+html[data-theme="light"] .card { backdrop-filter: none; background: #fff; border-color: var(--border); }
+html[data-theme="light"] .stat-card { background: #fff; }
+html[data-theme="light"] .modal { background: #fff; }
+html[data-theme="light"] .form-input { background: #f9f8f6; border-color: var(--border2); color: var(--text); }
+html[data-theme="light"] .form-input:focus { border-color: var(--accent); background: #fff; }
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea { color: var(--text); }
+html[data-theme="light"] table thead tr { background: var(--surface2); }
+html[data-theme="light"] table tbody tr:hover { background: var(--surface2); }
+html[data-theme="light"] .pipeline-col { background: var(--surface2); }
+html[data-theme="light"] .nav-item.active { background: var(--accent-glow); color: var(--accent); border-color: rgba(184,131,46,0.2); }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: var(--border2); }
+
+/* ── Theme Toggle Button ── */
+.theme-toggle {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 13px; font-weight: 500;
+    color: var(--text2); background: none; border: 1px solid var(--border);
+    width: 100%; transition: all 0.15s; margin-top: 8px;
+}
+.theme-toggle:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+.theme-toggle-track {
+    width: 34px; height: 18px; border-radius: 9px;
+    background: var(--surface3); border: 1px solid var(--border2);
+    position: relative; flex-shrink: 0; transition: background 0.2s;
+}
+.theme-toggle-track.on { background: var(--accent); border-color: var(--accent); }
+.theme-toggle-thumb {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--text2); position: absolute;
+    top: 2px; left: 2px; transition: all 0.2s;
+}
+.theme-toggle-track.on .theme-toggle-thumb { left: 18px; background: #fff; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     font-family: 'DM Sans', sans-serif;
@@ -654,6 +716,17 @@ textarea.form-input { resize: vertical; min-height: 80px; }
             <span class="nav-icon">&#128218;</span> Reading List
         </div>
     </div>
+
+    <div class="nav-section" style="margin-top:auto;">
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">
+            <span id="themeIcon">🌙</span>
+            <span id="themeLabel">Dark Mode</span>
+            <div style="flex:1;"></div>
+            <div class="theme-toggle-track" id="themeTrack">
+                <div class="theme-toggle-thumb"></div>
+            </div>
+        </button>
+    </div>
 </aside>
 
 <!-- ── Main Content ── -->
@@ -892,6 +965,28 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 </div>
 
 <script>
+// ── Theme ──
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const isDark = theme === 'dark';
+    document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+    document.getElementById('themeLabel').textContent = isDark ? 'Dark Mode' : 'Light Mode';
+    document.getElementById('themeTrack').classList.toggle('on', isDark);
+    localStorage.setItem('sb-theme', theme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+// Apply saved or system preference on load
+(function() {
+    const saved = localStorage.getItem('sb-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+})();
+
 // ── State ──
 let chartCat = null, chartMonthly = null;
 let allSurahs = [];
