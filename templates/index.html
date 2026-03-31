@@ -558,6 +558,64 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 }
 .ltask-cat.weekday { background: rgba(99,108,241,0.12); color: var(--accent3); }
 .ltask-cat.weekend { background: rgba(212,162,78,0.12); color: var(--accent); }
+.ltask-cat.mon, .ltask-cat.monday    { background: rgba(99,108,241,0.12); color: var(--accent3); }
+.ltask-cat.tue, .ltask-cat.tuesday   { background: rgba(52,199,157,0.12); color: var(--accent2); }
+.ltask-cat.wed, .ltask-cat.wednesday { background: rgba(212,162,78,0.12); color: var(--accent); }
+.ltask-cat.thu, .ltask-cat.thursday  { background: rgba(224,92,122,0.12); color: var(--accent4); }
+.ltask-cat.fri, .ltask-cat.friday    { background: rgba(99,108,241,0.18); color: var(--accent3); }
+.ltask-cat.sat, .ltask-cat.saturday  { background: rgba(139,92,246,0.12); color: #a78bfa; }
+.ltask-cat.sun, .ltask-cat.sunday    { background: rgba(251,146,60,0.12); color: #fb923c; }
+.ltask-cat.general                   { background: rgba(255,255,255,0.06); color: var(--text2); }
+
+/* ── Month Tab Navigation ── */
+.month-tab {
+    padding: 7px 16px; border-radius: 99px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border); background: none;
+    color: var(--text3); transition: all 0.15s; white-space: nowrap;
+}
+.month-tab:hover { color: var(--text); border-color: var(--border2); }
+.month-tab.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+.month-add-btn {
+    padding: 7px 14px; border-radius: 99px;
+    font-size: 13px; cursor: pointer;
+    border: 1px dashed var(--border2); background: none;
+    color: var(--text3); transition: all 0.15s;
+}
+.month-add-btn:hover { color: var(--text); border-color: var(--accent); }
+
+/* ── Week grid inside a month ── */
+.week-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.week-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.week-block-header {
+    padding: 14px 18px; display: flex; align-items: center;
+    justify-content: space-between; cursor: pointer;
+    border-bottom: 1px solid transparent; transition: background 0.15s;
+}
+.week-block-header:hover { background: var(--glass); }
+.week-block-header.expanded { border-bottom-color: var(--border); }
+.week-block-title { font-size: 14px; font-weight: 600; }
+.week-block-meta { font-size: 12px; color: var(--text3); margin-top: 3px; }
+.week-block-body { padding: 16px 18px; }
+.day-section { margin-bottom: 14px; }
+.day-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text3);
+    margin-bottom: 6px; padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+}
+.add-month-card {
+    border: 2px dashed var(--border2); border-radius: var(--radius);
+    padding: 32px; text-align: center; cursor: pointer;
+    transition: all 0.15s; color: var(--text3);
+    background: none; width: 100%;
+}
+.add-month-card:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
 .daily-planner-header {
     display: flex;
     align-items: center;
@@ -925,16 +983,21 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 <div id="sec-learning" class="section">
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-            <div class="page-title">2026 Learning Plan</div>
-            <div class="page-subtitle">Trimestrial AI Security Roadmap</div>
+            <div class="page-title">Learning Plan</div>
+            <div class="page-subtitle" id="learning-subtitle">Monthly schedule &amp; weekly tasks</div>
         </div>
         <div style="display:flex;gap:8px;">
-            <button class="btn" onclick="learningView='roadmap';loadLearning()">Roadmap</button>
-            <button class="btn" onclick="learningView='daily';loadLearning()">Daily Planner</button>
-            <button class="btn" style="background:#c0392b;border-color:#c0392b;" onclick="resetLearningProgress()">Reset All</button>
+            <button class="btn" onclick="setLearningTab('plan')">📅 Plan</button>
+            <button class="btn" onclick="setLearningTab('daily')">📋 Daily</button>
+            <button class="btn" onclick="setLearningTab('overview')">📊 Overview</button>
+            <button class="btn" style="background:#c0392b;border-color:#c0392b;color:#fff;" onclick="resetLearningProgress()">Reset</button>
         </div>
     </div>
     <div class="stats-grid" id="learning-stats"></div>
+
+    <!-- Month tab strip -->
+    <div id="learning-month-tabs" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);"></div>
+
     <div id="learning-content"></div>
 </div>
 
@@ -2110,31 +2173,258 @@ async function logWeight() {
 }
 
 // ── Learning Plan ──
-let learningView = 'roadmap';
+let learningTab = 'plan';
 let dailyDate = new Date().toISOString().split('T')[0];
+let activeMonthId = null;
+let learningRoadmapCache = [];
+
+const DAY_OPTIONS = ['General','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+function setLearningTab(tab) {
+    learningTab = tab;
+    loadLearning();
+}
 
 async function loadLearning() {
-    const stats = await api('learning/stats');
+    const [stats, roadmap] = await Promise.all([api('learning/stats'), api('learning/roadmap')]);
+    learningRoadmapCache = roadmap;
     const pct = stats.total ? Math.round(stats.done / stats.total * 100) : 0;
     document.getElementById('learning-badge').textContent = pct + '%';
 
-    const startDate = new Date('2026-01-01');
-    const now = new Date();
-    const diffDays = Math.max(0, Math.floor((now - startDate) / (1000*60*60*24)));
-    const currentWeek = Math.min(52, Math.floor(diffDays / 7) + 1);
-
     document.getElementById('learning-stats').innerHTML = `
         <div class="stat-card"><div class="stat-label">Overall Progress</div><div class="stat-value">${pct}%</div><div class="stat-sub">${stats.done} / ${stats.total} tasks</div></div>
-        <div class="stat-card" data-color="teal"><div class="stat-label">Current Week</div><div class="stat-value" style="color:var(--accent2)">${currentWeek}<span style="font-size:16px;color:var(--text3)"> / 52</span></div></div>
-        <div class="stat-card" data-color="purple"><div class="stat-label">Day</div><div class="stat-value" style="color:var(--accent3)">${Math.min(365, diffDays + 1)}<span style="font-size:16px;color:var(--text3)"> / 365</span></div></div>
-        <div class="stat-card" data-color="pink"><div class="stat-label">Tasks Remaining</div><div class="stat-value" style="color:var(--accent4)">${stats.total - stats.done}</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Months</div><div class="stat-value" style="color:var(--accent2)">${roadmap.length}</div><div class="stat-sub">planned</div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Total Weeks</div><div class="stat-value" style="color:var(--accent3)">${roadmap.reduce((s,p)=>s+p.weeks.length,0)}</div></div>
+        <div class="stat-card" data-color="pink"><div class="stat-label">Remaining</div><div class="stat-value" style="color:var(--accent4)">${stats.total - stats.done}</div></div>
     `;
 
-    if (learningView === 'roadmap') {
-        await renderRoadmap(stats);
-    } else {
+    // Build month tab strip
+    renderMonthTabs(roadmap);
+
+    if (learningTab === 'plan') {
+        if (!activeMonthId && roadmap.length) activeMonthId = roadmap[0].id;
+        await renderMonthPlan(roadmap);
+    } else if (learningTab === 'daily') {
+        document.getElementById('learning-month-tabs').innerHTML = '';
         await renderDailyPlanner();
+    } else {
+        document.getElementById('learning-month-tabs').innerHTML = '';
+        await renderLearningOverview(stats, roadmap);
     }
+}
+
+function renderMonthTabs(roadmap) {
+    const strip = document.getElementById('learning-month-tabs');
+    let html = roadmap.map(p => `
+        <button class="month-tab ${p.id === activeMonthId ? 'active' : ''}"
+            style="${p.id === activeMonthId ? 'border-color:'+p.color+';color:'+p.color+';background:'+p.color+'18;' : ''}"
+            onclick="activeMonthId=${p.id};renderMonthPlan(learningRoadmapCache)">
+            ${p.name}
+        </button>`).join('');
+    html += `<button class="month-add-btn" onclick="openAddMonthModal()">+ Month</button>`;
+    strip.innerHTML = html;
+}
+
+async function renderMonthPlan(roadmap) {
+    const month = roadmap.find(p => p.id === activeMonthId);
+    const content = document.getElementById('learning-content');
+
+    if (!month) {
+        content.innerHTML = `
+            <button class="add-month-card" onclick="openAddMonthModal()">
+                <div style="font-size:32px;margin-bottom:8px;">📅</div>
+                <div style="font-size:16px;font-weight:600;">Add your first month</div>
+                <div style="font-size:13px;margin-top:6px;opacity:0.7;">Click to create January, February, or any custom period</div>
+            </button>`;
+        return;
+    }
+
+    const mDone = month.weeks.reduce((s,w)=>s+w.tasks.filter(t=>t.completed).length,0);
+    const mTotal = month.weeks.reduce((s,w)=>s+w.tasks.length,0);
+    const mpct = mTotal ? Math.round(mDone/mTotal*100) : 0;
+
+    let html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;">${month.name}</div>
+                ${month.description ? `<div style="font-size:13px;color:var(--text3);margin-top:3px;">${month.description}</div>` : ''}
+                <div style="margin-top:8px;display:flex;align-items:center;gap:10px;">
+                    <div style="height:6px;width:160px;background:var(--border);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${mpct}%;background:${month.color};border-radius:3px;transition:width 0.4s;"></div>
+                    </div>
+                    <span style="font-size:12px;color:var(--text3);">${mDone}/${mTotal} tasks · ${mpct}%</span>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-sm" onclick="editPhase(${month.id},'${month.name.replace(/'/g,"\\'")}','${(month.description||'').replace(/'/g,"\\'")}','${month.color}')">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deletePhase(${month.id})">Delete</button>
+            </div>
+        </div>`;
+
+    if (!month.weeks.length) {
+        html += `<div class="empty-state" style="padding:40px;"><div class="empty-state-icon">📆</div><div class="empty-state-text">No weeks yet. Add Week 1 below.</div></div>`;
+    }
+
+    html += `<div class="week-grid">`;
+    for (const week of month.weeks) {
+        const wDone = week.tasks.filter(t=>t.completed).length;
+        const wTotal = week.tasks.length;
+        const wpct = wTotal ? Math.round(wDone/wTotal*100) : 0;
+
+        // Group tasks by day
+        const byDay = {};
+        for (const t of week.tasks) {
+            const key = t.category || 'general';
+            if (!byDay[key]) byDay[key] = [];
+            byDay[key].push(t);
+        }
+
+        html += `
+        <div class="week-block" id="wb-${week.id}">
+            <div class="week-block-header" onclick="toggleWeekBlock(${week.id})">
+                <div>
+                    <div class="week-block-title">Week ${week.week_number}${week.title ? ' — '+week.title : ''}</div>
+                    ${week.goal ? `<div class="week-block-meta">${week.goal}</div>` : ''}
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:12px;color:${wpct===100?'var(--accent2)':'var(--text3)'};">${wDone}/${wTotal}</span>
+                    <div style="height:4px;width:60px;background:var(--border);border-radius:2px;overflow:hidden;">
+                        <div style="height:100%;width:${wpct}%;background:${month.color};border-radius:2px;"></div>
+                    </div>
+                    <button class="btn btn-icon btn-sm btn-danger" style="width:22px;height:22px;font-size:9px;" onclick="event.stopPropagation();deleteWeek(${week.id})">✕</button>
+                    <span style="color:var(--text3);font-size:14px;" id="wbchev-${week.id}">▸</span>
+                </div>
+            </div>
+            <div class="week-block-body" id="wbb-${week.id}" style="display:none;">`;
+
+        // Render tasks grouped by day
+        const dayOrder = ['general','mon','tue','wed','thu','fri','sat','sun','weekday','weekend'];
+        const dayLabel = { general:'General', mon:'Monday', tue:'Tuesday', wed:'Wednesday', thu:'Thursday', fri:'Friday', sat:'Saturday', sun:'Sunday', weekday:'Weekdays', weekend:'Weekends' };
+        const sortedDays = [...new Set([...dayOrder.filter(d=>byDay[d]), ...Object.keys(byDay).filter(d=>!dayOrder.includes(d))])];
+
+        if (!week.tasks.length) {
+            html += `<div style="font-size:13px;color:var(--text3);padding:8px 0;">No tasks yet. Add one below.</div>`;
+        }
+
+        for (const day of sortedDays) {
+            html += `<div class="day-section">
+                <div class="day-section-label">${dayLabel[day] || day}</div>`;
+            for (const t of byDay[day]) {
+                html += `<div class="ltask-item ${t.completed?'done':''}">
+                    <div class="task-check ${t.completed?'checked':''}" onclick="toggleLearningTask(${t.id})" style="cursor:pointer;">✓</div>
+                    <span class="ltask-cat ${t.category}">${dayLabel[t.category]||t.category}</span>
+                    <span style="flex:1">${t.description}</span>
+                    <button class="btn btn-icon btn-sm btn-danger" style="width:20px;height:20px;font-size:9px;" onclick="deleteLearningTask(${t.id})">✕</button>
+                </div>`;
+            }
+            html += `</div>`;
+        }
+
+        // Add task row
+        html += `
+            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                <select class="form-input" style="width:100px;padding:5px 6px;font-size:12px;" id="lt-day-${week.id}">
+                    ${DAY_OPTIONS.map(d=>`<option value="${d.toLowerCase()}">${d}</option>`).join('')}
+                </select>
+                <input type="text" class="task-input" style="flex:1;min-width:150px;" placeholder="Add task..." id="lt-input-${week.id}" onkeydown="if(event.key==='Enter')addLearningTask(${week.id})">
+                <button class="btn btn-sm" onclick="addLearningTask(${week.id})">Add</button>
+            </div>
+            </div>
+        </div>`;
+    }
+    html += `</div>`;
+
+    // Add week row
+    html += `
+        <div class="card" style="margin-top:16px;padding:16px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Add a week to ${month.name}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <input type="text" class="task-input" style="flex:2;min-width:160px;" placeholder="Week title (e.g. API Security basics)" id="wk-input-${month.id}">
+                <input type="text" class="task-input" style="flex:2;min-width:160px;" placeholder="Goal (optional)" id="wk-goal-${month.id}">
+                <button class="btn" onclick="addWeek(${month.id})">+ Add Week</button>
+            </div>
+        </div>`;
+
+    content.innerHTML = html;
+}
+
+function toggleWeekBlock(id) {
+    const body = document.getElementById('wbb-' + id);
+    const chev = document.getElementById('wbchev-' + id);
+    const hdr = body.previousElementSibling;
+    const open = body.style.display === 'block';
+    body.style.display = open ? 'none' : 'block';
+    if (chev) chev.textContent = open ? '▸' : '▾';
+    if (hdr) hdr.classList.toggle('expanded', !open);
+}
+
+function openAddMonthModal() {
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="modal-title">Add Month / Period</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="nm-name" placeholder="e.g. January, Q1, Sprint 1…" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Color</label>
+                <input type="color" id="nm-color" value="#2e86c1" style="width:100%;height:38px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description (optional)</label>
+            <input type="text" class="form-input" id="nm-desc" placeholder="e.g. Focus: Penetration Testing fundamentals">
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="saveNewMonth()">Create</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function saveNewMonth() {
+    const name = document.getElementById('nm-name').value.trim();
+    if (!name) return;
+    const p = await api('learning/phases', 'POST', {
+        name,
+        description: document.getElementById('nm-desc').value.trim(),
+        color: document.getElementById('nm-color').value
+    });
+    closeModal();
+    await loadLearning();
+    if (p?.id) { activeMonthId = p.id; renderMonthPlan(learningRoadmapCache); }
+}
+
+async function renderLearningOverview(stats, roadmap) {
+    let html = '';
+    if (stats.by_phase.length) {
+        html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px;">`;
+        for (const bp of stats.by_phase) {
+            const ppct = bp.total ? Math.round(bp.done / bp.total * 100) : 0;
+            html += `<div class="card" style="border-top:3px solid ${bp.color};padding:16px;">
+                <div style="font-size:13px;font-weight:600;">${bp.name}</div>
+                <div style="font-family:Outfit;font-size:24px;font-weight:700;margin:6px 0;">${ppct}%</div>
+                <div style="font-size:12px;color:var(--text3);">${bp.done}/${bp.total} tasks</div>
+                <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" style="width:${ppct}%;background:${bp.color};"></div></div>
+            </div>`;
+        }
+        html += '</div>';
+    }
+    // Weekly breakdown
+    if (stats.by_week.length) {
+        html += `<div class="card"><div class="card-header"><div class="card-title">Weekly Breakdown</div></div>`;
+        for (const w of stats.by_week) {
+            const wpct = w.total ? Math.round(w.done/w.total*100) : 0;
+            html += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;">
+                <span style="min-width:100px;color:var(--text2);">W${w.week_number} · ${w.title}</span>
+                <div class="progress-bar" style="flex:1;"><div class="progress-fill" style="width:${wpct}%;background:var(--accent2);"></div></div>
+                <span style="min-width:50px;text-align:right;color:var(--text3);">${w.done}/${w.total}</span>
+            </div>`;
+        }
+        html += '</div>';
+    }
+    document.getElementById('learning-content').innerHTML = html || '<div class="empty-state"><div class="empty-state-text">No data yet.</div></div>';
 }
 
 async function renderRoadmap(stats) {
@@ -2303,9 +2593,9 @@ async function deleteLearningTask(id) {
 }
 async function addLearningTask(weekId) {
     const input = document.getElementById('lt-input-' + weekId);
-    const cat = document.getElementById('lt-cat-' + weekId);
+    const day = document.getElementById('lt-day-' + weekId);
     if (!input.value.trim()) return;
-    await api('learning/tasks', 'POST', { week_id: weekId, category: cat.value, description: input.value.trim() });
+    await api('learning/tasks', 'POST', { week_id: weekId, category: day ? day.value : 'general', description: input.value.trim() });
     input.value = '';
     loadLearning();
 }
@@ -2337,14 +2627,7 @@ async function saveDailyNotes() {
 
 // ── Phase / Week CRUD ──
 async function addPhase() {
-    const name = document.getElementById('phase-name-input').value.trim();
-    if (!name) return;
-    await api('learning/phases', 'POST', {
-        name,
-        description: document.getElementById('phase-desc-input').value.trim(),
-        color: document.getElementById('phase-color-input').value
-    });
-    loadLearning();
+    openAddMonthModal();
 }
 
 function editPhase(id, name, desc, color) {
