@@ -643,55 +643,79 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 }
 
 /* ── Books / Reading List ── */
-.book-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    transition: border-color 0.2s;
-}
-.book-card:hover { border-color: var(--accent2); }
-.book-card.status-completed { opacity: 0.55; }
-.book-status-btn {
-    width: 28px; height: 28px; min-width: 28px; border-radius: 8px;
-    border: 2px solid var(--border); background: transparent;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 13px; transition: all 0.2s; color: var(--text3);
-}
-.book-status-btn.to_read { border-color: var(--text3); }
-.book-status-btn.reading { border-color: var(--accent); background: rgba(212,162,78,0.12); color: var(--accent); }
-.book-status-btn.completed { border-color: var(--accent2); background: rgba(99,108,241,0.12); color: var(--accent2); }
-.book-info { flex: 1; min-width: 0; }
-.book-title { font-size: 14px; font-weight: 600; color: var(--text); }
-.book-author { font-size: 12px; color: var(--text3); margin-top: 2px; }
-.book-meta { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-.book-tag {
-    font-size: 10px; padding: 2px 8px; border-radius: 99px;
-    background: var(--glass); color: var(--text3);
-    text-transform: uppercase; letter-spacing: 0.5px;
-}
-.book-tag.q1 { background: rgba(26,82,118,0.25); color: #5dade2; }
-.book-tag.q2 { background: rgba(46,134,193,0.25); color: #85c1e9; }
-.book-tag.q3 { background: rgba(20,143,119,0.25); color: #76d7c4; }
-.book-tag.q4 { background: rgba(142,68,173,0.25); color: #bb8fce; }
-.book-notes { font-size: 12px; color: var(--text3); margin-top: 6px; line-height: 1.5; }
-.book-rating { display: flex; gap: 2px; margin-top: 6px; }
-.book-star { cursor: pointer; font-size: 15px; color: var(--border); transition: color 0.15s; }
-.book-star.filled { color: var(--accent); }
-.book-filter-btn { background: var(--surface2); border-color: var(--border); color: var(--text3); font-size: 12px; padding: 6px 14px; }
-.book-filter-btn.active { background: var(--accent3); border-color: var(--accent3); color: #fff; }
-.book-quarter-section { margin-bottom: 24px; }
-.book-quarter-title {
-    font-size: 14px; font-weight: 600; color: var(--text);
+/* ── Reading List ── */
+.book-status-section { margin-bottom: 28px; }
+.book-status-heading {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--text3);
     margin-bottom: 10px; padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
 }
-.book-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; opacity: 0.5; transition: opacity 0.15s; }
-.book-del:hover { opacity: 1; color: #e74c3c; }
+.book-status-count {
+    font-size: 11px; background: var(--surface2); color: var(--text3);
+    padding: 2px 8px; border-radius: 99px; font-weight: 600; letter-spacing: 0;
+}
+.book-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: border-color 0.15s, transform 0.1s;
+}
+.book-card:hover { border-color: var(--border2); transform: translateX(2px); }
+.book-card.status-reading { border-left-color: var(--accent); }
+.book-card.status-completed { opacity: 0.6; }
+.book-status-btn {
+    width: 24px; height: 24px; min-width: 24px; border-radius: 50%;
+    border: 2px solid var(--border2); background: transparent;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; transition: all 0.15s; color: var(--text3); margin-top: 1px;
+}
+.book-status-btn:hover { border-color: var(--accent); }
+.book-status-btn.reading { border-color: var(--accent); background: rgba(212,162,78,0.15); color: var(--accent); font-size:13px; }
+.book-status-btn.completed { border-color: var(--accent2); background: rgba(52,199,157,0.15); color: var(--accent2); font-size:13px; }
+.book-info { flex: 1; min-width: 0; }
+.book-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.book-author { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.book-meta { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; align-items: center; }
+.book-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 99px;
+    background: var(--surface2); color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600;
+}
+.book-tag.security    { background: rgba(224,82,82,0.1);  color: #f87171; }
+.book-tag.ai_security { background: rgba(99,108,241,0.12); color: var(--accent3); }
+.book-tag.ai_ml       { background: rgba(52,199,157,0.12); color: var(--accent2); }
+.book-tag.programming { background: rgba(212,162,78,0.12); color: var(--accent); }
+.book-tag.research    { background: rgba(139,92,246,0.12); color: #a78bfa; }
+.book-tag.career      { background: rgba(251,146,60,0.12); color: #fb923c; }
+.book-notes { font-size: 12px; color: var(--text3); margin-top: 5px; line-height: 1.5; font-style: italic; }
+.book-rating { display: flex; gap: 1px; margin-top: 5px; }
+.book-star { cursor: pointer; font-size: 14px; color: var(--border2); transition: color 0.1s; }
+.book-star:hover ~ .book-star { color: var(--border2) !important; }
+.book-star:hover, .book-star.filled { color: var(--accent); }
+.book-del {
+    background: none; border: none; color: var(--text3); cursor: pointer;
+    font-size: 14px; padding: 4px; border-radius: 4px; flex-shrink: 0;
+    transition: color 0.12s; opacity: 0; margin-top: 1px;
+}
+.book-card:hover .book-del { opacity: 1; }
+.book-del:hover { color: var(--danger); }
+.book-cat-chip {
+    font-size: 11px; padding: 4px 12px; border-radius: 99px; cursor: pointer;
+    border: 1px solid var(--border); background: none; color: var(--text3);
+    transition: all 0.12s; font-weight: 500;
+}
+.book-cat-chip:hover { border-color: var(--border2); color: var(--text2); }
+.book-cat-chip.active { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+.book-filter-btn { background: var(--surface2); border-color: var(--border); color: var(--text3); font-size: 12px; padding: 6px 14px; }
+.book-filter-btn.active { background: var(--accent3); border-color: var(--accent3); color: #fff; }
 
 /* ── Empty State ── */
 .empty-state {
@@ -1006,17 +1030,39 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
             <div class="page-title">Reading List</div>
-            <div class="page-subtitle">Books across your 2026 learning journey</div>
+            <div class="page-subtitle" id="book-subtitle">Your library</div>
         </div>
-        <button class="btn" onclick="openAddBookModal()">+ Add Book</button>
     </div>
+
+    <!-- Quick stats -->
     <div class="stats-grid" id="book-stats"></div>
-    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="book-filters">
-        <button class="btn book-filter-btn active" onclick="filterBooks('all',this)">All</button>
-        <button class="btn book-filter-btn" onclick="filterBooks('to_read',this)">To Read</button>
-        <button class="btn book-filter-btn" onclick="filterBooks('reading',this)">Reading</button>
-        <button class="btn book-filter-btn" onclick="filterBooks('completed',this)">Completed</button>
+
+    <!-- Search + category filter -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <input id="book-search" type="text" placeholder="🔍  Search books…"
+            style="flex:1;min-width:200px;"
+            oninput="renderBooks()">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="book-cat-filters"></div>
     </div>
+
+    <!-- Quick-add bar -->
+    <div class="card" style="padding:14px 18px;margin-bottom:24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input id="qa-title" class="form-input" style="flex:3;min-width:160px;" placeholder="Book title…" onkeydown="if(event.key==='Enter')quickAddBook()">
+        <input id="qa-author" class="form-input" style="flex:2;min-width:120px;" placeholder="Author (optional)" onkeydown="if(event.key==='Enter')quickAddBook()">
+        <select id="qa-cat" class="form-input" style="flex:1;min-width:120px;">
+            <option value="general">General</option>
+            <option value="security">Security</option>
+            <option value="ai_security">AI Security</option>
+            <option value="ai_ml">AI / ML</option>
+            <option value="programming">Programming</option>
+            <option value="research">Research</option>
+            <option value="career">Career</option>
+            <option value="other">Other</option>
+        </select>
+        <button class="btn btn-accent" onclick="quickAddBook()" style="flex-shrink:0;">+ Add</button>
+    </div>
+
+    <!-- Book list by status -->
     <div id="books-content"></div>
 </div>
 
@@ -2737,71 +2783,126 @@ async function resetLearningProgress() {
 // ── Books / Reading List ──
 let bookFilter = 'all';
 
+let allBooksCache = [];
+let bookCatFilter = 'all';
+
+const BOOK_CAT_LABELS = {
+    all:'All', general:'General', security:'Security', ai_security:'AI Security',
+    ai_ml:'AI/ML', programming:'Programming', research:'Research', career:'Career', other:'Other'
+};
+const STATUS_ICONS = { to_read:'', reading:'📖', completed:'✓' };
+const STATUS_CYCLE = { to_read:'reading', reading:'completed', completed:'to_read' };
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+
 async function loadBooks() {
-    const books = await api('books');
-    const filtered = bookFilter === 'all' ? books : books.filter(b => b.status === bookFilter);
-    const total = books.length;
-    const reading = books.filter(b => b.status === 'reading').length;
-    const completed = books.filter(b => b.status === 'completed').length;
-    const toRead = books.filter(b => b.status === 'to_read').length;
+    allBooksCache = await api('books');
+    buildCatFilterChips();
+    renderBooks();
+}
+
+function buildCatFilterChips() {
+    const cats = ['all', ...new Set(allBooksCache.map(b => b.category || 'general').filter(Boolean))];
+    document.getElementById('book-cat-filters').innerHTML = cats.map(c => `
+        <button class="book-cat-chip ${bookCatFilter === c ? 'active' : ''}"
+            onclick="bookCatFilter='${c}';document.querySelectorAll('.book-cat-chip').forEach(x=>x.classList.remove('active'));this.classList.add('active');renderBooks()">
+            ${BOOK_CAT_LABELS[c] || c}
+        </button>`).join('');
+}
+
+function renderBooks() {
+    const search = (document.getElementById('book-search')?.value || '').toLowerCase();
+    let books = allBooksCache.filter(b => {
+        const matchCat = bookCatFilter === 'all' || (b.category || 'general') === bookCatFilter;
+        const matchSearch = !search ||
+            (b.title || '').toLowerCase().includes(search) ||
+            (b.author || '').toLowerCase().includes(search) ||
+            (b.notes || '').toLowerCase().includes(search);
+        return matchCat && matchSearch;
+    });
+
+    const total = allBooksCache.length;
+    const reading = allBooksCache.filter(b => b.status === 'reading').length;
+    const completed = allBooksCache.filter(b => b.status === 'completed').length;
+    const toRead = allBooksCache.filter(b => b.status === 'to_read').length;
 
     document.getElementById('book-stats').innerHTML = `
-        <div class="stat-card"><div class="stat-label">Total Books</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
         <div class="stat-card"><div class="stat-label">To Read</div><div class="stat-value" style="color:var(--text3)">${toRead}</div></div>
-        <div class="stat-card"><div class="stat-label">Reading</div><div class="stat-value" style="color:var(--accent)">${reading}</div></div>
-        <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--accent2)">${completed}</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Reading Now</div><div class="stat-value" style="color:var(--accent)">${reading}</div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--accent2)">${completed}</div></div>
     `;
+    document.getElementById('book-subtitle').textContent = `${total} book${total !== 1 ? 's' : ''} · ${completed} read · ${reading} in progress`;
 
-    const quarters = [
-        { num: 1, name: 'Q1: Foundation & CPTS', cls: 'q1' },
-        { num: 2, name: 'Q2: AI Security Core', cls: 'q2' },
-        { num: 3, name: 'Q3: Research & Build', cls: 'q3' },
-        { num: 4, name: 'Q4: Launch & Apply', cls: 'q4' },
+    if (!books.length) {
+        document.getElementById('books-content').innerHTML = `
+            <div class="empty-state" style="padding:60px;">
+                <div class="empty-state-icon">📚</div>
+                <div class="empty-state-text">${search || bookCatFilter !== 'all' ? 'No books match your filter' : 'Add your first book above'}</div>
+            </div>`;
+        return;
+    }
+
+    const sections = [
+        { key: 'reading',  label: '📖 Currently Reading', color: 'var(--accent)' },
+        { key: 'to_read',  label: '📋 To Read',           color: 'var(--text3)' },
+        { key: 'completed',label: '✅ Completed',          color: 'var(--accent2)' },
     ];
-    const catLabels = { security:'Security', ai_security:'AI Security', ai_ml:'AI/ML', programming:'Programming', research:'Research', career:'Career', other:'Other' };
-    const statusIcons = { to_read:'', reading:'📖', completed:'✓' };
 
     let html = '';
-    for (const q of quarters) {
-        const qb = filtered.filter(b => b.quarter === q.num);
-        if (!qb.length) continue;
-        html += `<div class="book-quarter-section"><div class="book-quarter-title">${q.name}</div>`;
-        for (const b of qb) {
-            const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+    for (const sec of sections) {
+        const sb = books.filter(b => b.status === sec.key);
+        if (!sb.length) continue;
+        html += `<div class="book-status-section">
+            <div class="book-status-heading">
+                <span>${sec.label}</span>
+                <span class="book-status-count">${sb.length}</span>
+            </div>`;
+        for (const b of sb) {
+            const cat = b.category || 'general';
             html += `
             <div class="book-card status-${b.status}">
-                <button class="book-status-btn ${b.status}" onclick="cycleBookStatus(${b.id},'${b.status}')" title="Click to cycle status">${statusIcons[b.status]}</button>
+                <button class="book-status-btn ${b.status}" onclick="cycleBookStatus(${b.id},'${b.status}')"
+                    title="${b.status === 'to_read' ? 'Mark as reading' : b.status === 'reading' ? 'Mark as completed' : 'Move back to queue'}">
+                    ${STATUS_ICONS[b.status]}
+                </button>
                 <div class="book-info">
                     <div class="book-title">${esc(b.title)}</div>
-                    ${b.author ? `<div class="book-author">by ${esc(b.author)}</div>` : ''}
+                    ${b.author ? `<div class="book-author">${esc(b.author)}</div>` : ''}
                     <div class="book-meta">
-                        <span class="book-tag ${q.cls}">Q${b.quarter}</span>
-                        <span class="book-tag">${catLabels[b.category] || b.category}</span>
-                        <span class="book-tag">${b.status.replace('_',' ')}</span>
+                        <span class="book-tag ${cat}">${BOOK_CAT_LABELS[cat] || cat}</span>
+                        ${b.notes ? `<span class="book-tag">has notes</span>` : ''}
                     </div>
                     ${b.notes ? `<div class="book-notes">${esc(b.notes)}</div>` : ''}
                     <div class="book-rating">
-                        ${[1,2,3,4,5].map(s=>`<span class="book-star ${s<=b.rating?'filled':''}" onclick="rateBook(${b.id},${s})">★</span>`).join('')}
+                        ${[1,2,3,4,5].map(s => `<span class="book-star ${s <= b.rating ? 'filled' : ''}" onclick="rateBook(${b.id},${s})">★</span>`).join('')}
                     </div>
                 </div>
-                <button class="book-del" onclick="deleteBook(${b.id})">✕</button>
+                <button class="book-del" onclick="deleteBook(${b.id})" title="Remove">✕</button>
             </div>`;
         }
         html += '</div>';
     }
-    document.getElementById('books-content').innerHTML = html || '<div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-text">No books match this filter</div></div>';
+    document.getElementById('books-content').innerHTML = html;
 }
 
-function filterBooks(f, btn) {
-    bookFilter = f;
-    document.querySelectorAll('.book-filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+async function quickAddBook() {
+    const title = document.getElementById('qa-title').value.trim();
+    if (!title) { document.getElementById('qa-title').focus(); return; }
+    await api('books', 'POST', {
+        title,
+        author: document.getElementById('qa-author').value.trim(),
+        category: document.getElementById('qa-cat').value,
+        quarter: 1,
+    });
+    document.getElementById('qa-title').value = '';
+    document.getElementById('qa-author').value = '';
+    document.getElementById('qa-title').focus();
     loadBooks();
 }
 
 async function cycleBookStatus(id, current) {
-    const next = { to_read:'reading', reading:'completed', completed:'to_read' };
-    await api('books/' + id, 'PUT', { status: next[current] });
+    await api('books/' + id, 'PUT', { status: STATUS_CYCLE[current] });
     loadBooks();
 }
 
@@ -2811,66 +2912,8 @@ async function rateBook(id, rating) {
 }
 
 async function deleteBook(id) {
-    if (!confirm('Delete this book?')) return;
+    if (!confirm('Remove this book?')) return;
     await api('books/' + id, 'DELETE');
-    loadBooks();
-}
-
-function openAddBookModal() {
-    const el = document.getElementById('modal-content');
-    el.innerHTML = `
-        <h3>Add a Book</h3>
-        <div class="form-grid">
-            <div class="form-group" style="grid-column:span 2">
-                <label>Title</label><input id="f-book-title" class="form-input" placeholder="Book title...">
-            </div>
-            <div class="form-group">
-                <label>Author</label><input id="f-book-author" class="form-input" placeholder="Author...">
-            </div>
-            <div class="form-group">
-                <label>Quarter</label>
-                <select id="f-book-quarter" class="form-input">
-                    <option value="1">Q1: Foundation</option>
-                    <option value="2">Q2: AI Security</option>
-                    <option value="3">Q3: Research & Build</option>
-                    <option value="4">Q4: Launch & Apply</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Category</label>
-                <select id="f-book-cat" class="form-input">
-                    <option value="security">Security</option>
-                    <option value="ai_security">AI Security</option>
-                    <option value="ai_ml">AI / ML</option>
-                    <option value="programming">Programming</option>
-                    <option value="research">Research</option>
-                    <option value="career">Career</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group" style="grid-column:span 2">
-                <label>Notes</label><textarea id="f-book-notes" class="form-input" rows="2" placeholder="Why read this?"></textarea>
-            </div>
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-            <button class="btn" onclick="saveBook()">Add Book</button>
-        </div>
-    `;
-    document.getElementById('modal-overlay').classList.add('active');
-}
-
-async function saveBook() {
-    const title = document.getElementById('f-book-title').value.trim();
-    if (!title) return;
-    await api('books', 'POST', {
-        title,
-        author: document.getElementById('f-book-author').value.trim(),
-        quarter: parseInt(document.getElementById('f-book-quarter').value),
-        category: document.getElementById('f-book-cat').value,
-        notes: document.getElementById('f-book-notes').value.trim(),
-    });
-    closeModal();
     loadBooks();
 }
 
