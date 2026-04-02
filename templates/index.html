@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Second Brain</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
@@ -344,6 +344,177 @@ html[data-theme="light"] .term-cmd-btn:hover {
     .term-grid { grid-template-columns: 1fr; }
     .term-bottom-row { grid-template-columns: 1fr; }
     .term-clock { font-size: 20px; }
+}
+
+/* ══════════════════════════════════════════
+   SKIN SWITCHER BAR
+══════════════════════════════════════════ */
+.dash-skin-bar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px; padding: 7px 12px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--mono); font-size: 11px; color: var(--text3);
+}
+.dash-skin-label { font-weight: 700; letter-spacing: .08em; margin-right: 4px; }
+.dash-skin-btn {
+    padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: none; font-family: var(--mono); font-size: 11px; font-weight: 600;
+    cursor: pointer; color: var(--text3); transition: all .15s;
+}
+.dash-skin-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+.dash-skin-btn:hover:not(.active) { background: var(--surface3); color: var(--text2); }
+
+/* ══════════════════════════════════════════
+   🍄 MARIO / NINTENDO SKIN
+══════════════════════════════════════════ */
+.mario-skin { font-family: 'Press Start 2P', monospace; }
+
+/* NES HUD header */
+.mario-hud {
+    background: #060616;
+    border: 4px solid #eee;
+    outline: 4px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    padding: 14px 22px;
+    margin-bottom: 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+    position: relative; overflow: hidden;
+}
+.mario-hud::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 3px);
+}
+.mario-hud > * { position: relative; z-index: 1; }
+.mario-hud-section { display: flex; flex-direction: column; gap: 5px; }
+.mario-hud-lbl { font-size: 8px; color: #888; letter-spacing: .1em; }
+.mario-hud-val { font-size: 15px; color: #fff; }
+.mario-hud-score { font-size: 20px; color: #f7d51d; text-shadow: 0 0 10px rgba(247,213,29,.5); }
+.mario-hud-coins { font-size: 14px; color: #f7d51d; }
+.mario-hud-clock {
+    font-size: 24px; color: #6ab4fc;
+    text-shadow: 0 0 10px rgba(106,180,252,.5);
+    animation: mario-blink-slow 2s step-end infinite;
+}
+@keyframes mario-blink-slow { 0%,100%{opacity:1} 85%,99%{opacity:.7} }
+.mario-hud-world { font-size: 12px; color: #6ab4fc; }
+
+/* World cards grid */
+.mario-grid {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 16px; margin-bottom: 18px;
+}
+.mario-card {
+    background: #07071a;
+    border: 4px solid var(--wc, #c84b11);
+    outline: 2px solid #000;
+    box-shadow: 4px 4px 0 #000;
+    cursor: pointer; overflow: hidden;
+    transition: transform .08s, box-shadow .08s;
+}
+.mario-card:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 #000; }
+.mario-card:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
+.mario-card-head {
+    background: var(--wc, #c84b11);
+    padding: 8px 12px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.mario-card-wnum { font-size: 7px; color: #fff; letter-spacing: .08em; }
+.mario-card-icon { font-size: 18px; }
+.mario-card-body { padding: 14px 14px 12px; }
+.mario-card-label {
+    font-size: 7px; color: #666; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 10px;
+}
+.mario-card-bigval {
+    font-size: 19px; color: var(--wc, #f7d51d);
+    text-shadow: 2px 2px 0 #000; margin-bottom: 8px;
+    line-height: 1.3;
+}
+.mario-card-sub { font-size: 7px; color: #555; margin-bottom: 12px; line-height: 1.8; }
+.mario-coin-row { font-size: 11px; letter-spacing: 2px; margin-bottom: 4px;
+    animation: coin-glow 2s ease-in-out infinite; }
+@keyframes coin-glow { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.4)} }
+.mario-bar-lbl { font-size: 7px; color: #555; margin-bottom: 12px; }
+.mario-enter-btn {
+    display: block; width: 100%;
+    background: var(--wc, #c84b11);
+    border: 3px solid rgba(255,255,255,.4);
+    box-shadow: 3px 3px 0 #000;
+    font-family: 'Press Start 2P', monospace; font-size: 8px;
+    color: #fff; padding: 8px; cursor: pointer;
+    letter-spacing: .1em; transition: filter .1s, box-shadow .05s, transform .05s;
+}
+.mario-enter-btn:hover { filter: brightness(1.2); }
+.mario-enter-btn:active { box-shadow: 0 0 0 #000; transform: translate(3px,3px); }
+
+/* Bottom row */
+.mario-bottom-row { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
+
+/* Score panel */
+.mario-score-panel {
+    background: #060616;
+    border: 4px solid #eee; outline: 2px solid #000;
+    box-shadow: 4px 4px 0 #000; overflow: hidden;
+}
+.mario-panel-head {
+    background: #1a0a40; border-bottom: 3px solid currentColor;
+    padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+}
+.mario-panel-head.yellow { border-bottom-color: #f7d51d; color: #f7d51d; }
+.mario-panel-head.cyan   { border-bottom-color: #6ab4fc; color: #6ab4fc; }
+.mario-panel-title { font-size: 9px; letter-spacing: .1em; }
+.mario-score-body {
+    padding: 10px 14px; max-height: 200px;
+    overflow-y: auto; scrollbar-width: thin;
+}
+.mario-score-row {
+    display: grid; grid-template-columns: 95px 65px 1fr auto;
+    gap: 6px; align-items: center;
+    font-size: 7px; color: #888;
+    padding: 6px 0; border-bottom: 1px solid #1a1a2a;
+    opacity: 0; animation: fadeSlideIn .3s ease forwards;
+}
+.mario-score-row:last-child { border-bottom: none; }
+.mario-score-row .inc { color: #00e5a0; }
+.mario-score-row .exp { color: #e05252; }
+.mario-score-row .amt { text-align: right; white-space: nowrap; font-weight: 700; }
+
+/* Item box */
+.mario-items-panel {
+    background: #060616;
+    border: 4px solid #f7d51d; outline: 2px solid #000;
+    box-shadow: 4px 4px 0 #000; overflow: hidden;
+}
+.mario-items-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.mario-item-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: #0d0d24; border: 3px solid #333;
+    box-shadow: 2px 2px 0 #000;
+    font-family: 'Press Start 2P', monospace; font-size: 7px;
+    color: #aaa; padding: 8px 10px; cursor: pointer;
+    text-align: left; width: 100%; letter-spacing: .06em;
+    transition: border-color .1s, color .1s, transform .08s, box-shadow .08s;
+}
+.mario-item-btn:hover {
+    border-color: #f7d51d; color: #f7d51d;
+    transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #000;
+}
+.mario-item-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 #000; }
+.mario-item-icon { font-size: 14px; flex-shrink: 0; }
+
+/* Light mode Mario overrides */
+html[data-theme="light"] .mario-hud { background: #1a0050; }
+html[data-theme="light"] .mario-card { background: #0d0d2a; }
+html[data-theme="light"] .mario-score-panel,
+html[data-theme="light"] .mario-items-panel { background: #0d0d2a; }
+
+@media (max-width: 1100px) { .mario-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 768px) {
+    .mario-grid { grid-template-columns: 1fr; }
+    .mario-bottom-row { grid-template-columns: 1fr; }
+    .mario-hud-clock { font-size: 16px; }
 }
 
 /* ── Sidebar ── */
@@ -1214,53 +1385,14 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 
 <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
 <div id="sec-dashboard" class="section active">
-
-    <!-- ── Terminal Header ── -->
-    <div class="term-header">
-        <div class="term-header-left">
-            <div class="term-brand">⬡ SECOND BRAIN OS <span class="term-ver">v2.0</span> &nbsp;·&nbsp; <span style="color:var(--text3)">PERSONAL COMMAND CENTER</span></div>
-            <div class="term-greeting-line">
-                <span class="term-prompt">›</span>
-                <span id="term-greeting-text"></span><span class="term-cursor" id="term-cursor">▋</span>
-            </div>
-        </div>
-        <div class="term-header-right">
-            <div class="term-clock" id="term-clock">--:--:--</div>
-            <div class="term-date" id="term-date">---- -- --</div>
-            <div class="term-sys-status" id="dash-sys-status"></div>
-        </div>
+    <!-- Skin switcher — always visible -->
+    <div class="dash-skin-bar">
+        <span class="dash-skin-label">SKIN ›</span>
+        <button class="dash-skin-btn" data-skin="terminal" onclick="setSkin('terminal')">⌨️ TERMINAL</button>
+        <button class="dash-skin-btn" data-skin="mario"    onclick="setSkin('mario')">🍄 MARIO</button>
     </div>
-
-    <!-- ── Module panels ── -->
-    <div class="term-grid" id="dash-module-grid"></div>
-
-    <!-- ── Bottom row: log + quick exec ── -->
-    <div class="term-bottom-row">
-        <div class="term-panel term-log-panel">
-            <div class="term-panel-header">
-                <div class="term-panel-dots">
-                    <span class="term-dot red"></span>
-                    <span class="term-dot yellow"></span>
-                    <span class="term-dot green"></span>
-                </div>
-                ACTIVITY_LOG
-                <span class="term-panel-sub">recent transactions &amp; events</span>
-            </div>
-            <div id="dash-activity-log" class="term-log-body"></div>
-        </div>
-        <div class="term-panel">
-            <div class="term-panel-header">
-                <div class="term-panel-dots">
-                    <span class="term-dot red"></span>
-                    <span class="term-dot yellow"></span>
-                    <span class="term-dot green"></span>
-                </div>
-                QUICK_EXEC
-            </div>
-            <div id="dash-quick-cmds" class="term-cmds-body"></div>
-        </div>
-    </div>
-
+    <!-- All skin content rendered here -->
+    <div id="dash-content"></div>
 </div>
 
 <!-- ═══════════════════ FINANCES ═══════════════════ -->
@@ -1572,17 +1704,35 @@ function fmtMoney(n) { return (n || 0).toLocaleString('en', { minimumFractionDig
 function fmtDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'; }
 
 // ── Dashboard ──
-// ── Terminal dashboard helpers ──────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+//  DASHBOARD — SKIN SYSTEM
+// ════════════════════════════════════════════════════════════
 
+let dashSkin = localStorage.getItem('sb-dash-skin') || 'terminal';
+
+function setSkin(skin) {
+    dashSkin = skin;
+    localStorage.setItem('sb-dash-skin', skin);
+    document.querySelectorAll('.dash-skin-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.skin === skin));
+    loadDashboard();
+}
+
+// ── Shared helpers ───────────────────────────────────────────
 function blockBar(val, max, width = 12) {
-    if (!max || max === 0) return '░'.repeat(width);
+    if (!max) return '░'.repeat(width);
     const filled = Math.min(Math.round((val / max) * width), width);
     return '█'.repeat(filled) + '░'.repeat(width - filled);
 }
 
+function coinBar(val, max, n = 8) {
+    if (!max) return '⭕'.repeat(n);
+    const filled = Math.min(Math.round((val / max) * n), n);
+    return '🪙'.repeat(filled) + '⭕'.repeat(n - filled);
+}
+
 function typeText(el, text, speed = 38, done) {
-    let i = 0;
-    el.textContent = '';
+    let i = 0; el.textContent = '';
     const t = setInterval(() => {
         el.textContent += text[i++];
         if (i >= text.length) { clearInterval(t); if (done) done(); }
@@ -1594,172 +1744,288 @@ function startDashClock() {
     if (_dashClockInterval) clearInterval(_dashClockInterval);
     const tick = () => {
         const now = new Date();
-        const ce = document.getElementById('term-clock');
-        const de = document.getElementById('term-date');
-        if (ce) ce.textContent = now.toLocaleTimeString('en-GB', { hour12: false });
-        if (de) {
-            const day  = now.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
-            const date = now.toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' });
-            de.textContent = `${day}  ${date}`;
+        const hms = now.toLocaleTimeString('en-GB', { hour12: false });
+        const hm  = now.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        const tc  = document.getElementById('term-clock');
+        const td  = document.getElementById('term-date');
+        const mc  = document.getElementById('mario-clock');
+        if (tc) tc.textContent = hms;
+        if (td) {
+            const day = now.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
+            const dt  = now.toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            td.textContent = `${day}  ${dt}`;
         }
+        if (mc) mc.textContent = hm;
     };
     tick();
     _dashClockInterval = setInterval(tick, 1000);
 }
 
+// ── Main loader ──────────────────────────────────────────────
 async function loadDashboard() {
+    // Sync skin buttons
+    document.querySelectorAll('.dash-skin-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.skin === dashSkin));
     startDashClock();
     const d = await api('dashboard');
-    const fit   = d.fitness  || {};
-    const habits = d.habits  || {};
+    if (dashSkin === 'mario') renderMarioDash(d);
+    else renderTerminalDash(d);
+}
 
-    // ── Greeting ──
+// ════════════════════════════════════════════════════════════
+//  SKIN A — TERMINAL / HACKER
+// ════════════════════════════════════════════════════════════
+function renderTerminalDash(d) {
+    const fit = d.fitness || {};
+    const habits = d.habits || {};
+
+    document.getElementById('dash-content').innerHTML = `
+        <div class="term-header">
+            <div class="term-header-left">
+                <div class="term-brand">⬡ SECOND BRAIN OS <span class="term-ver">v2.0</span> &nbsp;·&nbsp; <span style="color:var(--text3)">PERSONAL COMMAND CENTER</span></div>
+                <div class="term-greeting-line">
+                    <span class="term-prompt">›</span>
+                    <span id="term-greeting-text"></span><span class="term-cursor">▋</span>
+                </div>
+            </div>
+            <div class="term-header-right">
+                <div class="term-clock" id="term-clock">--:--:--</div>
+                <div class="term-date" id="term-date">----</div>
+                <div class="term-sys-status" id="dash-sys-status"></div>
+            </div>
+        </div>
+        <div class="term-grid" id="dash-module-grid"></div>
+        <div class="term-bottom-row">
+            <div class="term-panel term-log-panel">
+                <div class="term-panel-header">
+                    <div class="term-panel-dots">
+                        <span class="term-dot red"></span><span class="term-dot yellow"></span><span class="term-dot green"></span>
+                    </div>
+                    ACTIVITY_LOG <span class="term-panel-sub">recent transactions &amp; events</span>
+                </div>
+                <div id="dash-activity-log" class="term-log-body"></div>
+            </div>
+            <div class="term-panel">
+                <div class="term-panel-header">
+                    <div class="term-panel-dots">
+                        <span class="term-dot red"></span><span class="term-dot yellow"></span><span class="term-dot green"></span>
+                    </div>
+                    QUICK_EXEC
+                </div>
+                <div id="dash-quick-cmds" class="term-cmds-body"></div>
+            </div>
+        </div>`;
+
+    // Greeting
     const greetEl = document.getElementById('term-greeting-text');
     if (greetEl) {
         const h = new Date().getHours();
-        const salut = h < 12 ? 'GOOD MORNING' : h < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
-        typeText(greetEl, `${salut}, ALI. ALL SYSTEMS OPERATIONAL.`, 36);
+        const s = h < 12 ? 'GOOD MORNING' : h < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
+        typeText(greetEl, `${s}, ALI. ALL SYSTEMS OPERATIONAL.`, 36);
     }
 
-    // ── System status row ──
-    const sysMods = [
-        { label: 'FIN',    ok: d.finance.net_worth > 0 },
-        { label: 'QURAN',  ok: d.quran.memorized > 0 },
-        { label: 'PROJ',   ok: d.projects.active >= 0 },
-        { label: 'JOBS',   ok: d.jobs.total > 0 },
-        { label: 'FIT',    ok: (fit.steps_today || 0) >= 0 },
-        { label: 'HABITS', ok: habits.total > 0 },
+    // Sys status
+    const mods = [
+        { label: 'FIN', ok: d.finance.net_worth > 0 }, { label: 'QURAN', ok: d.quran.memorized > 0 },
+        { label: 'PROJ', ok: d.projects.active >= 0 }, { label: 'JOBS',  ok: d.jobs.total > 0 },
+        { label: 'FIT',  ok: true },                   { label: 'HABITS', ok: habits.total > 0 },
     ];
-    document.getElementById('dash-sys-status').innerHTML = sysMods.map(m => `
+    document.getElementById('dash-sys-status').innerHTML = mods.map(m => `
         <div class="term-sys-dot">
             <div class="term-sys-dot-led" style="background:${m.ok ? 'var(--terminal)' : 'var(--border2)'};
-                box-shadow:${m.ok ? 'var(--terminal-glow)' : 'none'};"></div>
-            ${m.label}
+                box-shadow:${m.ok ? 'var(--terminal-glow)' : 'none'};"></div>${m.label}
         </div>`).join('');
 
-    // ── Compute derived values ──
-    const savRate   = d.finance.income > 0 ? Math.round((d.finance.income - d.finance.expenses) / d.finance.income * 100) : 0;
-    const learnPct  = d.learning.total  ? Math.round(d.learning.done  / d.learning.total  * 100) : 0;
-    const memPct    = Math.round((d.quran.memorized / 114) * 100);
-    const stepPct   = fit.steps_goal   ? Math.round((fit.steps_today  / fit.steps_goal)   * 100) : 0;
-    const habitPct  = habits.total     ? Math.round((habits.done_today / habits.total)     * 100) : 0;
+    // Values
+    const savRate  = d.finance.income > 0 ? Math.round((d.finance.income - d.finance.expenses) / d.finance.income * 100) : 0;
+    const learnPct = d.learning.total  ? Math.round(d.learning.done  / d.learning.total  * 100) : 0;
+    const memPct   = Math.round(d.quran.memorized / 114 * 100);
+    const stepPct  = (fit.steps_goal || 0) ? Math.round((fit.steps_today || 0) / fit.steps_goal * 100) : 0;
+    const habitPct = habits.total ? Math.round((habits.done_today || 0) / habits.total * 100) : 0;
 
-    // ── Module panel definitions ──
     const panels = [
-        {
-            icon: '💰', label: 'FINANCE_SYS', section: 'finances', accentColor: 'var(--accent)',
-            rows: [
-                { key: 'NET_WORTH', val: `€${Number(d.finance.net_worth).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}`, color: 'var(--accent)', lg: true },
-                { key: 'INCOME   ', val: `+€${Number(d.finance.income).toFixed(2)}`,   color: 'var(--terminal)' },
-                { key: 'EXPENSES ', val: `-€${Number(d.finance.expenses).toFixed(2)}`, color: 'var(--accent4)'  },
-            ],
-            bar: { val: savRate, max: 100, color: 'var(--terminal)', label: `SAVINGS_RATE  ${savRate}%` },
-        },
-        {
-            icon: '📖', label: 'QURAN_MEM', section: 'quran', accentColor: 'var(--accent)',
-            rows: [
-                { key: 'MEMORIZED', val: `${d.quran.memorized} / 114`, color: 'var(--accent)', lg: true },
-                { key: 'PROGRESS ', val: `${memPct}%  of Quran`,       color: 'var(--text2)' },
-            ],
-            bar: { val: d.quran.memorized, max: 114, color: 'var(--accent)', label: `${blockBar(d.quran.memorized, 114)}  ${memPct}%` },
-        },
-        {
-            icon: '🚀', label: 'PROJ_TRACKER', section: 'projects', accentColor: 'var(--accent3)',
-            rows: [
-                { key: 'IN_PROGRESS', val: `${d.projects.active}`,    color: 'var(--amber)', lg: true },
-                { key: 'DONE       ', val: `${d.projects.completed}`, color: 'var(--terminal)' },
-                { key: 'BACKLOG    ', val: `${d.projects.backlog||0}`, color: 'var(--text3)' },
-            ],
-            bar: null,
-            pill: d.projects.active > 0 ? 'BUILDING' : 'IDLE',
-        },
-        {
-            icon: '💼', label: 'JOB_HUNT', section: 'jobs', accentColor: 'var(--cyan)',
-            rows: [
-                { key: 'ACTIVE ', val: `${d.jobs.active}`, color: 'var(--cyan)', lg: true },
-                { key: 'TOTAL  ', val: `${d.jobs.total} apps`, color: 'var(--text2)' },
-                { key: 'OFFERS ', val: `${d.jobs.offers}`, color: d.jobs.offers > 0 ? 'var(--terminal)' : 'var(--text3)' },
-            ],
-            bar: { val: d.jobs.active, max: Math.max(d.jobs.total, 1), color: 'var(--cyan)', label: `PIPELINE  ${d.jobs.active}/${d.jobs.total}` },
-        },
-        {
-            icon: '💪', label: 'FITNESS_LOG', section: 'fitness', accentColor: 'var(--terminal)',
-            rows: [
-                { key: 'STEPS  ', val: `${(fit.steps_today||0).toLocaleString()}`, color: stepPct >= 100 ? 'var(--terminal)' : 'var(--amber)', lg: true },
-                { key: 'STREAK ', val: `${fit.activity_streak||0}d 🔥`,           color: 'var(--amber)' },
-                { key: 'THIS WK', val: `${fit.activities_this_week||0} sessions`,  color: 'var(--text2)' },
-            ],
-            bar: { val: fit.steps_today||0, max: fit.steps_goal||8000, color: 'var(--terminal)', label: `STEPS_GOAL  ${stepPct}%` },
-        },
-        {
-            icon: '🔥', label: 'HABIT_LOOP + LEARN', section: 'habits', accentColor: 'var(--amber)',
-            rows: [
-                { key: 'HABITS   ', val: `${habits.done_today||0}/${habits.total||0}`, color: habitPct===100 && habits.total>0 ? 'var(--terminal)' : 'var(--amber)', lg: true },
-                { key: 'LEARNING ', val: `${d.learning.done}/${d.learning.total} tasks`, color: 'var(--accent3)' },
-                { key: 'PLAN_PCT ', val: `${learnPct}%`, color: 'var(--text2)' },
-            ],
-            bar: { val: habits.done_today||0, max: habits.total||1, color: 'var(--amber)', label: `HABITS  ${habitPct}%` },
-        },
+        { icon:'💰', label:'FINANCE_SYS',    section:'finances', ac:'var(--accent)',
+          rows:[ {key:'NET_WORTH',val:`€${Number(d.finance.net_worth).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}`,color:'var(--accent)',lg:true},
+                 {key:'INCOME   ',val:`+€${Number(d.finance.income).toFixed(2)}`,color:'var(--terminal)'},
+                 {key:'EXPENSES ',val:`-€${Number(d.finance.expenses).toFixed(2)}`,color:'var(--accent4)'}],
+          bar:{val:savRate,max:100,color:'var(--terminal)',label:`SAVINGS_RATE  ${savRate}%`} },
+        { icon:'📖', label:'QURAN_MEM',      section:'quran',    ac:'var(--accent)',
+          rows:[ {key:'MEMORIZED',val:`${d.quran.memorized} / 114`,color:'var(--accent)',lg:true},
+                 {key:'PROGRESS ',val:`${memPct}% of Quran`,color:'var(--text2)'}],
+          bar:{val:d.quran.memorized,max:114,color:'var(--accent)',label:`${blockBar(d.quran.memorized,114)}  ${memPct}%`} },
+        { icon:'🚀', label:'PROJ_TRACKER',   section:'projects', ac:'var(--accent3)',
+          rows:[ {key:'IN_PROGRESS',val:`${d.projects.active}`,color:'var(--amber)',lg:true},
+                 {key:'DONE       ',val:`${d.projects.completed}`,color:'var(--terminal)'},
+                 {key:'BACKLOG    ',val:`${d.projects.backlog||0}`,color:'var(--text3)'}],
+          bar:null, pill:d.projects.active>0?'BUILDING':'IDLE' },
+        { icon:'💼', label:'JOB_HUNT',       section:'jobs',     ac:'var(--cyan)',
+          rows:[ {key:'ACTIVE',val:`${d.jobs.active}`,color:'var(--cyan)',lg:true},
+                 {key:'TOTAL ',val:`${d.jobs.total} apps`,color:'var(--text2)'},
+                 {key:'OFFERS',val:`${d.jobs.offers}`,color:d.jobs.offers>0?'var(--terminal)':'var(--text3)'}],
+          bar:{val:d.jobs.active,max:Math.max(d.jobs.total,1),color:'var(--cyan)',label:`PIPELINE  ${d.jobs.active}/${d.jobs.total}`} },
+        { icon:'💪', label:'FITNESS_LOG',    section:'fitness',  ac:'var(--terminal)',
+          rows:[ {key:'STEPS  ',val:`${(fit.steps_today||0).toLocaleString()}`,color:stepPct>=100?'var(--terminal)':'var(--amber)',lg:true},
+                 {key:'STREAK ',val:`${fit.activity_streak||0}d 🔥`,color:'var(--amber)'},
+                 {key:'THIS WK',val:`${fit.activities_this_week||0} sessions`,color:'var(--text2)'}],
+          bar:{val:fit.steps_today||0,max:fit.steps_goal||8000,color:'var(--terminal)',label:`STEPS_GOAL  ${stepPct}%`} },
+        { icon:'🔥', label:'HABIT_LOOP+LEARN', section:'habits', ac:'var(--amber)',
+          rows:[ {key:'HABITS   ',val:`${habits.done_today||0}/${habits.total||0}`,color:habitPct===100&&habits.total>0?'var(--terminal)':'var(--amber)',lg:true},
+                 {key:'LEARNING ',val:`${d.learning.done}/${d.learning.total} tasks`,color:'var(--accent3)'},
+                 {key:'PLAN_PCT ',val:`${learnPct}%`,color:'var(--text2)'}],
+          bar:{val:habits.done_today||0,max:habits.total||1,color:'var(--amber)',label:`HABITS  ${habitPct}%`} },
     ];
 
     document.getElementById('dash-module-grid').innerHTML = panels.map(p => `
-        <div class="term-panel term-module-panel" onclick="navigate('${p.section}')" title="Go to ${p.label}">
+        <div class="term-panel term-module-panel" onclick="navigate('${p.section}')">
             <div class="term-panel-header">
                 <div class="term-panel-dots">
-                    <span class="term-dot red"></span>
-                    <span class="term-dot yellow"></span>
-                    <span class="term-dot green"></span>
+                    <span class="term-dot red"></span><span class="term-dot yellow"></span><span class="term-dot green"></span>
                 </div>
-                <span class="term-panel-title" style="color:${p.accentColor}">${p.icon}&nbsp;${p.label}</span>
-                ${p.pill ? `<span class="term-status-pill">${p.pill}</span>` : ''}
+                <span class="term-panel-title" style="color:${p.ac}">${p.icon}&nbsp;${p.label}</span>
+                ${p.pill?`<span class="term-status-pill">${p.pill}</span>`:''}
             </div>
             <div class="term-panel-body">
-                ${p.rows.map(r => `
-                <div class="term-row">
-                    <span class="term-key">${r.key}</span>
-                    <span class="term-val${r.lg ? ' term-val-lg' : ''}" style="color:${r.color}">${r.val}</span>
-                </div>`).join('')}
-                ${p.bar ? `
-                <div class="term-bar-row">
-                    <span class="term-bar-chars" style="color:${p.bar.color}">${blockBar(p.bar.val, p.bar.max)}</span>
-                    <span class="term-bar-label">${p.bar.label}</span>
-                </div>` : ''}
+                ${p.rows.map(r=>`<div class="term-row"><span class="term-key">${r.key}</span>
+                    <span class="term-val${r.lg?' term-val-lg':''}" style="color:${r.color}">${r.val}</span></div>`).join('')}
+                ${p.bar?`<div class="term-bar-row">
+                    <span class="term-bar-chars" style="color:${p.bar.color}">${blockBar(p.bar.val,p.bar.max)}</span>
+                    <span class="term-bar-label">${p.bar.label}</span></div>`:''}
             </div>
         </div>`).join('');
 
-    // ── Activity log ──
-    const txLines = d.recent_transactions.map((t, i) => ({
-        time:   t.date,
-        type:   t.type === 'income' ? 'INCOME ' : 'EXPENSE',
-        color:  t.type === 'income' ? 'var(--terminal)' : 'var(--accent4)',
-        desc:   (t.description || t.category || '—').slice(0, 22),
-        amount: `${t.type === 'income' ? '+' : '-'}€${Number(t.amount).toFixed(2)}`,
-        delay:  i * 55,
-    }));
-
-    document.getElementById('dash-activity-log').innerHTML = txLines.length
-        ? txLines.map(l => `
-            <div class="term-log-line" style="animation-delay:${l.delay}ms">
-                <span class="term-log-time">[${l.time}]</span>
-                <span class="term-log-type" style="color:${l.color}">${l.type}</span>
-                <span class="term-log-desc">${l.desc}</span>
-                <span class="term-log-amount" style="color:${l.color}">${l.amount}</span>
+    // Activity log
+    document.getElementById('dash-activity-log').innerHTML = d.recent_transactions.length
+        ? d.recent_transactions.map((t,i)=>`
+            <div class="term-log-line" style="animation-delay:${i*55}ms">
+                <span class="term-log-time">[${t.date}]</span>
+                <span class="term-log-type" style="color:${t.type==='income'?'var(--terminal)':'var(--accent4)'}">${t.type==='income'?'INCOME ':'EXPENSE'}</span>
+                <span class="term-log-desc">${(t.description||t.category||'—').slice(0,22)}</span>
+                <span class="term-log-amount" style="color:${t.type==='income'?'var(--terminal)':'var(--accent4)'}">${t.type==='income'?'+':'-'}€${Number(t.amount).toFixed(2)}</span>
             </div>`).join('')
-        : '<div class="term-log-line" style="color:var(--text3);opacity:1;">[----] NO_EVENTS &nbsp; no transactions logged yet</div>';
+        : '<div class="term-log-line" style="color:var(--text3);opacity:1;">[----] NO_EVENTS  no transactions yet</div>';
 
-    // ── Quick exec ──
+    // Quick exec
     const cmds = [
-        { icon: '💰', label: '$ add_transaction',  action: `navigate('finances');setTimeout(()=>openModal('transaction'),120)` },
-        { icon: '💪', label: '$ log_activity',     action: `navigate('fitness');setTimeout(()=>openLogActivityModal(),120)` },
-        { icon: '🚀', label: '$ new_project',      action: `navigate('projects');setTimeout(()=>openModal('project'),120)` },
-        { icon: '💼', label: '$ new_application',  action: `navigate('jobs');setTimeout(()=>openModal('job'),120)` },
-        { icon: '🔥', label: '$ add_habit',        action: `navigate('habits');setTimeout(()=>openAddHabitModal(),120)` },
-        { icon: '📚', label: '$ add_book',         action: `navigate('books')` },
+        {icon:'💰',label:'$ add_transaction', action:`navigate('finances');setTimeout(()=>openModal('transaction'),120)`},
+        {icon:'💪',label:'$ log_activity',    action:`navigate('fitness');setTimeout(()=>openLogActivityModal(),120)`},
+        {icon:'🚀',label:'$ new_project',     action:`navigate('projects');setTimeout(()=>openModal('project'),120)`},
+        {icon:'💼',label:'$ new_application', action:`navigate('jobs');setTimeout(()=>openModal('job'),120)`},
+        {icon:'🔥',label:'$ add_habit',       action:`navigate('habits');setTimeout(()=>openAddHabitModal(),120)`},
+        {icon:'📚',label:'$ add_book',        action:`navigate('books')`},
     ];
-    document.getElementById('dash-quick-cmds').innerHTML = cmds.map(c => `
-        <button class="term-cmd-btn" onclick="${c.action}">
-            ${c.icon} <span class="term-cmd-text">${c.label}</span>
-        </button>`).join('');
+    document.getElementById('dash-quick-cmds').innerHTML = cmds.map(c=>
+        `<button class="term-cmd-btn" onclick="${c.action}">${c.icon} <span class="term-cmd-text">${c.label}</span></button>`
+    ).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  SKIN B — 🍄 SUPER MARIO / NINTENDO
+// ════════════════════════════════════════════════════════════
+function renderMarioDash(d) {
+    const fit = d.fitness || {};
+    const habits = d.habits || {};
+    const savRate  = d.finance.income > 0 ? Math.round((d.finance.income - d.finance.expenses) / d.finance.income * 100) : 0;
+    const memPct   = Math.round(d.quran.memorized / 114 * 100);
+    const stepPct  = fit.steps_goal ? Math.round((fit.steps_today||0) / fit.steps_goal * 100) : 0;
+    const learnPct = d.learning.total ? Math.round(d.learning.done / d.learning.total * 100) : 0;
+    const habitPct = habits.total ? Math.round((habits.done_today||0) / habits.total * 100) : 0;
+    const score    = Math.round(d.finance.net_worth);
+
+    const worlds = [
+        { emoji:'💰', wnum:'1-1', name:'FINANCE KINGDOM', section:'finances', wc:'#d4630a',
+          bigVal:`€${score.toLocaleString()}`, bigLbl:'NET WORTH',
+          cV:savRate, cM:100, barLbl:`SAVINGS ${savRate}%`,
+          sub:`+€${Math.round(d.finance.income)} INCOME\n-€${Math.round(d.finance.expenses)} EXPENSES` },
+        { emoji:'📖', wnum:'1-2', name:'QURAN TEMPLE',    section:'quran',    wc:'#b8832e',
+          bigVal:`${d.quran.memorized}/114`, bigLbl:'MEMORIZED',
+          cV:d.quran.memorized, cM:114, barLbl:`HIFZ ${memPct}%`,
+          sub:`${memPct}% OF THE HOLY QURAN` },
+        { emoji:'🚀', wnum:'2-1', name:'PROJECT FORTRESS',section:'projects', wc:'#4a54d4',
+          bigVal:`${d.projects.active}`, bigLbl:'IN PROGRESS',
+          cV:d.projects.completed, cM:Math.max(d.projects.active+d.projects.completed,1), barLbl:`DONE ${d.projects.completed}`,
+          sub:`${d.projects.completed} DONE · ${d.projects.backlog||0} BACKLOG` },
+        { emoji:'💼', wnum:'2-2', name:'JOB HUNT PLAINS', section:'jobs',     wc:'#1a9bc7',
+          bigVal:`${d.jobs.active}`, bigLbl:'ACTIVE APPS',
+          cV:d.jobs.offers, cM:Math.max(d.jobs.total,1), barLbl:`OFFERS ${d.jobs.offers}`,
+          sub:`${d.jobs.total} TOTAL · ${d.jobs.offers} OFFERS` },
+        { emoji:'💪', wnum:'3-1', name:'FITNESS DUNGEON', section:'fitness',  wc:'#1d8b3c',
+          bigVal:`${(fit.steps_today||0).toLocaleString()}`, bigLbl:'STEPS TODAY',
+          cV:fit.steps_today||0, cM:fit.steps_goal||8000, barLbl:`GOAL ${stepPct}%`,
+          sub:`${fit.activity_streak||0}🔥 STREAK · ${fit.activities_this_week||0} SESSIONS` },
+        { emoji:'🔥', wnum:'3-2', name:'HABIT CASTLE',    section:'habits',   wc:'#8b1db8',
+          bigVal:`${habits.done_today||0}/${habits.total||0}`, bigLbl:'HABITS TODAY',
+          cV:habits.done_today||0, cM:habits.total||1, barLbl:`DONE ${habitPct}%`,
+          sub:`${d.learning.done}/${d.learning.total} LEARN TASKS · ${learnPct}%` },
+    ];
+
+    const worldCards = worlds.map(w => `
+        <div class="mario-card" style="--wc:${w.wc}" onclick="navigate('${w.section}')">
+            <div class="mario-card-head">
+                <span class="mario-card-wnum">WORLD ${w.wnum}</span>
+                <span class="mario-card-icon">${w.emoji}</span>
+            </div>
+            <div class="mario-card-body">
+                <div class="mario-card-label">${w.name}</div>
+                <div class="mario-card-bigval">${w.bigVal}</div>
+                <div class="mario-card-sub">${w.bigLbl}<br>${w.sub.replace('\n','<br>')}</div>
+                <div class="mario-coin-row">${coinBar(w.cV, w.cM)}</div>
+                <div class="mario-bar-lbl">${w.barLbl}</div>
+                <button class="mario-enter-btn" onclick="event.stopPropagation();navigate('${w.section}')">▶ ENTER WORLD</button>
+            </div>
+        </div>`).join('');
+
+    const scoreRows = d.recent_transactions.map((t,i) => `
+        <div class="mario-score-row" style="animation-delay:${i*60}ms">
+            <span>${t.date}</span>
+            <span class="${t.type==='income'?'inc':'exp'}">${t.type.toUpperCase()}</span>
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(t.description||t.category||'—').slice(0,12)}</span>
+            <span class="amt" style="color:${t.type==='income'?'#00e5a0':'#e05252'}">${t.type==='income'?'+':'-'}€${Number(t.amount).toFixed(0)}</span>
+        </div>`).join('') || `<div class="mario-score-row" style="opacity:1;color:#444">-- NO EVENTS YET --</div>`;
+
+    const itemBtns = [
+        {icon:'🪙',lbl:'ADD TRANSACTION', action:`navigate('finances');setTimeout(()=>openModal('transaction'),120)`},
+        {icon:'💪',lbl:'LOG ACTIVITY',    action:`navigate('fitness');setTimeout(()=>openLogActivityModal(),120)`},
+        {icon:'🚀',lbl:'NEW PROJECT',     action:`navigate('projects');setTimeout(()=>openModal('project'),120)`},
+        {icon:'💼',lbl:'NEW APP',         action:`navigate('jobs');setTimeout(()=>openModal('job'),120)`},
+        {icon:'🔥',lbl:'NEW HABIT',       action:`navigate('habits');setTimeout(()=>openAddHabitModal(),120)`},
+    ].map(c=>`<button class="mario-item-btn" onclick="${c.action}"><span class="mario-item-icon">${c.icon}</span>${c.lbl}</button>`).join('');
+
+    document.getElementById('dash-content').innerHTML = `
+        <div class="mario-skin">
+            <div class="mario-hud">
+                <div class="mario-hud-section">
+                    <div class="mario-hud-lbl">PLAYER 1</div>
+                    <div class="mario-hud-val">ALI</div>
+                </div>
+                <div class="mario-hud-section" style="text-align:center">
+                    <div class="mario-hud-lbl">TOP SCORE</div>
+                    <div class="mario-hud-score">€${score.toLocaleString()}</div>
+                </div>
+                <div class="mario-hud-section" style="text-align:center">
+                    <div class="mario-hud-lbl">LIVES &amp; COINS</div>
+                    <div class="mario-hud-coins">🍄×${habits.total||0} &nbsp; ❤️×${fit.activity_streak||0}</div>
+                </div>
+                <div class="mario-hud-section" style="text-align:center">
+                    <div class="mario-hud-lbl">WORLD</div>
+                    <div class="mario-hud-world">SECOND BRAIN</div>
+                </div>
+                <div class="mario-hud-section" style="text-align:right">
+                    <div class="mario-hud-lbl">TIME</div>
+                    <div class="mario-hud-clock" id="mario-clock">--:--</div>
+                </div>
+            </div>
+            <div class="mario-grid">${worldCards}</div>
+            <div class="mario-bottom-row">
+                <div class="mario-score-panel">
+                    <div class="mario-panel-head cyan"><span class="mario-panel-title">★ HIGH SCORES — RECENT ACTIVITY ★</span></div>
+                    <div class="mario-score-body">${scoreRows}</div>
+                </div>
+                <div class="mario-items-panel">
+                    <div class="mario-panel-head yellow"><span class="mario-panel-title">? ITEM BOX ?</span></div>
+                    <div class="mario-items-body">${itemBtns}</div>
+                </div>
+            </div>
+        </div>`;
 }
 
 // ── Finances ──
