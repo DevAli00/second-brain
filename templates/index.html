@@ -4,12 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Second Brain</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
     --bg: #06060b;
     --bg2: #0c0c14;
+    --terminal: #00e5a0;
+    --terminal-dim: rgba(0,229,160,0.10);
+    --terminal-glow: 0 0 14px rgba(0,229,160,0.4);
+    --amber: #f0b429;
+    --amber-dim: rgba(240,180,41,0.10);
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34,211,238,0.10);
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
     --surface: rgba(16, 16, 28, 0.85);
     --surface2: rgba(24, 24, 40, 0.7);
     --surface3: rgba(32, 32, 52, 0.5);
@@ -36,6 +44,11 @@
 html[data-theme="light"] {
     --bg: #f4f3f0;
     --bg2: #ebe9e4;
+    --terminal: #0a7c57;
+    --terminal-dim: rgba(10,124,87,0.08);
+    --terminal-glow: 0 0 8px rgba(10,124,87,0.2);
+    --amber: #b07800;
+    --cyan: #0891b2;
     --surface: rgba(255, 255, 254, 0.9);
     --surface2: rgba(235, 233, 228, 0.8);
     --surface3: rgba(220, 218, 212, 0.6);
@@ -107,6 +120,231 @@ h1,h2,h3,h4,h5 { font-family: 'Outfit', sans-serif; font-weight: 600; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 input,select,textarea,button { font-family: inherit; }
+
+/* ══════════════════════════════════════════
+   TERMINAL DASHBOARD — Hacker HUD
+══════════════════════════════════════════ */
+
+/* Header */
+.term-header {
+    position: relative; overflow: hidden;
+    background: var(--bg2);
+    border: 1px solid rgba(0,229,160,0.18);
+    border-radius: var(--radius);
+    padding: 22px 28px;
+    margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    box-shadow: inset 0 0 60px rgba(0,229,160,0.03), 0 0 0 1px rgba(0,229,160,0.06);
+}
+html[data-theme="light"] .term-header {
+    border-color: rgba(10,124,87,0.2);
+    box-shadow: inset 0 0 40px rgba(10,124,87,0.02);
+}
+/* Scanline overlay */
+.term-header::before {
+    content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+    background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+    );
+}
+html[data-theme="light"] .term-header::before { opacity: 0.3; }
+.term-header > * { position: relative; z-index: 1; }
+
+.term-brand {
+    font-family: var(--mono);
+    font-size: 11px; font-weight: 700;
+    color: var(--text3); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 10px;
+}
+.term-ver { color: var(--terminal); }
+.term-greeting-line {
+    font-family: var(--mono);
+    font-size: 15px; font-weight: 500;
+    color: var(--text); display: flex; align-items: center; gap: 6px;
+    min-height: 22px;
+}
+.term-prompt { color: var(--terminal); font-size: 18px; line-height: 1; }
+.term-greeting-text { color: var(--text); }
+.term-cursor {
+    color: var(--terminal); font-size: 16px; line-height: 1;
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.term-header-right { text-align: right; }
+.term-clock {
+    font-family: var(--mono);
+    font-size: 28px; font-weight: 700;
+    color: var(--terminal);
+    text-shadow: var(--terminal-glow);
+    letter-spacing: 0.04em; line-height: 1;
+}
+html[data-theme="light"] .term-clock { text-shadow: none; }
+.term-date {
+    font-family: var(--mono);
+    font-size: 11px; color: var(--text3);
+    margin-top: 4px; letter-spacing: 0.08em;
+}
+.term-sys-status {
+    display: flex; gap: 10px; margin-top: 8px;
+    justify-content: flex-end; flex-wrap: wrap;
+}
+.term-sys-dot {
+    display: flex; align-items: center; gap: 4px;
+    font-family: var(--mono); font-size: 10px; color: var(--text3);
+}
+.term-sys-dot-led {
+    width: 6px; height: 6px; border-radius: 50%;
+}
+
+/* Panel */
+.term-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.term-module-panel:hover {
+    border-color: rgba(0,229,160,0.25);
+    box-shadow: 0 0 20px rgba(0,229,160,0.06);
+}
+html[data-theme="light"] .term-module-panel:hover {
+    border-color: rgba(10,124,87,0.25);
+}
+.term-panel-header {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2);
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 11px;
+    font-weight: 700; letter-spacing: 0.08em;
+    color: var(--text2);
+}
+.term-panel-dots { display: flex; gap: 5px; margin-right: 4px; }
+.term-dot {
+    width: 10px; height: 10px; border-radius: 50%; opacity: 0.85;
+}
+.term-dot.red    { background: #ff5f57; }
+.term-dot.yellow { background: #febc2e; }
+.term-dot.green  { background: var(--terminal); }
+.term-panel-title { flex: 1; }
+.term-panel-sub { margin-left: auto; font-size: 10px; color: var(--text3); font-weight: 400; }
+.term-status-pill {
+    background: var(--amber-dim); color: var(--amber);
+    border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700;
+}
+
+/* Panel body */
+.term-panel-body { padding: 14px 16px; }
+.term-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 8px;
+}
+.term-row:last-child { margin-bottom: 0; }
+.term-key {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--text3); letter-spacing: 0.06em;
+    flex-shrink: 0;
+}
+.term-val {
+    font-family: var(--mono); font-size: 13px;
+    font-weight: 700; text-align: right;
+}
+.term-val-lg {
+    font-size: 22px; font-weight: 700;
+    text-shadow: 0 0 8px currentColor;
+}
+html[data-theme="light"] .term-val-lg { text-shadow: none; }
+.term-bar-row {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+}
+.term-bar-chars {
+    font-family: var(--mono); font-size: 13px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 6px currentColor;
+}
+html[data-theme="light"] .term-bar-chars { text-shadow: none; }
+.term-bar-label {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--text3); letter-spacing: 0.06em;
+}
+
+/* Module grid */
+.term-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+/* Bottom row */
+.term-bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 14px;
+}
+.term-log-panel { overflow: hidden; }
+.term-log-body {
+    padding: 12px 14px;
+    max-height: 240px; overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+.term-log-line {
+    display: grid;
+    grid-template-columns: 110px 70px 1fr auto;
+    gap: 8px; align-items: center;
+    font-family: var(--mono); font-size: 11px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    opacity: 0; animation: fadeSlideIn 0.3s ease forwards;
+}
+.term-log-line:last-child { border-bottom: none; }
+@keyframes fadeSlideIn {
+    from { opacity:0; transform:translateX(-6px); }
+    to   { opacity:1; transform:translateX(0); }
+}
+.term-log-time  { color: var(--text3); font-size: 10px; }
+.term-log-type  { font-weight: 700; font-size: 10px; }
+.term-log-desc  { color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.term-log-amount { font-weight: 700; white-space: nowrap; }
+
+/* Quick commands */
+.term-cmds-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 7px; }
+.term-cmd-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    cursor: pointer; transition: all 0.15s;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--text2); text-align: left; width: 100%;
+}
+.term-cmd-btn:hover {
+    background: var(--terminal-dim);
+    border-color: rgba(0,229,160,0.3);
+    color: var(--terminal);
+}
+html[data-theme="light"] .term-cmd-btn:hover {
+    background: var(--terminal-dim);
+    border-color: rgba(10,124,87,0.3);
+    color: var(--terminal);
+}
+.term-cmd-text { font-size: 11px; }
+
+/* Responsive */
+@media (max-width: 1100px) { .term-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) {
+    .term-grid { grid-template-columns: 1fr; }
+    .term-bottom-row { grid-template-columns: 1fr; }
+    .term-clock { font-size: 20px; }
+}
 
 /* ── Sidebar ── */
 .sidebar {
@@ -976,26 +1214,53 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 
 <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
 <div id="sec-dashboard" class="section active">
-    <div class="page-header">
-        <div class="page-title">Dashboard</div>
-        <div class="page-subtitle" id="dash-date"></div>
-    </div>
-    <div class="stats-grid" id="dash-stats"></div>
-    <div class="grid-2">
-        <div class="card">
-            <div class="card-header"><div class="card-title">Recent Transactions</div></div>
-            <div id="dash-recent-tx"></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><div class="card-title">Quick Actions</div></div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button class="btn" onclick="navigate('finances'); setTimeout(()=>openModal('transaction'),100)">&#43; Add Transaction</button>
-                <button class="btn" onclick="navigate('quran'); setTimeout(()=>openModal('reading'),100)">&#43; Log Quran Reading</button>
-                <button class="btn" onclick="navigate('projects'); setTimeout(()=>openModal('project'),100)">&#43; New Project</button>
-                <button class="btn" onclick="navigate('jobs'); setTimeout(()=>openModal('job'),100)">&#43; Add Job Application</button>
+
+    <!-- ── Terminal Header ── -->
+    <div class="term-header">
+        <div class="term-header-left">
+            <div class="term-brand">⬡ SECOND BRAIN OS <span class="term-ver">v2.0</span> &nbsp;·&nbsp; <span style="color:var(--text3)">PERSONAL COMMAND CENTER</span></div>
+            <div class="term-greeting-line">
+                <span class="term-prompt">›</span>
+                <span id="term-greeting-text"></span><span class="term-cursor" id="term-cursor">▋</span>
             </div>
         </div>
+        <div class="term-header-right">
+            <div class="term-clock" id="term-clock">--:--:--</div>
+            <div class="term-date" id="term-date">---- -- --</div>
+            <div class="term-sys-status" id="dash-sys-status"></div>
+        </div>
     </div>
+
+    <!-- ── Module panels ── -->
+    <div class="term-grid" id="dash-module-grid"></div>
+
+    <!-- ── Bottom row: log + quick exec ── -->
+    <div class="term-bottom-row">
+        <div class="term-panel term-log-panel">
+            <div class="term-panel-header">
+                <div class="term-panel-dots">
+                    <span class="term-dot red"></span>
+                    <span class="term-dot yellow"></span>
+                    <span class="term-dot green"></span>
+                </div>
+                ACTIVITY_LOG
+                <span class="term-panel-sub">recent transactions &amp; events</span>
+            </div>
+            <div id="dash-activity-log" class="term-log-body"></div>
+        </div>
+        <div class="term-panel">
+            <div class="term-panel-header">
+                <div class="term-panel-dots">
+                    <span class="term-dot red"></span>
+                    <span class="term-dot yellow"></span>
+                    <span class="term-dot green"></span>
+                </div>
+                QUICK_EXEC
+            </div>
+            <div id="dash-quick-cmds" class="term-cmds-body"></div>
+        </div>
+    </div>
+
 </div>
 
 <!-- ═══════════════════ FINANCES ═══════════════════ -->
@@ -1307,24 +1572,194 @@ function fmtMoney(n) { return (n || 0).toLocaleString('en', { minimumFractionDig
 function fmtDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'; }
 
 // ── Dashboard ──
+// ── Terminal dashboard helpers ──────────────────────────────────────────────
+
+function blockBar(val, max, width = 12) {
+    if (!max || max === 0) return '░'.repeat(width);
+    const filled = Math.min(Math.round((val / max) * width), width);
+    return '█'.repeat(filled) + '░'.repeat(width - filled);
+}
+
+function typeText(el, text, speed = 38, done) {
+    let i = 0;
+    el.textContent = '';
+    const t = setInterval(() => {
+        el.textContent += text[i++];
+        if (i >= text.length) { clearInterval(t); if (done) done(); }
+    }, speed);
+}
+
+let _dashClockInterval = null;
+function startDashClock() {
+    if (_dashClockInterval) clearInterval(_dashClockInterval);
+    const tick = () => {
+        const now = new Date();
+        const ce = document.getElementById('term-clock');
+        const de = document.getElementById('term-date');
+        if (ce) ce.textContent = now.toLocaleTimeString('en-GB', { hour12: false });
+        if (de) {
+            const day  = now.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
+            const date = now.toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            de.textContent = `${day}  ${date}`;
+        }
+    };
+    tick();
+    _dashClockInterval = setInterval(tick, 1000);
+}
+
 async function loadDashboard() {
+    startDashClock();
     const d = await api('dashboard');
-    document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    document.getElementById('dash-stats').innerHTML = `
-        <div class="stat-card"><div class="stat-label">Net Worth</div><div class="stat-value">${fmtMoney(d.finance.net_worth)} EUR</div><div class="stat-sub">Savings: ${fmtMoney(d.finance.savings)}</div></div>
-        <div class="stat-card" data-color="teal"><div class="stat-label">Income</div><div class="stat-value" style="color:var(--accent2)">${fmtMoney(d.finance.income)}</div><div class="stat-sub">Expenses: ${fmtMoney(d.finance.expenses)}</div></div>
-        <div class="stat-card" data-color="purple"><div class="stat-label">Quran</div><div class="stat-value" style="color:var(--accent3)">${d.quran.completed}/114</div><div class="stat-sub">Surahs completed</div></div>
-        <div class="stat-card" data-color="pink"><div class="stat-label">Projects</div><div class="stat-value" style="color:var(--accent4)">${d.projects.active}</div><div class="stat-sub">Active &middot; ${d.projects.completed} done</div></div>
-        <div class="stat-card"><div class="stat-label">Job Hunt</div><div class="stat-value">${d.jobs.active}</div><div class="stat-sub">${d.jobs.offers} offers &middot; ${d.jobs.total} total</div></div>
-        <div class="stat-card" data-color="teal"><div class="stat-label">Learning Plan</div><div class="stat-value" style="color:var(--accent2)">${d.learning.total ? Math.round(d.learning.done/d.learning.total*100) : 0}%</div><div class="stat-sub">${d.learning.done}/${d.learning.total} tasks done</div></div>
-    `;
-    const txHtml = d.recent_transactions.length ? d.recent_transactions.map(t => `
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
-            <div><span class="badge badge-${t.type}">${t.type}</span> <span style="margin-left:8px;">${t.description || t.category}</span></div>
-            <div style="font-weight:600;color:${t.type==='income'?'var(--accent2)':'var(--text)'}">${t.type==='income'?'+':'-'}${fmtMoney(t.amount)}</div>
-        </div>
-    `).join('') : '<div class="empty-state"><div class="empty-state-text">No transactions yet</div></div>';
-    document.getElementById('dash-recent-tx').innerHTML = txHtml;
+    const fit   = d.fitness  || {};
+    const habits = d.habits  || {};
+
+    // ── Greeting ──
+    const greetEl = document.getElementById('term-greeting-text');
+    if (greetEl) {
+        const h = new Date().getHours();
+        const salut = h < 12 ? 'GOOD MORNING' : h < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
+        typeText(greetEl, `${salut}, ALI. ALL SYSTEMS OPERATIONAL.`, 36);
+    }
+
+    // ── System status row ──
+    const sysMods = [
+        { label: 'FIN',    ok: d.finance.net_worth > 0 },
+        { label: 'QURAN',  ok: d.quran.memorized > 0 },
+        { label: 'PROJ',   ok: d.projects.active >= 0 },
+        { label: 'JOBS',   ok: d.jobs.total > 0 },
+        { label: 'FIT',    ok: (fit.steps_today || 0) >= 0 },
+        { label: 'HABITS', ok: habits.total > 0 },
+    ];
+    document.getElementById('dash-sys-status').innerHTML = sysMods.map(m => `
+        <div class="term-sys-dot">
+            <div class="term-sys-dot-led" style="background:${m.ok ? 'var(--terminal)' : 'var(--border2)'};
+                box-shadow:${m.ok ? 'var(--terminal-glow)' : 'none'};"></div>
+            ${m.label}
+        </div>`).join('');
+
+    // ── Compute derived values ──
+    const savRate   = d.finance.income > 0 ? Math.round((d.finance.income - d.finance.expenses) / d.finance.income * 100) : 0;
+    const learnPct  = d.learning.total  ? Math.round(d.learning.done  / d.learning.total  * 100) : 0;
+    const memPct    = Math.round((d.quran.memorized / 114) * 100);
+    const stepPct   = fit.steps_goal   ? Math.round((fit.steps_today  / fit.steps_goal)   * 100) : 0;
+    const habitPct  = habits.total     ? Math.round((habits.done_today / habits.total)     * 100) : 0;
+
+    // ── Module panel definitions ──
+    const panels = [
+        {
+            icon: '💰', label: 'FINANCE_SYS', section: 'finances', accentColor: 'var(--accent)',
+            rows: [
+                { key: 'NET_WORTH', val: `€${Number(d.finance.net_worth).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}`, color: 'var(--accent)', lg: true },
+                { key: 'INCOME   ', val: `+€${Number(d.finance.income).toFixed(2)}`,   color: 'var(--terminal)' },
+                { key: 'EXPENSES ', val: `-€${Number(d.finance.expenses).toFixed(2)}`, color: 'var(--accent4)'  },
+            ],
+            bar: { val: savRate, max: 100, color: 'var(--terminal)', label: `SAVINGS_RATE  ${savRate}%` },
+        },
+        {
+            icon: '📖', label: 'QURAN_MEM', section: 'quran', accentColor: 'var(--accent)',
+            rows: [
+                { key: 'MEMORIZED', val: `${d.quran.memorized} / 114`, color: 'var(--accent)', lg: true },
+                { key: 'PROGRESS ', val: `${memPct}%  of Quran`,       color: 'var(--text2)' },
+            ],
+            bar: { val: d.quran.memorized, max: 114, color: 'var(--accent)', label: `${blockBar(d.quran.memorized, 114)}  ${memPct}%` },
+        },
+        {
+            icon: '🚀', label: 'PROJ_TRACKER', section: 'projects', accentColor: 'var(--accent3)',
+            rows: [
+                { key: 'IN_PROGRESS', val: `${d.projects.active}`,    color: 'var(--amber)', lg: true },
+                { key: 'DONE       ', val: `${d.projects.completed}`, color: 'var(--terminal)' },
+                { key: 'BACKLOG    ', val: `${d.projects.backlog||0}`, color: 'var(--text3)' },
+            ],
+            bar: null,
+            pill: d.projects.active > 0 ? 'BUILDING' : 'IDLE',
+        },
+        {
+            icon: '💼', label: 'JOB_HUNT', section: 'jobs', accentColor: 'var(--cyan)',
+            rows: [
+                { key: 'ACTIVE ', val: `${d.jobs.active}`, color: 'var(--cyan)', lg: true },
+                { key: 'TOTAL  ', val: `${d.jobs.total} apps`, color: 'var(--text2)' },
+                { key: 'OFFERS ', val: `${d.jobs.offers}`, color: d.jobs.offers > 0 ? 'var(--terminal)' : 'var(--text3)' },
+            ],
+            bar: { val: d.jobs.active, max: Math.max(d.jobs.total, 1), color: 'var(--cyan)', label: `PIPELINE  ${d.jobs.active}/${d.jobs.total}` },
+        },
+        {
+            icon: '💪', label: 'FITNESS_LOG', section: 'fitness', accentColor: 'var(--terminal)',
+            rows: [
+                { key: 'STEPS  ', val: `${(fit.steps_today||0).toLocaleString()}`, color: stepPct >= 100 ? 'var(--terminal)' : 'var(--amber)', lg: true },
+                { key: 'STREAK ', val: `${fit.activity_streak||0}d 🔥`,           color: 'var(--amber)' },
+                { key: 'THIS WK', val: `${fit.activities_this_week||0} sessions`,  color: 'var(--text2)' },
+            ],
+            bar: { val: fit.steps_today||0, max: fit.steps_goal||8000, color: 'var(--terminal)', label: `STEPS_GOAL  ${stepPct}%` },
+        },
+        {
+            icon: '🔥', label: 'HABIT_LOOP + LEARN', section: 'habits', accentColor: 'var(--amber)',
+            rows: [
+                { key: 'HABITS   ', val: `${habits.done_today||0}/${habits.total||0}`, color: habitPct===100 && habits.total>0 ? 'var(--terminal)' : 'var(--amber)', lg: true },
+                { key: 'LEARNING ', val: `${d.learning.done}/${d.learning.total} tasks`, color: 'var(--accent3)' },
+                { key: 'PLAN_PCT ', val: `${learnPct}%`, color: 'var(--text2)' },
+            ],
+            bar: { val: habits.done_today||0, max: habits.total||1, color: 'var(--amber)', label: `HABITS  ${habitPct}%` },
+        },
+    ];
+
+    document.getElementById('dash-module-grid').innerHTML = panels.map(p => `
+        <div class="term-panel term-module-panel" onclick="navigate('${p.section}')" title="Go to ${p.label}">
+            <div class="term-panel-header">
+                <div class="term-panel-dots">
+                    <span class="term-dot red"></span>
+                    <span class="term-dot yellow"></span>
+                    <span class="term-dot green"></span>
+                </div>
+                <span class="term-panel-title" style="color:${p.accentColor}">${p.icon}&nbsp;${p.label}</span>
+                ${p.pill ? `<span class="term-status-pill">${p.pill}</span>` : ''}
+            </div>
+            <div class="term-panel-body">
+                ${p.rows.map(r => `
+                <div class="term-row">
+                    <span class="term-key">${r.key}</span>
+                    <span class="term-val${r.lg ? ' term-val-lg' : ''}" style="color:${r.color}">${r.val}</span>
+                </div>`).join('')}
+                ${p.bar ? `
+                <div class="term-bar-row">
+                    <span class="term-bar-chars" style="color:${p.bar.color}">${blockBar(p.bar.val, p.bar.max)}</span>
+                    <span class="term-bar-label">${p.bar.label}</span>
+                </div>` : ''}
+            </div>
+        </div>`).join('');
+
+    // ── Activity log ──
+    const txLines = d.recent_transactions.map((t, i) => ({
+        time:   t.date,
+        type:   t.type === 'income' ? 'INCOME ' : 'EXPENSE',
+        color:  t.type === 'income' ? 'var(--terminal)' : 'var(--accent4)',
+        desc:   (t.description || t.category || '—').slice(0, 22),
+        amount: `${t.type === 'income' ? '+' : '-'}€${Number(t.amount).toFixed(2)}`,
+        delay:  i * 55,
+    }));
+
+    document.getElementById('dash-activity-log').innerHTML = txLines.length
+        ? txLines.map(l => `
+            <div class="term-log-line" style="animation-delay:${l.delay}ms">
+                <span class="term-log-time">[${l.time}]</span>
+                <span class="term-log-type" style="color:${l.color}">${l.type}</span>
+                <span class="term-log-desc">${l.desc}</span>
+                <span class="term-log-amount" style="color:${l.color}">${l.amount}</span>
+            </div>`).join('')
+        : '<div class="term-log-line" style="color:var(--text3);opacity:1;">[----] NO_EVENTS &nbsp; no transactions logged yet</div>';
+
+    // ── Quick exec ──
+    const cmds = [
+        { icon: '💰', label: '$ add_transaction',  action: `navigate('finances');setTimeout(()=>openModal('transaction'),120)` },
+        { icon: '💪', label: '$ log_activity',     action: `navigate('fitness');setTimeout(()=>openLogActivityModal(),120)` },
+        { icon: '🚀', label: '$ new_project',      action: `navigate('projects');setTimeout(()=>openModal('project'),120)` },
+        { icon: '💼', label: '$ new_application',  action: `navigate('jobs');setTimeout(()=>openModal('job'),120)` },
+        { icon: '🔥', label: '$ add_habit',        action: `navigate('habits');setTimeout(()=>openAddHabitModal(),120)` },
+        { icon: '📚', label: '$ add_book',         action: `navigate('books')` },
+    ];
+    document.getElementById('dash-quick-cmds').innerHTML = cmds.map(c => `
+        <button class="term-cmd-btn" onclick="${c.action}">
+            ${c.icon} <span class="term-cmd-text">${c.label}</span>
+        </button>`).join('');
 }
 
 // ── Finances ──

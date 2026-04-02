@@ -264,19 +264,50 @@ def dashboard():
     surahs_memorized = sum(1 for s in surahs if s.memorized)
     projects_active = Project.query.filter_by(status='active').count()
     projects_completed = Project.query.filter_by(status='completed').count()
+    projects_backlog = Project.query.filter_by(status='backlog').count()
+    projects_review = Project.query.filter_by(status='review').count()
     jobs_total = JobApplication.query.count()
     jobs_active = JobApplication.query.filter(JobApplication.status.notin_(['rejected','accepted'])).count()
     jobs_offers = JobApplication.query.filter_by(status='offer').count()
-    recent_tx = [to_dict(t, TX_FIELDS) for t in Transaction.query.order_by(Transaction.date.desc()).limit(5).all()]
+    recent_tx = [to_dict(t, TX_FIELDS) for t in Transaction.query.order_by(Transaction.date.desc()).limit(8).all()]
     learning_total = LearningTask.query.count()
     learning_done = LearningTask.query.filter_by(completed=True).count()
+    # Fitness summary
+    from datetime import timedelta
+    fit_p = FitnessProfile.query.first()
+    today_str = date.today().isoformat()
+    today_steps = StepEntry.query.filter_by(date=today_str).first()
+    act_dates = sorted({a.date for a in ActivityLog.query.all()}, reverse=True)
+    fit_streak = 0
+    check = date.today()
+    for ds in act_dates:
+        if date.fromisoformat(ds) == check:
+            fit_streak += 1
+            check = check - timedelta(days=1)
+        else:
+            break
+    week_start = (date.today() - timedelta(days=6)).isoformat()
+    acts_this_week = ActivityLog.query.filter(ActivityLog.date >= week_start).count()
+    last_act = ActivityLog.query.order_by(ActivityLog.date.desc(), ActivityLog.created_at.desc()).first()
+    # Habits summary
+    all_habits = Habit.query.all()
+    habits_done_today = sum(1 for h in all_habits if any(e.date == today_str for e in h.entries))
     return jsonify({
         'finance': {'income': total_income, 'expenses': total_expense, 'savings': total_savings,
                      'investments': total_investments, 'net_worth': net_worth},
         'quran': {'total': len(surahs), 'completed': surahs_completed, 'memorized': surahs_memorized},
-        'projects': {'active': projects_active, 'completed': projects_completed},
+        'projects': {'active': projects_active, 'completed': projects_completed,
+                     'backlog': projects_backlog, 'review': projects_review},
         'jobs': {'total': jobs_total, 'active': jobs_active, 'offers': jobs_offers},
         'learning': {'total': learning_total, 'done': learning_done},
+        'fitness': {
+            'steps_today': today_steps.steps if today_steps else 0,
+            'steps_goal': fit_p.steps_goal if fit_p else 8000,
+            'activity_streak': fit_streak,
+            'activities_this_week': acts_this_week,
+            'last_activity': last_act.type if last_act else None,
+        },
+        'habits': {'total': len(all_habits), 'done_today': habits_done_today},
         'recent_transactions': recent_tx
     })
 
