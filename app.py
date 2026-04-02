@@ -119,6 +119,8 @@ class FitnessProfile(db.Model):
     sex = db.Column(db.String(10), default='male')
     activity = db.Column(db.String(20), default='moderate')
     phase = db.Column(db.Integer, default=0)
+    steps_goal = db.Column(db.Integer, default=8000)
+    goal = db.Column(db.String(20), default='lose_fat')  # lose_fat / build_muscle / maintain
 
 class FitnessSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -131,6 +133,30 @@ class WeightEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, default=date.today)
     kg = db.Column(db.Float)
+
+class StepEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(10), unique=True, nullable=False)  # YYYY-MM-DD
+    steps = db.Column(db.Integer, nullable=False)
+
+class ActivityLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(10), nullable=False)
+    type = db.Column(db.String(30), nullable=False)      # Run, Lift, Bike…
+    duration_min = db.Column(db.Integer, default=0)
+    intensity = db.Column(db.String(10), default='medium')  # easy/medium/hard
+    calories = db.Column(db.Integer, default=0)
+    notes = db.Column(db.Text, default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PersonalRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    exercise = db.Column(db.String(100), nullable=False)
+    weight_kg = db.Column(db.Float, default=0)   # 0 = bodyweight
+    reps = db.Column(db.Integer, default=1)
+    date = db.Column(db.String(10), nullable=False)
+    notes = db.Column(db.Text, default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -214,6 +240,9 @@ DAILY_PLAN_FIELDS = ['id','date','notes','energy_level']
 DAILY_TASK_FIELDS = ['id','daily_plan_id','description','completed','time_slot','sort_order']
 BOOK_FIELDS = ['id','title','author','quarter','category','status','notes','rating','sort_order','created_at']
 HABIT_FIELDS = ['id','name','emoji','color','created_at']
+STEP_FIELDS = ['id','date','steps']
+ACTIVITY_FIELDS = ['id','date','type','duration_min','intensity','calories','notes','created_at']
+PR_FIELDS = ['id','exercise','weight_kg','reps','date','notes','created_at']
 
 # ── Routes ──────────────────────────────────────────────────────────────────
 
@@ -639,7 +668,9 @@ def get_fitness_profile():
         p = FitnessProfile()
         db.session.add(p)
         db.session.commit()
-    return jsonify({'weight': p.weight, 'height': p.height, 'age': p.age, 'sex': p.sex, 'activity': p.activity, 'phase': p.phase})
+    return jsonify({'weight': p.weight, 'height': p.height, 'age': p.age, 'sex': p.sex,
+                    'activity': p.activity, 'phase': p.phase,
+                    'steps_goal': p.steps_goal, 'goal': p.goal})
 
 @app.route('/api/fitness/profile', methods=['PUT'])
 def update_fitness_profile():
@@ -648,15 +679,13 @@ def update_fitness_profile():
         p = FitnessProfile()
         db.session.add(p)
     d = request.json
-    for k in ['weight', 'height', 'age', 'sex', 'activity', 'phase']:
+    for k in ['weight', 'height', 'age', 'sex', 'activity', 'phase', 'steps_goal', 'goal']:
         if k in d:
             val = d[k]
             if k in ('weight', 'height'):
                 val = float(val) if val else 0
-            elif k == 'age':
+            elif k in ('age', 'phase', 'steps_goal'):
                 val = int(val) if val else 0
-            elif k == 'phase':
-                val = int(val)
             setattr(p, k, val)
     db.session.commit()
     return jsonify({'ok': True})
@@ -705,10 +734,123 @@ def delete_weight_entry(wid):
 
 @app.route('/api/fitness/stats')
 def fitness_stats():
+    from datetime import timedelta
     p = FitnessProfile.query.first()
     entries = WeightEntry.query.order_by(WeightEntry.date).all()
     last_weight = entries[-1].kg if entries else None
-    return jsonify({'last_weight': last_weight, 'total_entries': len(entries), 'phase': p.phase if p else 0})
+
+    # Activity streak: consecutive days with at least 1 activity
+    activities = ActivityLog.query.order_by(ActivityLog.date.desc()).all()
+    act_dates = sorted({a.date for a in activities}, reverse=True)
+    streak = 0
+    check = date.today()
+    for ds in act_dates:
+        if date.fromisoformat(ds) == check:
+            streak += 1
+            check = check - timedelta(days=1)
+        else:
+            break
+
+    # Steps today
+    today_steps = StepEntry.query.filter_by(date=date.today().isoformat()).first()
+    return jsonify({
+        'last_weight': last_weight,
+        'total_weight_entries': len(entries),
+        'phase': p.phase if p else 0,
+        'steps_goal': p.steps_goal if p else 8000,
+        'steps_today': today_steps.steps if today_steps else 0,
+        'activity_streak': streak,
+        'activities_this_week': ActivityLog.query.filter(
+            ActivityLog.date >= (date.today() - timedelta(days=6)).isoformat()
+        ).count(),
+    })
+
+# ── Steps ─────────────────────────────────────────────────────────────────
+
+@app.route('/api/fitness/steps', methods=['GET'])
+def get_steps():
+    from datetime import timedelta
+    days = int(request.args.get('days', 30))
+    since = (date.today() - timedelta(days=days)).isoformat()
+    entries = StepEntry.query.filter(StepEntry.date >= since).order_by(StepEntry.date).all()
+    return jsonify([to_dict(e, STEP_FIELDS) for e in entries])
+
+@app.route('/api/fitness/steps', methods=['POST'])
+def log_steps():
+    d = request.json
+    dt = d.get('date', date.today().isoformat())
+    existing = StepEntry.query.filter_by(date=dt).first()
+    if existing:
+        existing.steps = int(d['steps'])
+    else:
+        db.session.add(StepEntry(date=dt, steps=int(d['steps'])))
+    db.session.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/fitness/steps/<int:sid>', methods=['DELETE'])
+def delete_step_entry(sid):
+    e = StepEntry.query.get_or_404(sid)
+    db.session.delete(e)
+    db.session.commit()
+    return '', 204
+
+# ── Activity Log ──────────────────────────────────────────────────────────
+
+@app.route('/api/fitness/activities', methods=['GET'])
+def get_activities():
+    limit = int(request.args.get('limit', 50))
+    activities = ActivityLog.query.order_by(ActivityLog.date.desc(), ActivityLog.created_at.desc()).limit(limit).all()
+    return jsonify([to_dict(a, ACTIVITY_FIELDS) for a in activities])
+
+@app.route('/api/fitness/activities', methods=['POST'])
+def log_activity():
+    d = request.json
+    a = ActivityLog(
+        date=d.get('date', date.today().isoformat()),
+        type=d['type'],
+        duration_min=int(d.get('duration_min', 0)),
+        intensity=d.get('intensity', 'medium'),
+        calories=int(d.get('calories', 0)),
+        notes=d.get('notes', ''),
+    )
+    db.session.add(a)
+    db.session.commit()
+    return jsonify({'id': a.id}), 201
+
+@app.route('/api/fitness/activities/<int:aid>', methods=['DELETE'])
+def delete_activity(aid):
+    a = ActivityLog.query.get_or_404(aid)
+    db.session.delete(a)
+    db.session.commit()
+    return '', 204
+
+# ── Personal Records ──────────────────────────────────────────────────────
+
+@app.route('/api/fitness/prs', methods=['GET'])
+def get_prs():
+    prs = PersonalRecord.query.order_by(PersonalRecord.exercise, PersonalRecord.date.desc()).all()
+    return jsonify([to_dict(p, PR_FIELDS) for p in prs])
+
+@app.route('/api/fitness/prs', methods=['POST'])
+def add_pr():
+    d = request.json
+    p = PersonalRecord(
+        exercise=d['exercise'].strip(),
+        weight_kg=float(d.get('weight_kg', 0)),
+        reps=int(d.get('reps', 1)),
+        date=d.get('date', date.today().isoformat()),
+        notes=d.get('notes', ''),
+    )
+    db.session.add(p)
+    db.session.commit()
+    return jsonify({'id': p.id}), 201
+
+@app.route('/api/fitness/prs/<int:pid>', methods=['DELETE'])
+def delete_pr(pid):
+    p = PersonalRecord.query.get_or_404(pid)
+    db.session.delete(p)
+    db.session.commit()
+    return '', 204
 
 # ── Learning Plan Routes ───────────────────────────────────────────────────
 
@@ -1361,9 +1503,32 @@ def seed_books():
         db.session.add(Book(title=title, author=author, quarter=quarter, category=category, sort_order=i))
     db.session.commit()
 
+def run_migrations() -> None:
+    """Apply SQLite column additions that db.create_all() can't handle."""
+    import sqlite3
+    db_path = os.path.join(datadir, 'secondbrain.db')
+    if not os.path.exists(db_path):
+        return
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    migrations: list[tuple[str, str, str]] = [
+        ('fitness_profile', 'steps_goal', 'INTEGER DEFAULT 8000'),
+        ('fitness_profile', 'goal',       "VARCHAR(20) DEFAULT 'lose_fat'"),
+    ]
+    existing_tables = {r[0] for r in cur.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+    for table, col, col_def in migrations:
+        if table not in existing_tables:
+            continue
+        cols = [r[1] for r in cur.execute(f'PRAGMA table_info({table})').fetchall()]
+        if col not in cols:
+            cur.execute(f'ALTER TABLE {table} ADD COLUMN {col} {col_def}')
+    conn.commit()
+    conn.close()
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        run_migrations()
         seed_quran()
         seed_books()
     app.run(debug=True, port=5555, host='0.0.0.0')

@@ -584,6 +584,71 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     background: var(--accent-glow);
 }
 
+/* ── Fitness v2 ── */
+.fit-tab-btn {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    padding: 8px 16px; font-size: 13px; font-weight: 500;
+    color: var(--text3); cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.fit-tab-btn:hover { color: var(--text2); }
+.fit-tab-btn.active { color: var(--text); border-bottom-color: var(--accent2); }
+/* Steps ring */
+.steps-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.steps-ring-label { font-size: 13px; color: var(--text3); }
+/* Activity type pill */
+.act-type-pill {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.03em;
+}
+.act-easy   { background: rgba(52,199,157,0.15); color: var(--accent2); }
+.act-medium { background: rgba(232,168,73,0.15); color: var(--warning); }
+.act-hard   { background: rgba(224,92,122,0.15); color: var(--accent4); }
+/* Activity card */
+.activity-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--surface);
+    margin-bottom: 8px; transition: all 0.15s;
+}
+.activity-card:hover { border-color: var(--border2); }
+.activity-emoji { font-size: 22px; flex-shrink: 0; }
+.activity-info { flex: 1; min-width: 0; }
+.activity-title { font-size: 14px; font-weight: 600; }
+.activity-meta  { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.activity-del { background: none; border: none; cursor: pointer; color: var(--text3);
+    font-size: 13px; padding: 4px; opacity: 0; transition: opacity 0.15s; }
+.activity-card:hover .activity-del { opacity: 1; }
+.activity-del:hover { color: var(--danger); }
+/* 7-day mini calendar */
+.week-cal { display: flex; gap: 6px; }
+.week-cal-day {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 4px; font-size: 10px; color: var(--text3);
+}
+.week-cal-dot {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.week-cal-dot.active { background: var(--accent2); border-color: var(--accent2); }
+.week-cal-dot.today { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+/* PR table */
+.pr-exercise-group { margin-bottom: 20px; }
+.pr-exercise-name { font-size: 14px; font-weight: 700; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px; }
+.pr-badge { background: var(--accent-glow); color: var(--accent); border-radius: 6px;
+    padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.pr-entry {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    border-radius: var(--radius-sm); background: var(--surface);
+    border: 1px solid var(--border); margin-bottom: 6px; font-size: 13px;
+}
+.pr-entry.best { border-left: 3px solid var(--accent); background: var(--accent-glow); }
+.pr-del { background: none; border: none; cursor: pointer; color: var(--text3);
+    font-size: 12px; opacity: 0; margin-left: auto; transition: opacity 0.15s; }
+.pr-entry:hover .pr-del { opacity: 1; }
+.pr-del:hover { color: var(--danger); }
+
 /* ── Learning Plan ── */
 .quarter-card {
     background: var(--surface);
@@ -1081,16 +1146,19 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 <div id="sec-fitness" class="section">
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-            <div class="page-title">Training Log</div>
-            <div class="page-subtitle" id="fit-phase-sub">3-month transformation</div>
+            <div class="page-title">💪 Fitness</div>
+            <div class="page-subtitle" id="fit-phase-sub">Track everything — steps, workouts, PRs</div>
         </div>
-        <div style="display:flex;gap:6px;" id="fit-tabs">
-            <button class="btn btn-accent" onclick="setFitTab('tracker')">Weekly Log</button>
-            <button class="btn" onclick="setFitTab('nutrition')">Nutrition</button>
-            <button class="btn" onclick="setFitTab('progress')">Progress</button>
-        </div>
+        <button class="btn btn-accent" onclick="openLogActivityModal()">＋ Log Activity</button>
     </div>
     <div class="stats-grid" id="fit-stats"></div>
+    <!-- Tab bar -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;" id="fit-tab-bar">
+        <button class="fit-tab-btn active" onclick="setFitTab2('overview')">📊 Overview</button>
+        <button class="fit-tab-btn" onclick="setFitTab2('log')">📝 Activity Log</button>
+        <button class="fit-tab-btn" onclick="setFitTab2('prs')">🏆 Personal Records</button>
+        <button class="fit-tab-btn" onclick="setFitTab2('settings')">⚙️ Settings</button>
+    </div>
     <div id="fit-content"></div>
 </div>
 
@@ -2176,199 +2244,363 @@ async function saveJob(e, id) {
 }
 
 // ── Fitness ──
-const FIT_SESSIONS = ['Mon — Upper Strength', 'Tue — HIIT + Core', 'Wed — Lower Strength', 'Thu — Cardio + Mobility', 'Fri — Full Body Circuit'];
-const FIT_PHASES = ['Phase 1 — Foundation', 'Phase 2 — Build', 'Phase 3 — Peak'];
-let fitTab = 'tracker';
-let fitWeekOffset = 0;
+// ── Fitness v2 ──────────────────────────────────────────────────────────────
 
-function getFitWeekKey(offset = 0) {
-    const d = new Date();
-    d.setDate(d.getDate() - d.getDay() + 1 + offset * 7);
-    return `w${d.getFullYear()}_${String(d.getMonth()+1).padStart(2,'0')}_${String(d.getDate()).padStart(2,'0')}`;
-}
-function getFitWeekLabel(offset = 0) {
-    const d = new Date();
-    d.setDate(d.getDate() - d.getDay() + 1 + offset * 7);
-    const end = new Date(d); end.setDate(d.getDate() + 4);
-    const fmt = dt => dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    return `${fmt(d)} – ${fmt(end)}`;
-}
+const ACT_TYPES = {
+    Run: '🏃', Lift: '🏋️', Bike: '🚴', Swim: '🏊', Walk: '🚶',
+    HIIT: '⚡', Yoga: '🧘', Calisthenics: '🤸', Sport: '⚽', Other: '📦'
+};
+const INTENSITY_COLORS = { easy: 'act-easy', medium: 'act-medium', hard: 'act-hard' };
+let fitTab2 = 'overview';
 
-function setFitTab(t) {
-    fitTab = t;
-    document.querySelectorAll('#fit-tabs .btn').forEach((b, i) => {
-        b.classList.toggle('btn-accent', ['tracker','nutrition','progress'][i] === t);
+function setFitTab2(t) {
+    fitTab2 = t;
+    document.querySelectorAll('.fit-tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', ['overview','log','prs','settings'][i] === t);
     });
     loadFitness();
 }
 
 async function loadFitness() {
-    const [profile, weightLog] = await Promise.all([api('fitness/profile'), api('fitness/weight')]);
-    const weekKey = getFitWeekKey(fitWeekOffset);
-    const sessions = await api('fitness/sessions/' + weekKey);
-    const doneSessions = Object.values(sessions).filter(v => v?.done).length;
+    const [profile, weightLog, stats] = await Promise.all([
+        api('fitness/profile'), api('fitness/weight'), api('fitness/stats')
+    ]);
 
-    document.getElementById('fit-phase-sub').textContent = '3-month transformation · ' + FIT_PHASES[profile.phase || 0];
-
+    const stepPct = Math.min(100, Math.round(stats.steps_today / (stats.steps_goal || 8000) * 100));
     document.getElementById('fit-stats').innerHTML = `
-        <div class="stat-card"><div class="stat-label">Sessions</div><div class="stat-value">${doneSessions}<span style="font-size:16px;color:var(--text3)"> / 5</span></div><div class="stat-sub">${Math.round(doneSessions/5*100)}% this week</div></div>
-        <div class="stat-card" data-color="teal"><div class="stat-label">Last Weight</div><div class="stat-value" style="color:var(--accent2)">${weightLog.length ? weightLog[weightLog.length-1].kg : '—'}<span style="font-size:14px"> kg</span></div></div>
-        <div class="stat-card" data-color="purple"><div class="stat-label">Entries</div><div class="stat-value" style="color:var(--accent3)">${weightLog.length}</div><div class="stat-sub">weight logs</div></div>
+        <div class="stat-card">
+            <div class="stat-label">Steps Today</div>
+            <div class="stat-value" style="color:${stepPct >= 100 ? 'var(--accent2)' : 'var(--text)'}">
+                ${stats.steps_today.toLocaleString()}<span style="font-size:13px;color:var(--text3)"> / ${(stats.steps_goal||8000).toLocaleString()}</span>
+            </div>
+            <div style="margin-top:6px;"><div class="progress-bar" style="height:4px;"><div class="progress-fill" style="width:${stepPct}%;background:var(--accent2);"></div></div></div>
+        </div>
+        <div class="stat-card" data-color="teal">
+            <div class="stat-label">🔥 Activity Streak</div>
+            <div class="stat-value" style="color:var(--warning)">${stats.activity_streak}<span style="font-size:14px;color:var(--text3)"> days</span></div>
+        </div>
+        <div class="stat-card" data-color="purple">
+            <div class="stat-label">This Week</div>
+            <div class="stat-value" style="color:var(--accent3)">${stats.activities_this_week}<span style="font-size:14px;color:var(--text3)"> sessions</span></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Weight</div>
+            <div class="stat-value">${weightLog.length ? weightLog[weightLog.length-1].kg : '—'}<span style="font-size:14px;color:var(--text3)"> kg</span></div>
+        </div>
     `;
 
-    if (fitTab === 'tracker') renderFitTracker(sessions, doneSessions, weekKey);
-    else if (fitTab === 'nutrition') renderFitNutrition(profile);
-    else renderFitProgress(weightLog);
+    if (fitTab2 === 'overview')  await renderFitOverview(stats, weightLog);
+    else if (fitTab2 === 'log')  await renderFitLog();
+    else if (fitTab2 === 'prs')  await renderFitPRs();
+    else renderFitSettings(profile, weightLog);
 }
 
-function renderFitTracker(sessions, doneSessions, weekKey) {
-    const label = fitWeekOffset === 0 ? 'This week' : fitWeekOffset === -1 ? 'Last week' : getFitWeekLabel(fitWeekOffset);
-    let html = `
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-            <button class="btn btn-sm" onclick="fitWeekOffset--;loadFitness()">&#8592;</button>
-            <span style="flex:1;font-size:14px;font-weight:500;">${label} · ${getFitWeekLabel(fitWeekOffset)}</span>
-            ${fitWeekOffset < 0 ? '<button class="btn btn-sm" onclick="fitWeekOffset++;loadFitness()">&#8594;</button>' : ''}
-        </div>
-        <div class="progress-bar" style="margin-bottom:20px;"><div class="progress-fill" style="width:${doneSessions/5*100}%;background:var(--accent2);"></div></div>`;
+async function renderFitOverview(stats, weightLog) {
+    const activities = await api('fitness/activities?limit=100');
+    const steps = await api('fitness/steps?days=30');
+    const today = new Date().toISOString().split('T')[0];
 
-    FIT_SESSIONS.forEach((name, idx) => {
-        const d = sessions[idx] || {};
-        html += `<div class="session-card ${d.done ? 'done' : ''}">
-            <div class="session-top">
-                <div class="session-check ${d.done ? 'checked' : ''}" onclick="toggleFitSession('${weekKey}',${idx},${!d.done})">&#10003;</div>
-                <span class="session-name" style="${d.done ? 'text-decoration:line-through;opacity:0.5' : ''}">${name}</span>
-            </div>
-            <textarea class="session-note" rows="1" placeholder="Notes — weights, reps, how you felt..."
-                onblur="updateFitNote('${weekKey}',${idx},this.value)">${d.note || ''}</textarea>
-        </div>`;
+    // Build last 7 days
+    const last7 = Array.from({length: 7}, (_, i) => {
+        const d = new Date(); d.setDate(d.getDate() - (6 - i));
+        return { date: d.toISOString().split('T')[0], label: d.toLocaleDateString('en', {weekday:'short'}) };
     });
-    document.getElementById('fit-content').innerHTML = html;
+    const actByDate = {};
+    activities.forEach(a => { actByDate[a.date] = (actByDate[a.date] || []); actByDate[a.date].push(a); });
+    const stepByDate = {};
+    steps.forEach(s => { stepByDate[s.date] = s.steps; });
+    const goal = stats.steps_goal || 8000;
+
+    const weekCalHtml = last7.map(({date, label}) => {
+        const acts = actByDate[date] || [];
+        const stepsDone = stepByDate[date];
+        const isToday = date === today;
+        const emoji = acts.length ? (ACT_TYPES[acts[0].type] || '💪') : (stepsDone && stepsDone >= goal ? '👣' : '');
+        return `<div class="week-cal-day">
+            <div class="week-cal-dot ${acts.length || (stepsDone >= goal) ? 'active' : ''} ${isToday ? 'today' : ''}">${emoji}</div>
+            <span>${label}</span>
+            ${stepsDone ? `<span style="font-size:9px;">${(stepsDone/1000).toFixed(1)}k</span>` : ''}
+        </div>`;
+    }).join('');
+
+    // Steps bar chart (last 14 days)
+    const last14 = steps.slice(-14);
+    const maxSteps = Math.max(goal, ...last14.map(s => s.steps));
+    const stepsChart = last14.length ? last14.map(s => {
+        const pct = Math.min(100, Math.round(s.steps / maxSteps * 100));
+        const over = s.steps >= goal;
+        const d = new Date(s.date);
+        return `<div style="flex:1;text-align:center;">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:80px;gap:2px;">
+                <div style="font-size:9px;color:var(--text3);">${s.steps >= 1000 ? (s.steps/1000).toFixed(1)+'k' : s.steps}</div>
+                <div style="width:100%;max-width:22px;border-radius:3px 3px 0 0;background:${over ? 'var(--accent2)' : 'var(--border2)'};height:${Math.max(4,pct*0.7)}px;"></div>
+            </div>
+            <div style="font-size:9px;color:var(--text3);margin-top:3px;">${d.toLocaleDateString('en',{weekday:'narrow'})}</div>
+        </div>`;
+    }).join('') : '<div style="color:var(--text3);font-size:13px;padding:20px;">No step data yet</div>';
+
+    // Recent activities
+    const recentActs = activities.slice(0, 5).map(a => {
+        const emoji = ACT_TYPES[a.type] || '💪';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:20px">${emoji}</span>
+            <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;">${a.type}</div>
+                <div style="font-size:11px;color:var(--text3);">${fmtDate(a.date)} · ${a.duration_min}min${a.calories ? ' · ' + a.calories + ' kcal' : ''}</div>
+            </div>
+            <span class="act-type-pill ${INTENSITY_COLORS[a.intensity] || 'act-medium'}">${a.intensity}</span>
+        </div>`;
+    }).join('') || '<div style="color:var(--text3);font-size:13px;padding:12px 0;">No activities logged yet</div>';
+
+    document.getElementById('fit-content').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="card">
+                <div class="card-header"><div class="card-title">7-Day Activity</div></div>
+                <div class="week-cal">${weekCalHtml}</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Steps — Last 14 Days</div>
+                    <div style="font-size:11px;color:var(--text3);">Goal: ${goal.toLocaleString()}/day</div>
+                </div>
+                <div style="display:flex;gap:4px;align-items:flex-end;">${stepsChart}</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Recent Activities</div>
+                <button class="btn btn-sm" onclick="setFitTab2('log')">See all →</button>
+            </div>
+            ${recentActs}
+        </div>`;
 }
 
-function renderFitNutrition(profile) {
-    let html = `
-        <div class="card" style="margin-bottom:20px;">
-            <div class="card-header"><div class="card-title">Your Profile</div></div>
-            <div class="form-row" style="margin-bottom:12px;">
-                <div class="form-group"><label class="form-label">Weight (kg)</label>
-                    <input class="form-input" type="number" id="fp-weight" value="${profile.weight||''}" placeholder="75" onchange="saveFitProfile()"></div>
-                <div class="form-group"><label class="form-label">Height (cm)</label>
-                    <input class="form-input" type="number" id="fp-height" value="${profile.height||''}" placeholder="178" onchange="saveFitProfile()"></div>
-            </div>
-            <div class="form-row" style="margin-bottom:12px;">
-                <div class="form-group"><label class="form-label">Age</label>
-                    <input class="form-input" type="number" id="fp-age" value="${profile.age||''}" placeholder="24" onchange="saveFitProfile()"></div>
-                <div class="form-group"><label class="form-label">Sex</label>
-                    <select class="form-input" id="fp-sex" onchange="saveFitProfile()">
-                        <option value="male" ${profile.sex==='male'?'selected':''}>Male</option>
-                        <option value="female" ${profile.sex==='female'?'selected':''}>Female</option>
-                    </select></div>
-            </div>
-            <div class="form-group"><label class="form-label">Activity Level</label>
-                <select class="form-input" id="fp-activity" onchange="saveFitProfile()">
-                    <option value="sedentary" ${profile.activity==='sedentary'?'selected':''}>Sedentary — desk job, no walks</option>
-                    <option value="light" ${profile.activity==='light'?'selected':''}>Light — occasional walks</option>
-                    <option value="moderate" ${profile.activity==='moderate'?'selected':''}>Moderate — active lifestyle</option>
-                    <option value="active" ${profile.activity==='active'?'selected':''}>Active — physical job too</option>
-                </select></div>
-        </div>
-        <div class="card" style="margin-bottom:20px;">
-            <div class="card-header"><div class="card-title">Current Phase</div></div>
-            <div style="display:flex;gap:8px;">
-                ${FIT_PHASES.map((p,i) => `<button class="phase-btn ${profile.phase===i?'active':''}" onclick="saveFitPhase(${i})">${p}</button>`).join('')}
-            </div>
-        </div>`;
+async function renderFitLog() {
+    const [activities, steps] = await Promise.all([api('fitness/activities?limit=100'), api('fitness/steps?days=14')]);
+    const stepByDate = {};
+    steps.forEach(s => { stepByDate[s.date] = s; });
 
+    // Group activities by date
+    const byDate = {};
+    activities.forEach(a => { (byDate[a.date] = byDate[a.date] || []).push(a); });
+    const sortedDates = Object.keys(byDate).sort().reverse();
+
+    const actHtml = sortedDates.length ? sortedDates.map(dt => {
+        const acts = byDate[dt];
+        const sd = stepByDate[dt];
+        return `<div style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+                ${fmtDate(dt)}
+                ${sd ? `<span style="background:rgba(52,199,157,.15);color:var(--accent2);border-radius:20px;padding:2px 8px;font-size:11px;">👣 ${sd.steps.toLocaleString()} steps</span>` : ''}
+            </div>
+            ${acts.map(a => `
+            <div class="activity-card">
+                <div class="activity-emoji">${ACT_TYPES[a.type] || '💪'}</div>
+                <div class="activity-info">
+                    <div class="activity-title">${a.type}${a.duration_min ? ' · ' + a.duration_min + ' min' : ''}</div>
+                    <div class="activity-meta">${a.calories ? a.calories + ' kcal · ' : ''}${a.notes || ''}</div>
+                </div>
+                <span class="act-type-pill ${INTENSITY_COLORS[a.intensity] || 'act-medium'}">${a.intensity}</span>
+                <button class="activity-del" onclick="deleteActivity(${a.id})">✕</button>
+            </div>`).join('')}
+        </div>`;
+    }).join('') : '<div class="empty-state" style="padding:40px;"><div class="empty-state-icon">💪</div><div class="empty-state-text">No activities yet — log your first one!</div></div>';
+
+    document.getElementById('fit-content').innerHTML = `
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-header"><div class="card-title">Log Steps Today</div></div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <input class="form-input" type="number" id="steps-input" placeholder="e.g. 9500" style="width:150px;"
+                    onkeydown="if(event.key==='Enter')logSteps()">
+                <button class="btn btn-accent" onclick="logSteps()">Save Steps</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Activity History</div>
+                <button class="btn btn-accent btn-sm" onclick="openLogActivityModal()">＋ Add</button>
+            </div>
+            ${actHtml}
+        </div>`;
+}
+
+async function renderFitPRs() {
+    const prs = await api('fitness/prs');
+
+    // Group by exercise
+    const byExercise = {};
+    prs.forEach(p => { (byExercise[p.exercise] = byExercise[p.exercise] || []).push(p); });
+
+    const exercises = Object.keys(byExercise).sort();
+    const prHtml = exercises.length ? exercises.map(ex => {
+        const entries = byExercise[ex].sort((a, b) => {
+            const scoreA = a.weight_kg * a.reps;
+            const scoreB = b.weight_kg * b.reps;
+            return scoreB - scoreA;
+        });
+        const best = entries[0];
+        return `<div class="pr-exercise-group">
+            <div class="pr-exercise-name">
+                🏋️ ${ex}
+                <span class="pr-badge">${best.weight_kg ? best.weight_kg + ' kg × ' + best.reps : best.reps + ' reps'}</span>
+            </div>
+            ${entries.map((p, i) => `
+            <div class="pr-entry ${i === 0 ? 'best' : ''}">
+                <span style="font-size:12px;color:var(--text3);width:90px;flex-shrink:0;">${fmtDate(p.date)}</span>
+                <span style="flex:1;font-size:13px;font-weight:${i===0?'700':'400'};">
+                    ${p.weight_kg ? p.weight_kg + ' kg' : 'Bodyweight'} × ${p.reps} reps
+                    ${i === 0 ? '<span style="color:var(--accent);font-size:11px;margin-left:6px;">★ Best</span>' : ''}
+                </span>
+                ${p.notes ? `<span style="font-size:11px;color:var(--text3);">${p.notes}</span>` : ''}
+                <button class="pr-del" onclick="deletePR(${p.id})">✕</button>
+            </div>`).join('')}
+        </div>`;
+    }).join('') : '<div class="empty-state" style="padding:40px;"><div class="empty-state-icon">🏆</div><div class="empty-state-text">No PRs yet — log your first lift!</div></div>';
+
+    document.getElementById('fit-content').innerHTML = `
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-header"><div class="card-title">Log a PR</div></div>
+            <div class="form-row" style="flex-wrap:wrap;gap:10px;">
+                <div class="form-group" style="flex:2;min-width:150px;">
+                    <label class="form-label">Exercise</label>
+                    <input class="form-input" id="pr-exercise" placeholder="e.g. Bench Press" list="pr-exercise-list">
+                    <datalist id="pr-exercise-list">
+                        ${exercises.map(e => `<option value="${e}">`).join('')}
+                        ${['Bench Press','Squat','Deadlift','OHP','Pull-ups','Dips','Row','RDL','Hip Thrust'].filter(e => !exercises.includes(e)).map(e => `<option value="${e}">`).join('')}
+                    </datalist>
+                </div>
+                <div class="form-group" style="flex:1;min-width:100px;">
+                    <label class="form-label">Weight (kg)</label>
+                    <input class="form-input" id="pr-weight" type="number" step="0.5" placeholder="80 (0 = bodyweight)">
+                </div>
+                <div class="form-group" style="flex:1;min-width:80px;">
+                    <label class="form-label">Reps</label>
+                    <input class="form-input" id="pr-reps" type="number" placeholder="5">
+                </div>
+                <div class="form-group" style="flex:1;min-width:100px;">
+                    <label class="form-label">Date</label>
+                    <input class="form-input" id="pr-date" type="date" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group" style="display:flex;align-items:flex-end;">
+                    <button class="btn btn-accent" onclick="savePR()">Save PR</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">${prHtml}</div>`;
+}
+
+function renderFitSettings(profile, weightLog) {
     const w = parseFloat(profile.weight), h = parseFloat(profile.height), a = parseFloat(profile.age);
+    let nutrHtml = '';
     if (w && h && a) {
         const bmr = profile.sex === 'male' ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161;
         const mults = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725 };
         const tdee = Math.round(bmr * (mults[profile.activity] || 1.55));
-        const target = tdee - 350;
-        const protein = Math.round(w * 1.9);
+        const goal = profile.goal || 'lose_fat';
+        const deficit = goal === 'lose_fat' ? -400 : goal === 'build_muscle' ? +300 : 0;
+        const target = tdee + deficit;
+        const protein = Math.round(w * (goal === 'build_muscle' ? 2.2 : 1.9));
         const carbs = Math.round((target * 0.4) / 4);
         const fats = Math.round((target * 0.3) / 9);
-
-        html += `<div class="card"><div class="card-header"><div class="card-title">Daily Targets</div></div>
+        nutrHtml = `<div class="card" style="margin-top:20px;">
+            <div class="card-header"><div class="card-title">📊 Daily Targets</div></div>
             <div class="grid-2" style="margin-bottom:12px;">
-                <div class="nutr-card" style="border-left-color:#378ADD"><div class="nutr-value">${target} kcal</div><div class="nutr-label">Target calories (deficit)</div></div>
-                <div class="nutr-card" style="border-left-color:#1D9E75"><div class="nutr-value">${protein} g</div><div class="nutr-label">Protein minimum</div></div>
+                <div class="nutr-card" style="border-left-color:#378ADD"><div class="nutr-value">${target} kcal</div><div class="nutr-label">${goal==='lose_fat'?'Deficit (−'+Math.abs(deficit)+' kcal)':goal==='build_muscle'?'Surplus (+'+deficit+' kcal)':'Maintenance'}</div></div>
+                <div class="nutr-card" style="border-left-color:#1D9E75"><div class="nutr-value">${protein} g</div><div class="nutr-label">Protein / day</div></div>
                 <div class="nutr-card" style="border-left-color:#BA7517"><div class="nutr-value">${carbs} g</div><div class="nutr-label">Carbohydrates</div></div>
                 <div class="nutr-card" style="border-left-color:#D4537E"><div class="nutr-value">${fats} g</div><div class="nutr-label">Fats</div></div>
             </div>
-            <div style="font-size:12px;color:var(--text3);line-height:1.7;">TDEE: ${tdee} kcal/day · Deficit: ~${tdee-target} kcal · Expected fat loss: ~0.3–0.4 kg/week</div>
+            <div style="font-size:12px;color:var(--text3);">TDEE: ${tdee} kcal/day · Mifflin-St Jeor formula</div>
         </div>`;
-    } else {
-        html += '<div class="empty-state"><div class="empty-state-text">Fill in your profile to see daily targets</div></div>';
     }
-    document.getElementById('fit-content').innerHTML = html;
-}
 
-function renderFitProgress(weightLog) {
-    let html = `
-        <div class="card" style="margin-bottom:20px;">
-            <div class="card-header"><div class="card-title">Log Weight</div></div>
-            <div style="display:flex;gap:8px;align-items:center;">
-                <input class="form-input" type="number" step="0.1" id="new-weight-val" placeholder="74.5" style="width:120px;">
-                <button class="btn btn-accent" onclick="logWeight()">Log Today</button>
+    const vals = weightLog.map(e => e.kg);
+    const maxW = vals.length ? Math.max(...vals) : 0;
+    const minW = vals.length ? Math.min(...vals) : 0;
+    const wDiff = vals.length > 1 ? (vals[vals.length-1] - vals[0]).toFixed(1) : null;
+
+    document.getElementById('fit-content').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div>
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-header"><div class="card-title">⚙️ Your Profile</div></div>
+                    <div class="form-row" style="margin-bottom:12px;">
+                        <div class="form-group"><label class="form-label">Weight (kg)</label>
+                            <input class="form-input" type="number" step="0.1" id="fp-weight" value="${profile.weight||''}" placeholder="75" onchange="saveFitProfile()"></div>
+                        <div class="form-group"><label class="form-label">Height (cm)</label>
+                            <input class="form-input" type="number" id="fp-height" value="${profile.height||''}" placeholder="178" onchange="saveFitProfile()"></div>
+                    </div>
+                    <div class="form-row" style="margin-bottom:12px;">
+                        <div class="form-group"><label class="form-label">Age</label>
+                            <input class="form-input" type="number" id="fp-age" value="${profile.age||''}" placeholder="24" onchange="saveFitProfile()"></div>
+                        <div class="form-group"><label class="form-label">Sex</label>
+                            <select class="form-input" id="fp-sex" onchange="saveFitProfile()">
+                                <option value="male" ${profile.sex==='male'?'selected':''}>Male</option>
+                                <option value="female" ${profile.sex==='female'?'selected':''}>Female</option>
+                            </select></div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Activity Level</label>
+                        <select class="form-input" id="fp-activity" onchange="saveFitProfile()">
+                            <option value="sedentary" ${profile.activity==='sedentary'?'selected':''}>Sedentary — desk, no exercise</option>
+                            <option value="light" ${profile.activity==='light'?'selected':''}>Light — 1-3 workouts/week</option>
+                            <option value="moderate" ${profile.activity==='moderate'?'selected':''}>Moderate — 3-5 workouts/week</option>
+                            <option value="active" ${profile.activity==='active'?'selected':''}>Active — 6+ workouts/week</option>
+                        </select></div>
+                    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Goal</label>
+                        <select class="form-input" id="fp-goal" onchange="saveFitProfile()">
+                            <option value="lose_fat" ${(profile.goal||'lose_fat')==='lose_fat'?'selected':''}>🔥 Lose Fat</option>
+                            <option value="build_muscle" ${profile.goal==='build_muscle'?'selected':''}>💪 Build Muscle</option>
+                            <option value="maintain" ${profile.goal==='maintain'?'selected':''}>⚖️ Maintain</option>
+                        </select></div>
+                    <div class="form-group"><label class="form-label">Daily Steps Goal</label>
+                        <input class="form-input" type="number" step="500" id="fp-steps-goal" value="${profile.steps_goal||8000}" onchange="saveFitProfile()"></div>
+                </div>
+                ${nutrHtml}
+            </div>
+            <div>
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-header"><div class="card-title">📉 Log Weight</div></div>
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+                        <input class="form-input" type="number" step="0.1" id="new-weight-val" placeholder="74.5 kg" style="width:130px;">
+                        <button class="btn btn-accent" onclick="logWeight()">Log Today</button>
+                    </div>
+                    ${vals.length > 0 ? `
+                    <div style="display:flex;gap:4px;align-items:flex-end;margin-bottom:10px;">
+                        ${weightLog.slice(-20).map(e => {
+                            const pct = maxW > minW ? (e.kg - minW) / (maxW - minW) : 0.5;
+                            const barH = Math.max(14, Math.round(pct * 70));
+                            const hue = Math.round((1-pct)*120);
+                            return `<div style="flex:1;text-align:center;">
+                                <div class="weight-bar" style="height:${barH}px;background:hsl(${hue},60%,50%);">
+                                    <span style="font-size:8px;color:#fff;font-weight:600;">${e.kg}</span>
+                                </div>
+                                <div style="font-size:8px;color:var(--text3);margin-top:2px;">${new Date(e.date).toLocaleDateString('en',{month:'numeric',day:'numeric'})}</div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    <div style="font-size:12px;color:var(--text3);display:flex;justify-content:space-between;">
+                        <span>Start: ${vals[0]} kg</span>
+                        ${wDiff !== null ? `<span style="color:${wDiff < 0 ? 'var(--accent2)' : 'var(--text2)'};font-weight:600;">${wDiff > 0 ? '↑' : wDiff < 0 ? '↓' : '→'} ${Math.abs(wDiff)} kg</span>` : ''}
+                    </div>` : '<div style="color:var(--text3);font-size:13px;">No weight entries yet</div>'}
+                </div>
             </div>
         </div>`;
-
-    if (weightLog.length > 0) {
-        const vals = weightLog.map(e => e.kg);
-        const minW = Math.min(...vals) - 0.5, maxW = Math.max(...vals) + 0.5;
-        const recent = weightLog.slice(-21);
-        const diff = weightLog.length > 1 ? (vals[vals.length-1] - vals[0]).toFixed(1) : 0;
-        const diffColor = diff < 0 ? 'var(--accent2)' : 'var(--text2)';
-        const arrow = diff < 0 ? '↓' : diff > 0 ? '↑' : '→';
-
-        html += `<div class="card" style="margin-bottom:20px;">
-            <div class="card-header"><div class="card-title">Weight Trend · last ${recent.length} entries</div></div>
-            <div style="display:flex;gap:4px;align-items:flex-end;margin-bottom:12px;">
-                ${recent.map(e => {
-                    const pct = maxW > minW ? (e.kg - minW) / (maxW - minW) : 0.5;
-                    const h = Math.max(20, Math.round(pct * 80));
-                    const hue = Math.round((1 - pct) * 140);
-                    return `<div style="flex:1;text-align:center;">
-                        <div class="weight-bar" style="height:${h}px;background:hsl(${hue},60%,50%)">
-                            <span style="font-size:9px;color:#fff;font-weight:500;">${e.kg}</span>
-                        </div>
-                        <div style="font-size:9px;color:var(--text3);margin-top:3px;">${fmtDate(e.date).split(',')[0].split(' ')[0]}</div>
-                    </div>`;
-                }).join('')}
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);">
-                <span>Start: ${vals[0]} kg</span>
-                ${weightLog.length > 1 ? `<span style="color:${diffColor};font-weight:600;">${arrow} ${Math.abs(diff)} kg total</span>` : ''}
-            </div>
-        </div>`;
-    } else {
-        html += '<div class="empty-state"><div class="empty-state-icon">&#9883;</div><div class="empty-state-text">No weight entries yet — log your first one above</div></div>';
-    }
-    document.getElementById('fit-content').innerHTML = html;
 }
 
-async function toggleFitSession(weekKey, idx, done) {
-    await api('fitness/sessions/' + weekKey + '/' + idx, 'POST', { done });
-    loadFitness();
-}
-async function updateFitNote(weekKey, idx, note) {
-    await api('fitness/sessions/' + weekKey + '/' + idx, 'POST', { note });
-}
+// ── Fitness helpers ──
 async function saveFitProfile() {
     await api('fitness/profile', 'PUT', {
-        weight: document.getElementById('fp-weight').value,
-        height: document.getElementById('fp-height').value,
-        age: document.getElementById('fp-age').value,
-        sex: document.getElementById('fp-sex').value,
-        activity: document.getElementById('fp-activity').value,
+        weight: document.getElementById('fp-weight')?.value,
+        height: document.getElementById('fp-height')?.value,
+        age:    document.getElementById('fp-age')?.value,
+        sex:    document.getElementById('fp-sex')?.value,
+        activity: document.getElementById('fp-activity')?.value,
+        goal:   document.getElementById('fp-goal')?.value,
+        steps_goal: document.getElementById('fp-steps-goal')?.value,
     });
     loadFitness();
 }
-async function saveFitPhase(phase) {
-    await api('fitness/profile', 'PUT', { phase });
-    loadFitness();
-}
+
 async function logWeight() {
     const v = document.getElementById('new-weight-val').value;
     if (!v || isNaN(parseFloat(v))) return;
@@ -2376,6 +2608,106 @@ async function logWeight() {
     document.getElementById('new-weight-val').value = '';
     loadFitness();
 }
+
+async function logSteps() {
+    const v = document.getElementById('steps-input').value;
+    if (!v || isNaN(parseInt(v))) return;
+    await api('fitness/steps', 'POST', { steps: parseInt(v) });
+    document.getElementById('steps-input').value = '';
+    loadFitness();
+}
+
+function openLogActivityModal() {
+    document.getElementById('modal-content').innerHTML = `
+        <div class="modal-title">Log Activity</div>
+        <div class="form-group">
+            <label class="form-label">Activity Type</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
+                ${Object.entries(ACT_TYPES).map(([type, emoji]) =>
+                    `<button class="phase-btn" id="act-type-${type}" style="flex:none;padding:8px 12px;"
+                        onclick="document.querySelectorAll('[id^=act-type-]').forEach(b=>b.classList.remove('active'));this.classList.add('active');document.getElementById('act-type-val').value='${type}'">
+                        ${emoji} ${type}</button>`).join('')}
+            </div>
+            <input type="hidden" id="act-type-val" value="Lift">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Duration (min)</label>
+                <input class="form-input" type="number" id="act-dur" placeholder="45">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Intensity</label>
+                <select class="form-input" id="act-intensity">
+                    <option value="easy">🟢 Easy</option>
+                    <option value="medium" selected>🟡 Medium</option>
+                    <option value="hard">🔴 Hard</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Calories burned (optional)</label>
+                <input class="form-input" type="number" id="act-cal" placeholder="300">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Date</label>
+                <input class="form-input" type="date" id="act-date" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Notes (exercises, sets, how you felt…)</label>
+            <textarea class="form-input session-note" id="act-notes" rows="3" placeholder="Bench 80kg×5, Squat 100kg×3…"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="saveActivity()">Save Activity</button>
+        </div>
+    `;
+    // Pre-select Lift
+    setTimeout(() => document.getElementById('act-type-Lift')?.classList.add('active'), 10);
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function saveActivity() {
+    const type = document.getElementById('act-type-val').value;
+    if (!type) return;
+    await api('fitness/activities', 'POST', {
+        type,
+        duration_min: parseInt(document.getElementById('act-dur').value) || 0,
+        intensity: document.getElementById('act-intensity').value,
+        calories: parseInt(document.getElementById('act-cal').value) || 0,
+        date: document.getElementById('act-date').value,
+        notes: document.getElementById('act-notes').value.trim(),
+    });
+    closeModal(); loadFitness();
+}
+
+async function deleteActivity(id) {
+    await api('fitness/activities/' + id, 'DELETE');
+    loadFitness();
+}
+
+async function savePR() {
+    const exercise = document.getElementById('pr-exercise').value.trim();
+    if (!exercise) { document.getElementById('pr-exercise').focus(); return; }
+    await api('fitness/prs', 'POST', {
+        exercise,
+        weight_kg: parseFloat(document.getElementById('pr-weight').value) || 0,
+        reps: parseInt(document.getElementById('pr-reps').value) || 1,
+        date: document.getElementById('pr-date').value,
+    });
+    loadFitness();
+}
+
+async function deletePR(id) {
+    if (!confirm('Delete this PR entry?')) return;
+    await api('fitness/prs/' + id, 'DELETE');
+    loadFitness();
+}
+
+// legacy — keep for old sessions (no longer used in UI but keep route working)
+async function toggleFitSession(weekKey, idx, done) { await api('fitness/sessions/' + weekKey + '/' + idx, 'POST', { done }); }
+async function saveFitPhase(phase) { await api('fitness/profile', 'PUT', { phase }); loadFitness(); }
 
 // ── Learning Plan ──
 let learningTab = 'plan';
