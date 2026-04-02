@@ -335,15 +335,66 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 }
 .surah-progress-fill { height: 100%; background: var(--accent2); border-radius: 2px; transition: width 0.3s; }
 
-/* ── Project Cards ── */
-.project-card {
-    background: var(--surface);
+/* ── Surah cell — memorized only mode ── */
+.surah-cell.memorized {
+    border-color: rgba(212,162,78,0.5);
+    background: rgba(212,162,78,0.08);
+}
+.surah-cell.memorized::before { background: var(--accent); }
+.surah-cell.memorized .surah-name { color: var(--accent); }
+.quran-juz-chip {
+    padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface2); font-size: 12px; cursor: pointer; transition: all 0.15s;
+    color: var(--text2);
+}
+.quran-juz-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+/* ── Kanban Board ── */
+.kanban-col {
+    background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 20px;
-    transition: all 0.15s;
+    padding: 14px;
+    min-height: 300px;
 }
-.project-card:hover { border-color: var(--border2); }
+.kanban-col-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.kanban-col-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.kanban-col-count {
+    background: var(--surface3); border-radius: 12px;
+    padding: 2px 8px; font-size: 11px; color: var(--text3);
+}
+.kanban-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px;
+    margin-bottom: 8px; cursor: pointer; transition: all 0.15s;
+    position: relative;
+}
+.kanban-card:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: var(--shadow); }
+.kanban-card-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.kanban-color-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.kanban-card-name { font-size: 14px; font-weight: 600; flex: 1; line-height: 1.4; }
+.kanban-card-desc { font-size: 12px; color: var(--text3); margin-bottom: 10px; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kanban-card-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.kanban-task-count { font-size: 11px; color: var(--text3); }
+.kanban-deadline { font-size: 11px; color: var(--text3); }
+.kanban-card-actions {
+    position: absolute; top: 8px; right: 8px; display: none;
+    gap: 4px;
+}
+.kanban-card:hover .kanban-card-actions { display: flex; }
+.kanban-move-btn {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 4px;
+    padding: 3px 7px; font-size: 11px; cursor: pointer; color: var(--text2);
+    transition: background 0.15s;
+}
+.kanban-move-btn:hover { background: var(--accent-glow); color: var(--accent); }
+.kanban-task-list { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+
+/* ── Project Cards (kept for modal) ── */
 .project-color-bar { width: 100%; height: 3px; border-radius: 2px; margin-bottom: 14px; }
 .project-name { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
 .project-desc { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
@@ -368,6 +419,44 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     flex: 1; background: none; border: none; border-bottom: 1px solid var(--border);
     color: var(--text); padding: 4px 0; font-size: 13px; outline: none;
 }
+
+/* ── Habit Tracker ── */
+.habit-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 10px; transition: all 0.15s;
+}
+.habit-card:hover { border-color: var(--border2); }
+.habit-emoji { font-size: 28px; flex-shrink: 0; }
+.habit-info { flex: 1; min-width: 0; }
+.habit-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.habit-streak { font-size: 12px; color: var(--text3); }
+.habit-streak span { color: var(--warning); font-weight: 600; }
+.habit-week { display: flex; gap: 5px; margin-top: 8px; }
+.habit-day-dot {
+    width: 26px; height: 26px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: var(--text3); flex-shrink: 0;
+}
+.habit-day-dot.done { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.habit-day-dot.today { border-color: var(--accent); }
+.habit-check-btn {
+    width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--border2);
+    background: var(--surface2); cursor: pointer; font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+}
+.habit-check-btn.done { background: var(--accent2); border-color: var(--accent2); }
+.habit-check-btn:hover { transform: scale(1.1); }
+.habit-del-btn {
+    background: none; border: none; cursor: pointer; color: var(--text3);
+    font-size: 14px; padding: 4px 6px; border-radius: 4px; opacity: 0;
+    transition: opacity 0.15s;
+}
+.habit-card:hover .habit-del-btn { opacity: 1; }
+.habit-del-btn:hover { color: var(--danger); }
 
 /* ── Finance Tabs ── */
 .fin-tab {
@@ -733,6 +822,7 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 @media (max-width: 1024px) {
     .pipeline { grid-template-columns: repeat(3, 1fr); }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    #proj-kanban { grid-template-columns: 1fr 1fr !important; }
 }
 @media (max-width: 768px) {
     .sidebar { transform: translateX(-100%); }
@@ -740,6 +830,8 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     .main { margin-left: 0; padding: 20px 16px; }
     .pipeline { grid-template-columns: 1fr 1fr; }
     .surah-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    #proj-kanban { grid-template-columns: 1fr !important; }
+    .habit-card { flex-wrap: wrap; }
     .mobile-toggle {
         display: flex !important;
         position: fixed; top: 16px; left: 16px; z-index: 101;
@@ -769,33 +861,36 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     <div class="nav-section">
         <div class="nav-label">Overview</div>
         <div class="nav-item active" onclick="navigate('dashboard')">
-            <span class="nav-icon">&#9632;</span> Dashboard
+            <span class="nav-icon">🏠</span> Dashboard
         </div>
     </div>
     <div class="nav-section">
         <div class="nav-label">Modules</div>
         <div class="nav-item" onclick="navigate('finances')">
-            <span class="nav-icon">&#9830;</span> Finances
+            <span class="nav-icon">💰</span> Finances
         </div>
         <div class="nav-item" onclick="navigate('quran')">
-            <span class="nav-icon">&#9789;</span> Quran
+            <span class="nav-icon">📖</span> Quran
         </div>
         <div class="nav-item" onclick="navigate('projects')">
-            <span class="nav-icon">&#9881;</span> Projects
+            <span class="nav-icon">🚀</span> Projects
         </div>
         <div class="nav-item" onclick="navigate('jobs')">
-            <span class="nav-icon">&#9733;</span> Job Applications
+            <span class="nav-icon">💼</span> Job Applications
             <span class="nav-badge" id="jobs-badge">0</span>
         </div>
         <div class="nav-item" onclick="navigate('fitness')">
-            <span class="nav-icon">&#9883;</span> Fitness
+            <span class="nav-icon">💪</span> Fitness
         </div>
         <div class="nav-item" onclick="navigate('learning')">
-            <span class="nav-icon">&#9655;</span> Learning Plan
+            <span class="nav-icon">🧠</span> Learning Plan
             <span class="nav-badge" id="learning-badge">0%</span>
         </div>
         <div class="nav-item" onclick="navigate('books')">
-            <span class="nav-icon">&#128218;</span> Reading List
+            <span class="nav-icon">📚</span> Reading List
+        </div>
+        <div class="nav-item" onclick="navigate('habits')">
+            <span class="nav-icon">🔥</span> Habits
         </div>
     </div>
 
@@ -939,24 +1034,19 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 <div id="sec-quran" class="section">
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-            <div class="page-title">Quran Tracker</div>
-            <div class="page-subtitle">Your journey through the Holy Quran</div>
+            <div class="page-title">📖 Quran Memorization</div>
+            <div class="page-subtitle">Track your hifz journey — click a surah to mark it memorized</div>
         </div>
-        <button class="btn btn-accent" onclick="openModal('reading')">&#43; Log Reading</button>
     </div>
     <div class="stats-grid" id="quran-stats"></div>
-    <div class="card" style="margin-bottom:24px;">
-        <div class="card-header"><div class="card-title">Surah Progress</div></div>
-        <div class="surah-grid" id="surah-grid"></div>
-    </div>
+    <!-- Juz filter chips -->
+    <div id="quran-juz-filters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;"></div>
     <div class="card">
-        <div class="card-header"><div class="card-title">Reading Log</div></div>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Date</th><th>Surah</th><th>Ayahs</th><th>Duration</th><th>Type</th><th>Notes</th><th></th></tr></thead>
-                <tbody id="log-table"></tbody>
-            </table>
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="card-title" id="quran-grid-title">All Surahs</div>
+            <div style="font-size:13px;color:var(--text3)">Click to toggle memorized</div>
         </div>
+        <div class="surah-grid" id="surah-grid"></div>
     </div>
 </div>
 
@@ -964,13 +1054,14 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 <div id="sec-projects" class="section">
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-            <div class="page-title">Projects</div>
-            <div class="page-subtitle">Manage your work</div>
+            <div class="page-title">🚀 Projects</div>
+            <div class="page-subtitle" id="proj-subtitle">Your work, organized</div>
         </div>
         <button class="btn btn-accent" onclick="openModal('project')">&#43; New Project</button>
     </div>
     <div class="stats-grid" id="proj-stats"></div>
-    <div class="grid-2" id="proj-grid"></div>
+    <!-- Kanban board -->
+    <div id="proj-kanban" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start;"></div>
 </div>
 
 <!-- ═══════════════════ JOBS ═══════════════════ -->
@@ -1064,6 +1155,19 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 
     <!-- Book list by status -->
     <div id="books-content"></div>
+</div>
+
+<!-- ═══════════════════ HABITS ═══════════════════ -->
+<div id="sec-habits" class="section">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div class="page-title">🔥 Habits</div>
+            <div class="page-subtitle" id="habits-subtitle">Build consistency, one day at a time</div>
+        </div>
+        <button class="btn btn-accent" onclick="openAddHabitModal()">＋ New Habit</button>
+    </div>
+    <div class="stats-grid" id="habits-stats"></div>
+    <div id="habits-grid"></div>
 </div>
 
 </main>
@@ -1515,129 +1619,146 @@ function filterTxTable() {
 }
 
 // ── Quran ──
+// ── Quran (memorization only) ──
+let activeQuranJuz = 'all';
+
 async function loadQuran() {
-    const [surahs, logs] = await Promise.all([api('quran/surahs'), api('quran/log')]);
-    allSurahs = surahs;
-    const completed = surahs.filter(s => s.completed).length;
-    const memorized = surahs.filter(s => s.memorized).length;
-    const totalAyahs = surahs.reduce((s, su) => s + su.total_ayahs, 0);
-    const readAyahs = surahs.reduce((s, su) => s + su.ayahs_read, 0);
-    const juzDone = new Set(surahs.filter(s => s.completed).map(s => s.juz)).size;
+    allSurahs = await api('quran/surahs');
+    renderQuranView();
+}
+
+function renderQuranView() {
+    const memorized = allSurahs.filter(s => s.memorized).length;
+    const pctMem = Math.round(memorized / 114 * 100);
+    const juzMemorized = new Set(allSurahs.filter(s => s.memorized).map(s => s.juz)).size;
+    const totalAyahs = allSurahs.reduce((acc, s) => acc + s.total_ayahs, 0);
+    const memAyahs = allSurahs.filter(s => s.memorized).reduce((acc, s) => acc + s.total_ayahs, 0);
+
     document.getElementById('quran-stats').innerHTML = `
-        <div class="stat-card"><div class="stat-label">Surahs Read</div><div class="stat-value">${completed}<span style="font-size:16px;color:var(--text3)"> / 114</span></div></div>
-        <div class="stat-card" data-color="teal"><div class="stat-label">Ayahs Read</div><div class="stat-value" style="color:var(--accent2)">${readAyahs.toLocaleString()}<span style="font-size:14px;color:var(--text3)"> / ${totalAyahs.toLocaleString()}</span></div></div>
-        <div class="stat-card" data-color="purple"><div class="stat-label">Memorized</div><div class="stat-value" style="color:var(--accent3)">${memorized}</div></div>
-        <div class="stat-card"><div class="stat-label">Juz Covered</div><div class="stat-value">${juzDone}<span style="font-size:16px;color:var(--text3)"> / 30</span></div></div>
+        <div class="stat-card"><div class="stat-label">Surahs Memorized</div><div class="stat-value" style="color:var(--accent)">${memorized}<span style="font-size:16px;color:var(--text3)"> / 114</span></div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Juz Completed</div><div class="stat-value" style="color:var(--accent2)">${juzMemorized}<span style="font-size:16px;color:var(--text3)"> / 30</span></div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Ayahs Memorized</div><div class="stat-value" style="color:var(--accent3)">${memAyahs.toLocaleString()}</div></div>
+        <div class="stat-card"><div class="stat-label">Completion</div><div class="stat-value">${pctMem}<span style="font-size:14px;color:var(--text3)">%</span></div></div>
     `;
-    document.getElementById('surah-grid').innerHTML = surahs.map(s => {
-        const pct = s.total_ayahs ? Math.round(s.ayahs_read / s.total_ayahs * 100) : 0;
-        const cls = s.memorized ? 'memorized' : s.completed ? 'read' : '';
-        return `<div class="surah-cell ${cls}" onclick="openSurahModal(${s.surah_number})">
+
+    // Juz filter chips (1-30 + All)
+    const juzList = [...new Set(allSurahs.map(s => s.juz))].sort((a, b) => a - b);
+    document.getElementById('quran-juz-filters').innerHTML =
+        ['all', ...juzList].map(j => `
+            <button class="quran-juz-chip ${activeQuranJuz == j ? 'active' : ''}"
+                onclick="activeQuranJuz='${j}';renderQuranView()">
+                ${j === 'all' ? 'All Juz' : 'Juz ' + j}
+            </button>`).join('');
+
+    const visible = activeQuranJuz === 'all'
+        ? allSurahs
+        : allSurahs.filter(s => s.juz == activeQuranJuz);
+
+    const juzLabel = activeQuranJuz === 'all' ? 'All Surahs (114)' : `Juz ${activeQuranJuz} — ${visible.length} surahs`;
+    document.getElementById('quran-grid-title').textContent = juzLabel;
+
+    document.getElementById('surah-grid').innerHTML = visible.map(s => `
+        <div class="surah-cell ${s.memorized ? 'memorized' : ''}" onclick="toggleSurahMemorized(${s.surah_number},${s.memorized})">
             <div class="surah-num">${s.surah_number}</div>
             <div class="surah-name">${s.surah_name}</div>
             <div class="surah-ar">${s.surah_name_ar}</div>
-            <div class="surah-progress-bar"><div class="surah-progress-fill" style="width:${pct}%"></div></div>
-        </div>`;
-    }).join('');
-    document.getElementById('log-table').innerHTML = logs.length ? logs.map(l => `
-        <tr>
-            <td>${fmtDate(l.date)}</td>
-            <td>${l.surah_name} (${l.surah_number})</td>
-            <td>${l.from_ayah} - ${l.to_ayah}</td>
-            <td>${l.duration ? l.duration + ' min' : '-'}</td>
-            <td><span class="badge badge-${l.type === 'memorization' ? 'savings' : 'active'}">${l.type}</span></td>
-            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${l.notes||'-'}</td>
-            <td><button class="btn btn-icon btn-sm btn-danger" onclick="deleteLog(${l.id})">&#10005;</button></td>
-        </tr>
-    `).join('') : '<tr><td colspan="7" class="empty-state"><div class="empty-state-text">No readings logged</div></td></tr>';
+            <div style="font-size:10px;color:var(--text3);margin-top:4px;">${s.total_ayahs} ayahs · Juz ${s.juz}${s.memorized ? ' · ✓' : ''}</div>
+        </div>`).join('');
 }
 
-async function deleteLog(id) { await api('quran/log/' + id, 'DELETE'); loadQuran(); }
-
-function openSurahModal(num) {
-    const s = allSurahs.find(su => su.surah_number === num);
-    if (!s) return;
-    const pct = s.total_ayahs ? Math.round(s.ayahs_read / s.total_ayahs * 100) : 0;
-    document.getElementById('modal-content').innerHTML = `
-        <div class="modal-title">${s.surah_number}. ${s.surah_name} <span style="color:var(--text3);font-size:18px;">${s.surah_name_ar}</span></div>
-        <div style="margin-bottom:16px;">
-            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:6px;"><span>Progress</span><span>${s.ayahs_read}/${s.total_ayahs} ayahs (${pct}%)</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--accent2);"></div></div>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Ayahs Read</label>
-            <input type="number" class="form-input" id="surah-ayahs" value="${s.ayahs_read}" min="0" max="${s.total_ayahs}">
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
-                    <input type="checkbox" id="surah-completed" ${s.completed?'checked':''} style="width:18px;height:18px;accent-color:var(--accent2);"> Completed
-                </label>
-            </div>
-            <div class="form-group">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
-                    <input type="checkbox" id="surah-memorized" ${s.memorized?'checked':''} style="width:18px;height:18px;accent-color:var(--accent);"> Memorized
-                </label>
-            </div>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
-            <button class="btn" onclick="closeModal()">Cancel</button>
-            <button class="btn btn-accent" onclick="saveSurah(${num})">Save</button>
-        </div>
-    `;
-    document.getElementById('modal-overlay').classList.add('active');
+async function toggleSurahMemorized(num, current) {
+    await api('quran/surahs/' + num, 'PUT', { memorized: !current, completed: !current });
+    allSurahs = allSurahs.map(s => s.surah_number === num
+        ? { ...s, memorized: !current, completed: !current }
+        : s);
+    renderQuranView();
 }
 
-async function saveSurah(num) {
-    await api('quran/surahs/' + num, 'PUT', {
-        ayahs_read: parseInt(document.getElementById('surah-ayahs').value),
-        completed: document.getElementById('surah-completed').checked,
-        memorized: document.getElementById('surah-memorized').checked
-    });
-    closeModal(); loadQuran();
-}
+// ── Projects (Kanban) ──
+const PROJ_COLS = [
+    { key: 'backlog',   label: 'Backlog',      color: 'var(--text3)' },
+    { key: 'active',    label: 'In Progress',  color: 'var(--accent)' },
+    { key: 'review',    label: 'Review',        color: 'var(--accent3)' },
+    { key: 'completed', label: 'Done',          color: 'var(--accent2)' },
+];
+const PROJ_NEXT = { backlog: 'active', active: 'review', review: 'completed', completed: 'backlog' };
+const PROJ_PREV = { active: 'backlog', review: 'active', completed: 'review', backlog: 'completed' };
 
-// ── Projects ──
 async function loadProjects() {
     const projects = await api('projects');
     const active = projects.filter(p => p.status === 'active').length;
     const completed = projects.filter(p => p.status === 'completed').length;
+    const backlog = projects.filter(p => p.status === 'backlog').length;
     document.getElementById('proj-stats').innerHTML = `
-        <div class="stat-card"><div class="stat-label">Total Projects</div><div class="stat-value">${projects.length}</div></div>
-        <div class="stat-card" data-color="teal"><div class="stat-label">Active</div><div class="stat-value" style="color:var(--accent2)">${active}</div></div>
-        <div class="stat-card" data-color="purple"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--accent3)">${completed}</div></div>
+        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${projects.length}</div></div>
+        <div class="stat-card"><div class="stat-label">Backlog</div><div class="stat-value" style="color:var(--text3)">${backlog}</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">In Progress</div><div class="stat-value" style="color:var(--accent)">${active}</div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Done</div><div class="stat-value" style="color:var(--accent2)">${completed}</div></div>
     `;
-    document.getElementById('proj-grid').innerHTML = projects.length ? projects.map(p => {
-        const taskHtml = (p.tasks || []).map(t => `
-            <div class="task-item ${t.completed?'done':''}">
-                <div class="task-check ${t.completed?'checked':''}" onclick="toggleTask(${t.id},${!t.completed})">&#10003;</div>
-                <span style="flex:1">${t.title}</span>
-                <button class="btn btn-icon btn-sm btn-danger" style="width:24px;height:24px;font-size:10px;" onclick="deleteTask(${t.id})">&#10005;</button>
-            </div>
-        `).join('');
-        return `<div class="project-card">
-            <div class="project-color-bar" style="background:${p.color}"></div>
-            <div style="display:flex;justify-content:space-between;align-items:start;">
-                <div class="project-name">${p.name}</div>
-                <div style="display:flex;gap:4px;">
-                    <button class="btn btn-icon btn-sm" onclick="openModal('project',${JSON.stringify(p).replace(/"/g,'&quot;')})">&#9998;</button>
-                    <button class="btn btn-icon btn-sm btn-danger" onclick="deleteProject(${p.id})">&#10005;</button>
+    document.getElementById('proj-subtitle').textContent =
+        `${projects.length} project${projects.length !== 1 ? 's' : ''} · ${active} in progress`;
+
+    const kanban = document.getElementById('proj-kanban');
+    if (!projects.length) {
+        kanban.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:60px;">
+            <div class="empty-state-icon">🚀</div>
+            <div class="empty-state-text">No projects yet — create your first one!</div></div>`;
+        return;
+    }
+
+    kanban.innerHTML = PROJ_COLS.map(col => {
+        const colProjects = projects.filter(p => (p.status || 'backlog') === col.key);
+        const cards = colProjects.map(p => {
+            const tasks = p.tasks || [];
+            const doneTasks = tasks.filter(t => t.completed).length;
+            const taskPct = tasks.length ? Math.round(doneTasks / tasks.length * 100) : p.progress || 0;
+            const nextLabel = col.key === 'completed' ? '↺' : '→';
+            const prevLabel = col.key === 'backlog' ? '' : '←';
+            return `<div class="kanban-card">
+                <div class="kanban-card-top">
+                    <div class="kanban-color-dot" style="background:${p.color}"></div>
+                    <div class="kanban-card-name">${p.name}</div>
                 </div>
+                ${p.description ? `<div class="kanban-card-desc">${p.description}</div>` : ''}
+                <div style="margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px;">
+                        <span>${tasks.length ? doneTasks + '/' + tasks.length + ' tasks' : 'No tasks'}</span>
+                        <span>${taskPct}%</span>
+                    </div>
+                    <div class="progress-bar" style="height:4px;"><div class="progress-fill" style="width:${taskPct}%;background:${p.color};"></div></div>
+                </div>
+                <div class="kanban-card-footer">
+                    ${p.deadline ? `<span class="kanban-deadline">📅 ${fmtDate(p.deadline)}</span>` : ''}
+                    <div style="margin-left:auto;display:flex;gap:4px;">
+                        ${prevLabel ? `<button class="kanban-move-btn" onclick="event.stopPropagation();moveProject(${p.id},'${PROJ_PREV[col.key]}')">${prevLabel}</button>` : ''}
+                        <button class="kanban-move-btn" onclick="event.stopPropagation();moveProject(${p.id},'${PROJ_NEXT[col.key]}')">${nextLabel}</button>
+                        <button class="kanban-move-btn" onclick="event.stopPropagation();openModal('project',${JSON.stringify(p).replace(/"/g,'&quot;')})">✎</button>
+                        <button class="kanban-move-btn" style="color:var(--danger);" onclick="event.stopPropagation();deleteProject(${p.id})">✕</button>
+                    </div>
+                </div>
+                ${tasks.length ? `<div class="kanban-task-list">${tasks.slice(0,3).map(t => `
+                    <div class="task-item ${t.completed?'done':''}" style="padding:3px 0;">
+                        <div class="task-check ${t.completed?'checked':''}" onclick="toggleTask(${t.id},${!t.completed})">✓</div>
+                        <span style="flex:1;font-size:12px;">${t.title}</span>
+                    </div>`).join('')}
+                    ${tasks.length > 3 ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">+${tasks.length-3} more</div>` : ''}
+                </div>` : ''}
+            </div>`;
+        }).join('');
+
+        return `<div class="kanban-col">
+            <div class="kanban-col-header">
+                <span class="kanban-col-title" style="color:${col.color}">${col.label}</span>
+                <span class="kanban-col-count">${colProjects.length}</span>
             </div>
-            <div class="project-desc">${p.description||''}</div>
-            <div class="project-meta">
-                <span class="badge badge-${p.status}">${p.status}</span>
-                ${p.deadline ? '<span>Due: ' + fmtDate(p.deadline) + '</span>' : ''}
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px;"><span>Progress</span><span>${p.progress}%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:${p.progress}%;background:${p.color};"></div></div>
-            <div class="task-list">${taskHtml}</div>
-            <div style="margin-top:10px;display:flex;gap:6px;">
-                <input type="text" class="task-input" placeholder="Add task..." id="task-input-${p.id}" onkeydown="if(event.key==='Enter')addTask(${p.id})">
-                <button class="btn btn-sm" onclick="addTask(${p.id})">Add</button>
-            </div>
+            ${cards || `<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Empty</div>`}
         </div>`;
-    }).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">&#9881;</div><div class="empty-state-text">No projects yet. Create one!</div></div>';
+    }).join('');
+}
+
+async function moveProject(id, newStatus) {
+    await api('projects/' + id, 'PUT', { status: newStatus });
+    loadProjects();
 }
 
 async function addTask(projectId) {
@@ -1890,10 +2011,10 @@ const modalForms = {
                 <div class="form-group">
                     <label class="form-label">Status</label>
                     <select class="form-input" id="f-proj-status">
-                        <option value="active" ${data?.status==='active'?'selected':''}>Active</option>
-                        <option value="paused" ${data?.status==='paused'?'selected':''}>Paused</option>
-                        <option value="completed" ${data?.status==='completed'?'selected':''}>Completed</option>
-                        <option value="archived" ${data?.status==='archived'?'selected':''}>Archived</option>
+                        <option value="backlog" ${(!data?.status||data?.status==='backlog')?'selected':''}>Backlog</option>
+                        <option value="active" ${data?.status==='active'?'selected':''}>In Progress</option>
+                        <option value="review" ${data?.status==='review'?'selected':''}>Review</option>
+                        <option value="completed" ${data?.status==='completed'?'selected':''}>Done</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -2760,6 +2881,115 @@ async function deleteWeek(id) {
     loadLearning();
 }
 
+// ── Habits ──
+async function loadHabits() {
+    const habits = await api('habits');
+    const today = new Date().toISOString().split('T')[0];
+    const doneToday = habits.filter(h => h.done_today).length;
+    const totalStreak = habits.reduce((acc, h) => acc + (h.streak || 0), 0);
+
+    document.getElementById('habits-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Total Habits</div><div class="stat-value">${habits.length}</div></div>
+        <div class="stat-card" data-color="teal"><div class="stat-label">Done Today</div><div class="stat-value" style="color:var(--accent2)">${doneToday}<span style="font-size:16px;color:var(--text3)"> / ${habits.length}</span></div></div>
+        <div class="stat-card" data-color="purple"><div class="stat-label">Total Streak Days</div><div class="stat-value" style="color:var(--warning)">${totalStreak}🔥</div></div>
+    `;
+    document.getElementById('habits-subtitle').textContent =
+        habits.length ? `${doneToday}/${habits.length} completed today` : 'Build consistency, one day at a time';
+
+    if (!habits.length) {
+        document.getElementById('habits-grid').innerHTML = `
+            <div class="empty-state" style="padding:60px;">
+                <div class="empty-state-icon">🔥</div>
+                <div class="empty-state-text">No habits yet — add one to start your streak!</div>
+            </div>`;
+        return;
+    }
+
+    // Build last 7 days labels
+    const days = Array.from({length: 7}, (_, i) => {
+        const d = new Date(); d.setDate(d.getDate() - (6 - i));
+        return { date: d.toISOString().split('T')[0], label: d.toLocaleDateString('en', {weekday:'short'}) };
+    });
+
+    document.getElementById('habits-grid').innerHTML = habits.map(h => {
+        const weekDots = days.map(({date, label}) => {
+            const done = h.week[date];
+            const isToday = date === today;
+            return `<div class="habit-day-dot ${done ? 'done' : ''} ${isToday ? 'today' : ''}" title="${label}">${label[0]}</div>`;
+        }).join('');
+        return `<div class="habit-card">
+            <div class="habit-emoji">${h.emoji}</div>
+            <div class="habit-info">
+                <div class="habit-name">${h.name}</div>
+                <div class="habit-streak">${h.streak > 0 ? `<span>${h.streak} day streak 🔥</span>` : 'Start your streak today'}</div>
+                <div class="habit-week">${weekDots}</div>
+            </div>
+            <button class="habit-check-btn ${h.done_today ? 'done' : ''}"
+                onclick="toggleHabit(${h.id})">${h.done_today ? '✓' : '○'}</button>
+            <button class="habit-del-btn" onclick="deleteHabit(${h.id})" title="Delete habit">✕</button>
+        </div>`;
+    }).join('');
+}
+
+async function toggleHabit(id) {
+    await api('habits/' + id + '/toggle', 'POST');
+    loadHabits();
+}
+
+async function deleteHabit(id) {
+    if (!confirm('Delete this habit and all its history?')) return;
+    await api('habits/' + id, 'DELETE');
+    loadHabits();
+}
+
+function openAddHabitModal() {
+    const EMOJIS = ['✅','💪','📚','🏃','💧','🧘','🍎','😴','✍️','🎯','🎸','🌿','🧠','💰','🙏'];
+    document.getElementById('modal-content').innerHTML = `
+        <div class="modal-title">New Habit</div>
+        <div class="form-group">
+            <label class="form-label">Habit Name</label>
+            <input type="text" class="form-input" id="habit-name" placeholder="e.g. Read 30 minutes" autofocus>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Emoji</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                ${EMOJIS.map(e => `<button onclick="document.getElementById('habit-emoji').value='${e}';
+                    this.parentElement.querySelectorAll('button').forEach(b=>b.style.background='');
+                    this.style.background='var(--accent-glow)';"
+                    style="font-size:20px;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;">${e}</button>`).join('')}
+            </div>
+            <input type="text" class="form-input" id="habit-emoji" placeholder="Or type any emoji" value="✅">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Color</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                ${['#34c79d','#d4a24e','#636cf1','#e05c7a','#e8a849','#4ecde3','#a8e063'].map(c =>
+                    `<div onclick="document.getElementById('habit-color').value='${c}';
+                        this.parentElement.querySelectorAll('div').forEach(d=>d.style.outline='');
+                        this.style.outline='2px solid var(--text)';"
+                        style="width:28px;height:28px;border-radius:50%;background:${c};cursor:pointer;"></div>`).join('')}
+            </div>
+            <input type="color" class="form-input" id="habit-color" value="#34c79d" style="margin-top:8px;height:40px;">
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="saveHabit()">Create Habit</button>
+        </div>
+    `;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function saveHabit() {
+    const name = document.getElementById('habit-name').value.trim();
+    if (!name) { document.getElementById('habit-name').focus(); return; }
+    await api('habits', 'POST', {
+        name,
+        emoji: document.getElementById('habit-emoji').value || '✅',
+        color: document.getElementById('habit-color').value || '#34c79d'
+    });
+    closeModal(); loadHabits();
+}
+
 // ── Loaders Map ──
 const loaders = {
     dashboard: loadDashboard,
@@ -2769,7 +2999,8 @@ const loaders = {
     jobs: loadJobs,
     fitness: loadFitness,
     learning: loadLearning,
-    books: loadBooks
+    books: loadBooks,
+    habits: loadHabits
 };
 
 // ── Reset Learning (delete everything) ──

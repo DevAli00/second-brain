@@ -59,7 +59,7 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     description = db.Column(db.Text)
-    status = db.Column(db.String(20), default='active')
+    status = db.Column(db.String(20), default='backlog')
     progress = db.Column(db.Integer, default=0)
     deadline = db.Column(db.Date)
     color = db.Column(db.String(7), default='#e8a849')
@@ -173,6 +173,20 @@ class Book(db.Model):
     sort_order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Habit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    emoji = db.Column(db.String(10), default='✅')
+    color = db.Column(db.String(20), default='#34c79d')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    entries = db.relationship('HabitEntry', backref='habit', cascade='all,delete', lazy=True)
+
+class HabitEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    habit_id = db.Column(db.Integer, db.ForeignKey('habit.id'), nullable=False)
+    date = db.Column(db.String(10), nullable=False)  # YYYY-MM-DD
+    __table_args__ = (db.UniqueConstraint('habit_id', 'date', name='uq_habit_date'),)
+
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 def to_dict(obj, fields):
@@ -199,6 +213,7 @@ LTASK_FIELDS = ['id','week_id','category','description','completed','notes','com
 DAILY_PLAN_FIELDS = ['id','date','notes','energy_level']
 DAILY_TASK_FIELDS = ['id','daily_plan_id','description','completed','time_slot','sort_order']
 BOOK_FIELDS = ['id','title','author','quarter','category','status','notes','rating','sort_order','created_at']
+HABIT_FIELDS = ['id','name','emoji','color','created_at']
 
 # ── Routes ──────────────────────────────────────────────────────────────────
 
@@ -918,6 +933,72 @@ def delete_book(bid):
     db.session.delete(b)
     db.session.commit()
     return '', 204
+
+# ── Habits ───────────────────────────────────────────────────────────────────
+
+def _habit_streak(entries_sorted: list[str]) -> int:
+    """Given sorted date strings (desc), compute current streak."""
+    if not entries_sorted:
+        return 0
+    today = date.today().isoformat()
+    yesterday = (date.today().replace(day=date.today().day - 1) if date.today().day > 1
+                 else date.today()).isoformat()
+    # allow streak if last entry is today or yesterday
+    if entries_sorted[0] not in (today, yesterday):
+        return 0
+    streak = 0
+    from datetime import timedelta
+    check = date.fromisoformat(entries_sorted[0])
+    for ds in entries_sorted:
+        d_entry = date.fromisoformat(ds)
+        if d_entry == check:
+            streak += 1
+            check = check - timedelta(days=1)
+        else:
+            break
+    return streak
+
+@app.route('/api/habits', methods=['GET'])
+def get_habits():
+    from datetime import timedelta
+    habits = Habit.query.order_by(Habit.created_at).all()
+    today = date.today().isoformat()
+    last_30 = [(date.today() - timedelta(days=i)).isoformat() for i in range(30)]
+    result = []
+    for h in habits:
+        entry_dates = sorted([e.date for e in h.entries], reverse=True)
+        d = to_dict(h, HABIT_FIELDS)
+        d['done_today'] = today in entry_dates
+        d['streak'] = _habit_streak(entry_dates)
+        d['week'] = {ds: (ds in entry_dates) for ds in last_30[:7]}
+        result.append(d)
+    return jsonify(result)
+
+@app.route('/api/habits', methods=['POST'])
+def create_habit():
+    data = request.json
+    h = Habit(name=data['name'], emoji=data.get('emoji', '✅'), color=data.get('color', '#34c79d'))
+    db.session.add(h)
+    db.session.commit()
+    return jsonify({'id': h.id})
+
+@app.route('/api/habits/<int:hid>', methods=['DELETE'])
+def delete_habit(hid):
+    h = Habit.query.get_or_404(hid)
+    db.session.delete(h)
+    db.session.commit()
+    return '', 204
+
+@app.route('/api/habits/<int:hid>/toggle', methods=['POST'])
+def toggle_habit(hid):
+    today = date.today().isoformat()
+    existing = HabitEntry.query.filter_by(habit_id=hid, date=today).first()
+    if existing:
+        db.session.delete(existing)
+    else:
+        db.session.add(HabitEntry(habit_id=hid, date=today))
+    db.session.commit()
+    return jsonify({'ok': True})
 
 # ── Seed Quran Data ─────────────────────────────────────────────────────────
 
