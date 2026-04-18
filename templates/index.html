@@ -5032,10 +5032,12 @@ async function loadTriathlon() {
     el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:300px;color:#4a6285;font-family:JetBrains Mono,monospace;font-size:12px;letter-spacing:2px;">LOADING TRI/OS…</div>';
     try {
         const data = await api('triathlon/data');
+        TRI_DATA = data;
         window.TRI_DATA = data;
         triRender();
     } catch(e) {
-        el.innerHTML = '<div style="padding:40px;color:#ff4a6e;font-family:JetBrains Mono,monospace;">Failed to load triathlon data</div>';
+        console.error('Triathlon load error:', e);
+        el.innerHTML = '<div style="padding:40px;color:#ff4a6e;font-family:JetBrains Mono,monospace;">Failed to load triathlon data: ' + e.message + '</div>';
     }
 }
 
@@ -5693,7 +5695,7 @@ function triStartSim() {
 }
 
 function triTickSim() {
-  const trans = TRI_DATA.transitions[TRI.activeTransition];
+  const trans = window.TRI_DATA.transitions[TRI.activeTransition];
   if (TRI.simStep >= trans.steps.length) {
     TRI.simRunning = false;
     triRender();
