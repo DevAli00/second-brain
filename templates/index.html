@@ -517,6 +517,193 @@ html[data-theme="light"] .mario-items-panel { background: #0d0d2a; }
     .mario-hud-clock { font-size: 16px; }
 }
 
+/* ══════════════════════════════════════════
+   🏴‍☠️ ONE PIECE — GRAND LINE MAP SKIN
+══════════════════════════════════════════ */
+.op-skin {
+    position: relative;
+    width: 100%;
+    height: 72vh;
+    min-height: 560px;
+    overflow: visible;
+    font-family: 'Outfit', sans-serif;
+    user-select: none;
+}
+/* Canvas clipping box — aged map frame via box-shadow insets */
+.op-canvas-wrap {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 4px;
+    z-index: 0;
+    box-shadow:
+        inset 0 0 0 10px #7a4510,
+        inset 0 0 0 14px #a06820,
+        inset 0 0 0 18px #5a3008,
+        inset 0 0 80px rgba(0,0,0,.65),
+        0 0 32px rgba(0,0,0,.5);
+}
+#op-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+}
+/* Islands overlay */
+.op-islands-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+/* Island pin — map marker */
+.op-island-pin {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    pointer-events: all;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* Island body — organic land mass */
+.op-island-body {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter .22s, transform .22s;
+    filter: drop-shadow(3px 6px 10px rgba(0,0,0,.55));
+    animation: op-island-bob 4s ease-in-out infinite;
+}
+/* Each island gets its own organic shape + terrain */
+.op-island-pin[data-island="foosha"]    .op-island-body { width:100px; height:76px; background:linear-gradient(145deg,#6ab840 0%,#3d7c1e 55%,#2a5c12 100%); clip-path:polygon(22% 0%,78% 4%,98% 28%,96% 65%,78% 98%,22% 100%,4% 72%,2% 35%); }
+.op-island-pin[data-island="skypiea"]   .op-island-body { width: 82px; height:64px; background:linear-gradient(145deg,#8ad850 0%,#58a028 45%,#3e7818 100%); clip-path:polygon(50% 0%,82% 12%,100% 45%,86% 82%,60% 100%,32% 96%,8% 74%,4% 40%,20% 14%); }
+.op-island-pin[data-island="water7"]    .op-island-body { width:112px; height:82px; background:linear-gradient(145deg,#60b030 0%,#3e8018 55%,#2a5c0e 100%); clip-path:polygon(14% 0%,62% 0%,92% 16%,100% 52%,86% 86%,58% 100%,18% 98%,0% 68%,4% 28%); }
+.op-island-pin[data-island="sabaody"]   .op-island-body { width: 90px; height:68px; background:linear-gradient(145deg,#78c840 0%,#508822 45%,#3a6814 100%); clip-path:polygon(35% 0%,65% 0%,90% 18%,100% 52%,86% 82%,60% 100%,34% 98%,10% 80%,0% 50%,12% 18%); }
+.op-island-pin[data-island="wano"]      .op-island-body { width:118px; height:88px; background:linear-gradient(145deg,#70b838 0%,#4a7820 55%,#365c14 100%); clip-path:polygon(24% 0%,54% 2%,76% 0%,96% 20%,100% 58%,88% 84%,64% 100%,28% 98%,8% 78%,0% 46%,6% 20%); }
+.op-island-pin[data-island="wholecake"] .op-island-body { width: 86px; height:86px; background:radial-gradient(ellipse at 38% 38%,#8cd858 0%,#60a030 45%,#487818 100%); clip-path:circle(46% at 50% 50%); }
+/* Terrain overlay — mountain/highland highlight */
+.op-island-body::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse at 48% 38%, rgba(110,78,30,.5) 0%, rgba(110,78,30,.15) 40%, transparent 68%),
+                linear-gradient(180deg, rgba(255,255,255,.1) 0%, transparent 45%);
+    clip-path:inherit; z-index:1;
+}
+/* Sandy shore fringe */
+.op-island-body::after {
+    content:''; position:absolute; inset:-5px;
+    background:rgba(200,168,88,.3); clip-path:inherit; z-index:-1; filter:blur(4px);
+}
+/* Icon on island */
+.op-island-icon {
+    position:relative; font-size:20px; z-index:2;
+    filter:drop-shadow(1px 2px 3px rgba(0,0,0,.5));
+}
+/* Hover lift */
+.op-island-pin:hover .op-island-body {
+    filter:drop-shadow(4px 10px 14px rgba(0,0,0,.65)) brightness(1.12);
+    transform:translateY(-4px) scale(1.07);
+}
+@keyframes op-island-bob {
+    0%,100% { transform:translateY(0); }
+    50%      { transform:translateY(-5px); }
+}
+.op-island-pin:nth-child(2) .op-island-body { animation-delay:-.7s; }
+.op-island-pin:nth-child(3) .op-island-body { animation-delay:-1.4s; }
+.op-island-pin:nth-child(4) .op-island-body { animation-delay:-2.1s; }
+.op-island-pin:nth-child(5) .op-island-body { animation-delay:-2.8s; }
+.op-island-pin:nth-child(6) .op-island-body { animation-delay:-3.5s; }
+
+/* Island label — parchment scroll banner */
+.op-island-label {
+    position:relative; margin-top:6px;
+    background:linear-gradient(135deg,#f2e4a2,#dfc870,#f2e4a2);
+    border:1.5px solid #8a5e0c; padding:3px 12px;
+    font-size:8px; font-weight:800; letter-spacing:1.8px;
+    text-transform:uppercase; color:#251404;
+    white-space:nowrap; text-align:center; pointer-events:none;
+    clip-path:polygon(7% 0%,93% 0%,100% 50%,93% 100%,7% 100%,0% 50%);
+    box-shadow:1px 2px 5px rgba(0,0,0,.35);
+}
+
+/* Tooltip — aged parchment card */
+.op-island-tooltip {
+    position:absolute; bottom:calc(100% + 16px); left:50%;
+    transform:translateX(-50%) translateY(8px);
+    background:linear-gradient(160deg,#f6ecbe,#e8d48a,#f6ecbe);
+    border:2px solid #8a5e0c; border-radius:3px;
+    padding:14px 18px; min-width:205px; max-width:235px;
+    box-shadow:4px 6px 22px rgba(0,0,0,.6), inset 0 1px 2px rgba(255,255,255,.4);
+    opacity:0; pointer-events:none;
+    transition:opacity .2s, transform .2s; z-index:100;
+}
+.op-island-tooltip::after {
+    content:''; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
+    border-left:8px solid transparent; border-right:8px solid transparent;
+    border-top:8px solid #8a5e0c;
+}
+/* Flip for top-positioned islands */
+.op-island-pin.tooltip-down .op-island-tooltip { bottom:auto; top:calc(100% + 16px); transform:translateX(-50%) translateY(-8px); }
+.op-island-pin.tooltip-down .op-island-tooltip::after { bottom:auto; top:-8px; border-top:none; border-bottom:8px solid #8a5e0c; }
+.op-tt-name { font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#3a1c04; margin-bottom:1px; }
+.op-tt-arc  { font-size:8px; color:#7a5218; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:5px; }
+.op-tt-lore { font-size:9.5px; color:#4a3010; font-style:italic; margin-bottom:7px; padding-bottom:7px; border-bottom:1px solid rgba(90,50,10,.2); line-height:1.5; }
+.op-tt-stat { display:flex; justify-content:space-between; gap:10px; font-size:10px; color:#5a3c18; margin:2px 0; }
+.op-tt-stat strong { color:#2a1404; font-weight:800; }
+.op-tt-btn {
+    margin-top:9px; width:100%; padding:7px; border:2px solid #5a3008; border-radius:2px;
+    color:#f2e4a2; font-size:9px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+    cursor:pointer; background:#6a3c10;
+    clip-path:polygon(5% 0%,95% 0%,100% 50%,95% 100%,5% 100%,0% 50%);
+    transition:background .15s;
+}
+.op-tt-btn:hover { background:#8a5018; }
+
+/* Captain's Log HUD — parchment strip */
+.op-hud {
+    position:absolute; top:14px; left:18px; right:18px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:linear-gradient(135deg,rgba(245,230,148,.97),rgba(225,196,100,.97),rgba(245,230,148,.97));
+    border:2px solid #8a5e0c; border-radius:2px;
+    padding:8px 20px; z-index:25;
+    box-shadow:2px 3px 14px rgba(0,0,0,.55), inset 0 1px 2px rgba(255,255,255,.45);
+}
+.op-hud-brand { font-size:13px; font-weight:800; color:#251404; letter-spacing:4px; text-transform:uppercase; white-space:nowrap; }
+.op-hud-divider { height:26px; width:1px; background:rgba(90,50,10,.3); flex-shrink:0; }
+.op-hud-stat { display:flex; flex-direction:column; align-items:center; gap:1px; min-width:74px; }
+.op-hud-stat-lbl { font-size:7.5px; color:#7a4e18; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.op-hud-stat-val { font-size:12px; font-weight:800; color:#251404; }
+#op-clock { color:#6a1c04; font-family:var(--mono); font-size:14px; font-weight:700; }
+
+/* Compass rose */
+.op-compass { position:absolute; bottom:16px; right:20px; width:60px; height:60px; z-index:20; opacity:.88; }
+
+/* Log Pose — parchment dots */
+.op-logpose {
+    position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg,rgba(245,230,148,.92),rgba(225,196,100,.92));
+    border:1.5px solid #8a5e0c; border-radius:20px;
+    padding:5px 14px; z-index:20;
+    box-shadow:1px 2px 8px rgba(0,0,0,.4);
+}
+.op-logpose-label { font-size:7px; color:#6a3e10; letter-spacing:2px; text-transform:uppercase; margin-right:3px; font-weight:700; }
+.op-logpose-dot {
+    width:8px; height:8px; border-radius:50%;
+    border:1.5px solid #8a5e0c; background:rgba(90,50,10,.15);
+    cursor:pointer; transition:all .3s;
+}
+.op-logpose-dot:hover { background:#c8900c; border-color:#5a3008; box-shadow:0 0 6px rgba(200,144,12,.7); }
+@media (max-width: 768px) {
+    .op-skin { height:85vh; }
+    .op-hud { flex-wrap:wrap; gap:4px; padding:6px 10px; left:10px; right:10px; }
+    .op-hud-stat { min-width:58px; }
+}
+
 /* ── Sidebar ── */
 .sidebar {
     width: 260px;
@@ -1316,6 +1503,263 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     }
 }
 .mobile-toggle { display: none; }
+
+/* ══════════════════════════════════════════
+   TRIATHLON JOURNEY
+══════════════════════════════════════════ */
+#sec-triathlon { padding: 0; background: #0a1628; }
+.tri-shell {
+    min-height: 100%;
+    background: #0a1628;
+    color: #e8f1ff;
+    font-family: 'DM Sans', sans-serif;
+    position: relative;
+}
+.tri-shell::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+        linear-gradient(rgba(28,50,87,0.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(28,50,87,0.35) 1px, transparent 1px);
+    background-size: 80px 80px;
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 85%);
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 85%);
+}
+.tri-shell::after {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+        radial-gradient(circle at 20% 10%, rgba(0,212,255,0.06), transparent 40%),
+        radial-gradient(circle at 80% 90%, rgba(0,212,255,0.04), transparent 45%);
+}
+.tri-topnav {
+    position: sticky; top: 0; z-index: 20;
+    backdrop-filter: blur(16px);
+    background: rgba(10,22,40,0.85);
+    border-bottom: 1px solid #1c3257;
+}
+.tri-topnav-inner {
+    max-width: 1440px; margin: 0 auto;
+    padding: 16px 40px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+}
+.tri-logo {
+    display: flex; align-items: center; gap: 12px;
+}
+.tri-logo-box {
+    width: 26px; height: 26px;
+    border: 1.5px solid #00d4ff;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.tri-logo-inner {
+    position: absolute; inset: 4px;
+    border: 1px solid #00d4ff;
+    transform: rotate(45deg); opacity: 0.6;
+}
+.tri-logo-text { font-family: 'JetBrains Mono', monospace; }
+.tri-logo-title { font-size: 11px; letter-spacing: 2px; color: #00d4ff; text-transform: uppercase; }
+.tri-logo-sub { font-size: 10px; color: #4a6285; letter-spacing: 1.5px; }
+.tri-nav-buttons {
+    display: flex; gap: 2px;
+    border: 1px solid #1c3257; padding: 2px;
+}
+.tri-nav-btn {
+    padding: 8px 14px;
+    font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace; font-weight: 500;
+    background: transparent; color: #8ba3c7;
+    border: none; cursor: pointer;
+    transition: all 0.2s;
+}
+.tri-nav-btn.active { background: #00d4ff; color: #0a1628; font-weight: 700; }
+.tri-nav-btn:not(.active):hover { background: rgba(255,255,255,0.04); color: #e8f1ff; }
+.tri-days-box {
+    text-align: center;
+    padding: 8px 12px;
+    border: 1px solid #00d4ff;
+    background: rgba(0,212,255,0.06);
+}
+.tri-days-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px; color: #00d4ff; line-height: 1;
+}
+.tri-days-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: #0099bb; letter-spacing: 2px; margin-top: 3px;
+}
+.tri-content {
+    position: relative; z-index: 1;
+    max-width: 1440px; margin: 0 auto;
+    padding: 48px 40px 100px;
+    animation: triPageIn 500ms cubic-bezier(0.2,0.9,0.2,1);
+}
+@keyframes triPageIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes triDrawLine {
+    from { stroke-dashoffset: 2000; }
+    to   { stroke-dashoffset: 0; }
+}
+@keyframes triPulse {
+    0%,100% { opacity:1; } 50% { opacity:0.4; }
+}
+@keyframes triSlideIn {
+    from { opacity:0; transform: translateX(-8px); }
+    to   { opacity:1; transform: translateX(0); }
+}
+.tri-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: #00d4ff;
+    display: flex; align-items: center; gap: 8px;
+}
+.tri-eyebrow-warn { color: #ffb84a; }
+.tri-eyebrow::before { content:''; display: inline-block; width: 14px; height: 1px; background: #00d4ff; flex-shrink:0; }
+.tri-eyebrow-warn::before { background: #ffb84a; }
+.tri-h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(60px, 8vw, 100px); line-height: 0.95;
+    margin-top: 24px; letter-spacing: -2px; font-weight: 400;
+}
+.tri-h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(28px, 4vw, 44px); font-weight: 400;
+    letter-spacing: -1px; margin-top: 12px;
+}
+.tri-mono { font-family: 'JetBrains Mono', monospace; }
+.tri-cyan { color: #00d4ff; }
+.tri-warn { color: #ffb84a; }
+.tri-ok { color: #4aff9d; }
+.tri-hot { color: #ff4a6e; }
+.tri-ink-dim { color: #8ba3c7; }
+.tri-ink-faint { color: #4a6285; }
+.tri-line { color: #1c3257; }
+.tri-stat-tile {
+    padding: 20px 24px;
+    border: 1px solid #1c3257;
+    flex: 1; min-width: 0;
+}
+.tri-stat-tile.accent { background: rgba(0,212,255,0.04); }
+.tri-stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: #4a6285;
+}
+.tri-stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 30px; color: #e8f1ff; line-height: 1; margin-top: 10px;
+}
+.tri-stat-tile.accent .tri-stat-value { color: #00d4ff; }
+.tri-stat-unit {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: #4a6285; letter-spacing: 1px;
+    margin-left: 6px;
+}
+.tri-progress-bar {
+    height: 2px; background: #1c3257; width: 100%; position: relative; overflow: hidden;
+}
+.tri-progress-fill {
+    position: absolute; inset: 0; right: auto;
+    background: #00d4ff;
+    box-shadow: 0 0 10px #00d4ff;
+    transition: width 600ms cubic-bezier(0.2,0.9,0.2,1);
+}
+.tri-btn {
+    padding: 14px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 10px;
+    cursor: pointer; border: none; transition: all 0.2s;
+}
+.tri-btn-primary { background: #00d4ff; color: #0a1628; }
+.tri-btn-primary:hover { background: #fff; }
+.tri-btn-outline { background: transparent; border: 1px solid #00d4ff; color: #00d4ff; }
+.tri-btn-outline:hover { background: #00d4ff; color: #0a1628; }
+.tri-btn-outline-warn { background: transparent; border: 1px solid #ffb84a; color: #ffb84a; }
+.tri-btn-outline-warn:hover { background: #ffb84a; color: #0a1628; }
+.tri-btn-ghost {
+    background: transparent; border: 1px solid #1c3257; color: #8ba3c7;
+}
+.tri-btn-ghost:hover { border-color: #2d4875; color: #e8f1ff; }
+.tri-card {
+    border: 1px solid #1c3257;
+    background: transparent;
+    position: relative;
+}
+.tri-card-accent-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: #00d4ff;
+}
+.tri-card-accent-top-warn { background: #ffb84a; }
+.tri-section-divider { border: none; border-top: 1px solid #1c3257; margin: 60px 0; }
+.tri-tab-bar {
+    display: flex; border: 1px solid #1c3257;
+}
+.tri-tab-btn {
+    padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    background: transparent; color: #8ba3c7;
+    border: none; cursor: pointer; transition: all 0.2s;
+}
+.tri-tab-btn.active { background: #00d4ff; color: #0a1628; font-weight: 700; }
+.tri-tab-btn:not(.active):hover { background: rgba(255,255,255,0.04); color: #e8f1ff; }
+.tri-effort-bar { display: flex; gap: 2px; align-items: flex-end; }
+.tri-effort-seg {
+    width: 3px; transition: background 0.3s;
+}
+.tri-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 8px; border: 1px solid #2d4875; color: #8ba3c7;
+}
+.tri-tag-threshold { border-color: #ff4a6e; color: #ff4a6e; }
+.tri-tag-technique { border-color: #00d4ff; color: #00d4ff; }
+.tri-tag-endurance { border-color: #4aff9d; color: #4aff9d; }
+.tri-tag-recovery { border-color: #4a6285; color: #8ba3c7; }
+.tri-tag-racespecific { border-color: #ffb84a; color: #ffb84a; }
+.tri-tag-strength { border-color: #ffb84a; color: #ffb84a; }
+.tri-gear-tier-essential { background: rgba(0,212,255,0.08); border-color: #00d4ff; }
+.tri-gear-tier-training { background: rgba(74,255,157,0.06); border-color: #4aff9d; }
+.tri-gear-tier-optional { background: rgba(255,255,255,0.03); border-color: #2d4875; }
+.tri-sim-step-active { background: rgba(0,212,255,0.08); }
+.tri-check-box {
+    width: 26px; height: 26px; flex-shrink: 0;
+    border: 1px solid #2d4875;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+}
+.tri-check-box.checked { background: #00d4ff; border-color: #00d4ff; }
+.tri-check-box.checked::after { content: '✓'; color: #0a1628; font-size: 13px; font-weight: 700; }
+.tri-timeline-item {
+    width: 100%; text-align: left; padding: 14px 18px;
+    border-left: 2px solid #1c3257;
+    background: transparent;
+    display: flex; gap: 14px; align-items: center;
+    cursor: pointer; transition: all 0.2s; border-top: none; border-right: none; border-bottom: none;
+    color: #e8f1ff;
+}
+.tri-timeline-item.active { border-left-color: #ffb84a; background: rgba(255,184,74,0.06); }
+.tri-timeline-item:not(.active):hover { background: rgba(255,255,255,0.02); }
+.tri-breadcrumb {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+}
+.tri-back-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #4a6285; background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; padding: 0;
+    transition: color 0.2s;
+}
+.tri-back-btn:hover { color: #00d4ff; }
+@media (max-width: 900px) {
+    .tri-content { padding: 24px 20px 80px; }
+    .tri-topnav-inner { padding: 12px 20px; }
+    .tri-h1 { font-size: 48px; }
+    .tri-nav-buttons { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>
@@ -1366,6 +1810,9 @@ textarea.form-input { resize: vertical; min-height: 80px; }
         <div class="nav-item" onclick="navigate('habits')">
             <span class="nav-icon">🔥</span> Habits
         </div>
+        <div class="nav-item" onclick="navigate('triathlon')">
+            <span class="nav-icon">🏊</span> Triathlon
+        </div>
     </div>
 
     <div class="nav-section" style="margin-top:auto;">
@@ -1388,8 +1835,9 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     <!-- Skin switcher — always visible -->
     <div class="dash-skin-bar">
         <span class="dash-skin-label">SKIN ›</span>
-        <button class="dash-skin-btn" data-skin="terminal" onclick="setSkin('terminal')">⌨️ TERMINAL</button>
+        <button class="dash-skin-btn" data-skin="terminal"  onclick="setSkin('terminal')">⌨️ TERMINAL</button>
         <button class="dash-skin-btn" data-skin="mario"    onclick="setSkin('mario')">🍄 MARIO</button>
+        <button class="dash-skin-btn" data-skin="onepiece" onclick="setSkin('onepiece')">🏴‍☠️ ONE PIECE</button>
     </div>
     <!-- All skin content rendered here -->
     <div id="dash-content"></div>
@@ -1635,6 +2083,11 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     <div id="habits-grid"></div>
 </div>
 
+<!-- ═══════════════════ TRIATHLON JOURNEY ═══════════════════ -->
+<div id="sec-triathlon" class="section">
+    <div class="tri-shell" id="tri-shell"></div>
+</div>
+
 </main>
 
 <!-- ── Modal ── -->
@@ -1749,13 +2202,15 @@ function startDashClock() {
         const tc  = document.getElementById('term-clock');
         const td  = document.getElementById('term-date');
         const mc  = document.getElementById('mario-clock');
+        const opc = document.getElementById('op-clock');
         if (tc) tc.textContent = hms;
         if (td) {
             const day = now.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
             const dt  = now.toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' });
             td.textContent = `${day}  ${dt}`;
         }
-        if (mc) mc.textContent = hm;
+        if (mc)  mc.textContent  = hm;
+        if (opc) opc.textContent = hm;
     };
     tick();
     _dashClockInterval = setInterval(tick, 1000);
@@ -1763,13 +2218,14 @@ function startDashClock() {
 
 // ── Main loader ──────────────────────────────────────────────
 async function loadDashboard() {
-    // Sync skin buttons
+    stopOceanCanvas(); // no-op if not running
     document.querySelectorAll('.dash-skin-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.skin === dashSkin));
     startDashClock();
     const d = await api('dashboard');
-    if (dashSkin === 'mario') renderMarioDash(d);
-    else renderTerminalDash(d);
+    if      (dashSkin === 'mario')    renderMarioDash(d);
+    else if (dashSkin === 'onepiece') renderOnePieceDash(d);
+    else                              renderTerminalDash(d);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2026,6 +2482,376 @@ function renderMarioDash(d) {
                 </div>
             </div>
         </div>`;
+}
+
+// ════════════════════════════════════════════════════════════
+//  SKIN C — 🏴‍☠️ ONE PIECE / GRAND LINE
+// ════════════════════════════════════════════════════════════
+
+let _opAnimFrame = null;
+let _opBoats     = null;
+let _opStars     = null;
+let _opSparkles  = null;
+let _opTime      = 0;
+
+function stopOceanCanvas() {
+    if (_opAnimFrame) { cancelAnimationFrame(_opAnimFrame); _opAnimFrame = null; }
+    _opBoats = null; _opStars = null; _opSparkles = null; _opTime = 0;
+}
+
+// Map-style top-down ship (like an old nautical illustration)
+function _drawBoat(ctx, x, y, size, tilt) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    const s = size;
+
+    // Wake trail (elongated foam behind boat)
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    const wkG = ctx.createLinearGradient(-s * 2.2, 0, 0, 0);
+    wkG.addColorStop(0, 'rgba(210,235,255,0)');
+    wkG.addColorStop(1, 'rgba(230,248,255,.55)');
+    ctx.fillStyle = wkG;
+    ctx.beginPath(); ctx.ellipse(-s * 1.0, s * 0.08, s * 1.5, s * 0.09, 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // Hull (top-down teardrop — pointed bow right, wide stern left)
+    ctx.beginPath();
+    ctx.moveTo(s * 0.52, 0);
+    ctx.bezierCurveTo(s * 0.55, -s * 0.18, s * 0.1, -s * 0.24, -s * 0.38, -s * 0.2);
+    ctx.quadraticCurveTo(-s * 0.52, 0, -s * 0.38, s * 0.2);
+    ctx.bezierCurveTo(s * 0.1, s * 0.24, s * 0.55, s * 0.18, s * 0.52, 0);
+    ctx.closePath();
+    ctx.fillStyle = '#5a3010'; ctx.fill();
+    ctx.strokeStyle = '#3a1c06'; ctx.lineWidth = s * 0.03; ctx.stroke();
+
+    // Deck planking highlight
+    ctx.save();
+    ctx.clip();
+    ctx.fillStyle = 'rgba(120,72,28,.35)';
+    for (let pl = -s * 0.3; pl < s * 0.5; pl += s * 0.12) {
+        ctx.fillRect(pl, -s * 0.22, s * 0.06, s * 0.44);
+    }
+    ctx.restore();
+
+    // Main mast (circle from above)
+    ctx.beginPath(); ctx.arc(s * 0.08, 0, s * 0.065, 0, Math.PI * 2);
+    ctx.fillStyle = '#2a1006'; ctx.fill();
+
+    // Main sail (oval billow from top-down)
+    ctx.beginPath(); ctx.ellipse(s * 0.08, 0, s * 0.34, s * 0.16, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(245,234,196,.92)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(140,110,60,.35)'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // Skull on sail
+    ctx.font = `${Math.max(s * 0.16, 5)}px serif`;
+    ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(20,10,4,.65)';
+    ctx.fillText('☠', s * 0.08, s * 0.06);
+
+    // Foremast + small front sail
+    ctx.beginPath(); ctx.arc(-s * 0.24, 0, s * 0.045, 0, Math.PI * 2);
+    ctx.fillStyle = '#2a1006'; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-s * 0.24, 0, s * 0.2, s * 0.1, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(240,228,188,.82)'; ctx.fill();
+
+    // Jolly Roger flag (tiny pennant at bow)
+    ctx.fillStyle = '#080808';
+    ctx.beginPath();
+    ctx.moveTo(s * 0.52, 0);
+    ctx.lineTo(s * 0.62, -s * 0.06);
+    ctx.lineTo(s * 0.62, s * 0.06);
+    ctx.closePath(); ctx.fill();
+
+    ctx.restore();
+}
+
+function startOceanCanvas() {
+    if (_opAnimFrame) cancelAnimationFrame(_opAnimFrame);
+    const canvas = document.getElementById('op-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const dpr = window.devicePixelRatio || 1;
+    function resize() {
+        const cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+        if (!cw || !ch) return;
+        canvas.width = cw * dpr; canvas.height = ch * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        _opBoats = null; _opStars = null; _opSparkles = null;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function ensureEntities() {
+        const W = canvas.offsetWidth, H = canvas.offsetHeight;
+        if (!_opSparkles) {
+            // Wave-mark clusters scattered across ocean
+            _opSparkles = Array.from({length: 55}, () => ({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                phase: Math.random() * Math.PI * 2,
+                speed: Math.random() * 0.35 + 0.04,
+                len: 14 + Math.random() * 14
+            }));
+        }
+        if (!_opBoats) {
+            _opBoats = [
+                { x: -180, y: 0.64, size: 66,  speed: 0.55, phase: 0,              angle: 0 },
+                { x: W*0.5, y: 0.55, size: 42, speed: 0.32, phase: Math.PI*0.7,   angle: 0.08 },
+                { x: W*0.2, y: 0.46, size: 26, speed: 0.18, phase: Math.PI*1.4,   angle: -0.05 },
+            ];
+        }
+        if (!_opStars) {
+            // Depth patches (watercolor blobs)
+            _opStars = Array.from({length: 14}, () => ({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                rx: 55 + Math.random() * 90,
+                ry: 35 + Math.random() * 65,
+                alpha: 0.04 + Math.random() * 0.07
+            }));
+        }
+    }
+
+    function draw() {
+        const W = canvas.offsetWidth, H = canvas.offsetHeight;
+        if (!W || !H) { _opAnimFrame = requestAnimationFrame(draw); return; }
+        ensureEntities();
+        ctx.clearRect(0, 0, W, H);
+
+        // ── MAP OCEAN BASE — watercolour deep blue ──
+        const ocG = ctx.createRadialGradient(W*0.5, H*0.45, 0, W*0.5, H*0.45, Math.max(W, H)*0.7);
+        ocG.addColorStop(0,   '#3a7898');
+        ocG.addColorStop(0.3, '#2a6080');
+        ocG.addColorStop(0.6, '#1a4460');
+        ocG.addColorStop(1,   '#0e2838');
+        ctx.fillStyle = ocG;
+        ctx.fillRect(0, 0, W, H);
+
+        // Watercolour depth patches
+        _opStars.forEach(p => {
+            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.rx);
+            g.addColorStop(0,   `rgba(70,148,188,${p.alpha})`);
+            g.addColorStop(0.6, `rgba(50,110,155,${p.alpha * 0.4})`);
+            g.addColorStop(1,   'rgba(50,110,155,0)');
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI * 2); ctx.fill();
+        });
+
+        // Shallow water near map edges (lighter blue vignette)
+        const edgeG = ctx.createRadialGradient(W*0.5, H*0.5, Math.min(W,H)*0.25, W*0.5, H*0.5, Math.min(W,H)*0.72);
+        edgeG.addColorStop(0, 'rgba(0,0,0,0)');
+        edgeG.addColorStop(1, 'rgba(8,28,50,.55)');
+        ctx.fillStyle = edgeG; ctx.fillRect(0, 0, W, H);
+
+        // ── OLD-MAP WAVE MARKS ──
+        // (groups of small curved lines like illustrated nautical charts)
+        _opSparkles.forEach(sp => {
+            sp.x -= sp.speed;
+            if (sp.x < -30) { sp.x = W + 10; sp.y = Math.random() * H; }
+            const baseAlpha = 0.07 + Math.sin(_opTime * 1.2 + sp.phase) * 0.04;
+            ctx.strokeStyle = `rgba(180,220,240,${baseAlpha})`;
+            ctx.lineWidth = 0.8;
+            // First curl
+            ctx.beginPath();
+            ctx.moveTo(sp.x, sp.y);
+            ctx.quadraticCurveTo(sp.x + sp.len * 0.5, sp.y - 3.5, sp.x + sp.len, sp.y);
+            ctx.stroke();
+            // Second curl offset
+            ctx.beginPath();
+            ctx.moveTo(sp.x + 3, sp.y + 5);
+            ctx.quadraticCurveTo(sp.x + sp.len * 0.5 + 3, sp.y + 1.5, sp.x + sp.len + 3, sp.y + 5);
+            ctx.stroke();
+        });
+
+        // Subtle large swell rings (very faint)
+        for (let ri = 0; ri < 3; ri++) {
+            const rx = W * (0.25 + ri * 0.25);
+            const ry = H * (0.4 + Math.sin(_opTime * 0.3 + ri) * 0.08);
+            const rr = 60 + ri * 30 + Math.sin(_opTime * 0.5 + ri) * 10;
+            ctx.beginPath(); ctx.arc(rx, ry, rr, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(160,210,240,.05)'; ctx.lineWidth = 1.2; ctx.stroke();
+        }
+
+        // ── BOATS (top-down map illustration style) ──
+        [..._opBoats].reverse().forEach((b, ri) => {
+            const i = _opBoats.length - 1 - ri;
+            b.x += b.speed;
+            if (b.x > W + 220) b.x = -220;
+            const bobY  = b.y * H + Math.sin(_opTime * 1.6 + b.phase) * 2.5;
+            const tiltZ = b.angle + Math.sin(_opTime * 1.0 + b.phase) * 0.04;
+            ctx.globalAlpha = 0.35 + (i === 0 ? 0.65 : i === 1 ? 0.4 : 0.2);
+            _drawBoat(ctx, b.x, bobY, b.size, tiltZ);
+            ctx.globalAlpha = 1;
+        });
+
+        _opTime += 0.016;
+        _opAnimFrame = requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+function renderOnePieceDash(d) {
+    const fin   = d.finance  || {};
+    const fit   = d.fitness  || {};
+    const hbts  = d.habits   || {};
+    const proj  = d.projects || {};
+    const jobs  = d.jobs     || {};
+    const quran = d.quran    || {};
+
+    const savRate  = fin.income > 0 ? Math.round((fin.income - fin.expenses) / fin.income * 100) : 0;
+    const memPct   = Math.round((quran.memorized || 0) / 114 * 100);
+    const stepPct  = fit.steps_goal ? Math.round((fit.steps_today || 0) / fit.steps_goal * 100) : 0;
+    const habitPct = hbts.total     ? Math.round((hbts.done_today || 0) / hbts.total * 100) : 0;
+
+    const islands = [
+        {
+            id: 'foosha',    section: 'finances',
+            name: 'Foosha Village',      arc: 'East Blue',
+            lore: 'Where Luffy set sail — your financial home base.',
+            emoji: '💰', color: '#e07c18', x: 13, y: 60, tooltipDown: false,
+            stats: [['NET WORTH',`€${(fin.net_worth||0).toLocaleString()}`],['INCOME',`+€${fin.income||0}`],['EXPENSES',`-€${fin.expenses||0}`],['SAVINGS',`${savRate}%`]]
+        },
+        {
+            id: 'skypiea',   section: 'quran',
+            name: 'Skypiea',             arc: 'Sky Island Arc',
+            lore: 'An island floating in the heavens — pursuit of divine knowledge.',
+            emoji: '📖', color: '#d4a820', x: 72, y: 24, tooltipDown: true,
+            stats: [['MEMORIZED',`${quran.memorized||0} / 114`],['PROGRESS',`${memPct}%`]]
+        },
+        {
+            id: 'water7',    section: 'projects',
+            name: 'Water 7',             arc: 'Water Seven Arc',
+            lore: 'City of master craftsmen — where great projects are forged.',
+            emoji: '🚀', color: '#3a7adb', x: 41, y: 50, tooltipDown: true,
+            stats: [['IN PROGRESS',`${proj.active||0}`],['DONE',`${proj.completed||0}`],['BACKLOG',`${proj.backlog||0}`]]
+        },
+        {
+            id: 'sabaody',   section: 'jobs',
+            name: 'Sabaody',             arc: 'Sabaody Archipelago',
+            lore: 'Gateway to the New World — where opportunities and rivals gather.',
+            emoji: '💼', color: '#22b8c8', x: 63, y: 57, tooltipDown: true,
+            stats: [['ACTIVE APPS',`${jobs.active||0}`],['TOTAL',`${jobs.total||0}`],['OFFERS',`${jobs.offers||0}`]]
+        },
+        {
+            id: 'wano',      section: 'fitness',
+            name: 'Wano Country',        arc: 'Wano Arc',
+            lore: 'Land of samurai warriors — where strength is forged every day.',
+            emoji: '💪', color: '#2db856', x: 24, y: 72, tooltipDown: false,
+            stats: [['STEPS TODAY',`${(fit.steps_today||0).toLocaleString()}`],['GOAL %',`${stepPct}%`],['STREAK',`${fit.activity_streak||0}d 🔥`],['SESSIONS WK',`${fit.activities_this_week||0}`]]
+        },
+        {
+            id: 'wholecake', section: 'habits',
+            name: 'Whole Cake Island',   arc: 'Whole Cake Arc',
+            lore: "Big Mom's perfectly organized kingdom — your habit stronghold.",
+            emoji: '🔥', color: '#a030d8', x: 84, y: 70, tooltipDown: false,
+            stats: [['DONE TODAY',`${hbts.done_today||0} / ${hbts.total||0}`],['COMPLETION',`${habitPct}%`]]
+        }
+    ];
+
+    document.getElementById('dash-content').innerHTML = `
+        <div class="op-skin">
+            <div class="op-canvas-wrap"><canvas id="op-canvas"></canvas></div>
+
+            <div class="op-hud">
+                <div class="op-hud-brand">⚓ Grand Line</div>
+                <div class="op-hud-divider"></div>
+                <div class="op-hud-stat">
+                    <span class="op-hud-stat-lbl">BOUNTY</span>
+                    <span class="op-hud-stat-val">€${(fin.net_worth||0).toLocaleString()}</span>
+                </div>
+                <div class="op-hud-divider"></div>
+                <div class="op-hud-stat">
+                    <span class="op-hud-stat-lbl">ISLANDS</span>
+                    <span class="op-hud-stat-val">6 CHARTED 🗺️</span>
+                </div>
+                <div class="op-hud-divider"></div>
+                <div class="op-hud-stat">
+                    <span class="op-hud-stat-lbl">STREAK</span>
+                    <span class="op-hud-stat-val">${fit.activity_streak||0}d 🔥</span>
+                </div>
+                <div class="op-hud-divider"></div>
+                <div class="op-hud-stat">
+                    <span class="op-hud-stat-lbl">LOCAL TIME</span>
+                    <span id="op-clock" class="op-hud-stat-val">--:--</span>
+                </div>
+            </div>
+
+            <div class="op-islands-layer">
+                ${islands.map(isl => `
+                    <div class="op-island-pin${isl.tooltipDown ? ' tooltip-down' : ''}"
+                         style="left:${isl.x}%;top:${isl.y}%;--ic:${isl.color}"
+                         data-island="${isl.id}"
+                         data-section="${isl.section}">
+                        <div class="op-island-tooltip">
+                            <div class="op-tt-name">${isl.name}</div>
+                            <div class="op-tt-arc">${isl.arc}</div>
+                            <div class="op-tt-lore">${isl.lore}</div>
+                            ${isl.stats.map(([k,v]) => `<div class="op-tt-stat"><span>${k}</span><strong>${v}</strong></div>`).join('')}
+                            <button class="op-tt-btn" style="background:${isl.color}"
+                                onclick="event.stopPropagation();navigate('${isl.section}')">⚓ ENTER ISLAND</button>
+                        </div>
+                        <div class="op-island-body" onclick="navigate('${isl.section}')">
+                            <span class="op-island-icon">${isl.emoji}</span>
+                        </div>
+                        <div class="op-island-label">${isl.name}</div>
+                    </div>`).join('')}
+            </div>
+
+            <!-- Compass Rose -->
+            <svg class="op-compass" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="56" fill="none" stroke="#8a5e0c" stroke-width="2" opacity="0.6"/>
+                <circle cx="60" cy="60" r="48" fill="rgba(245,230,148,0.15)" stroke="#a06820" stroke-width="1.5" opacity="0.5"/>
+                <!-- Cardinal spokes -->
+                <polygon points="60,8 65,52 55,52" fill="#6a1c04" opacity="0.9"/>
+                <polygon points="60,112 55,68 65,68" fill="#5a3008" opacity="0.7"/>
+                <polygon points="8,60 52,55 52,65" fill="#5a3008" opacity="0.7"/>
+                <polygon points="112,60 68,65 68,55" fill="#5a3008" opacity="0.7"/>
+                <!-- Intercardinal spokes -->
+                <polygon points="60,60 45,20 38,38" fill="#8a5e0c" opacity="0.5"/>
+                <polygon points="60,60 75,20 82,38" fill="#8a5e0c" opacity="0.5"/>
+                <polygon points="60,60 100,45 82,82" fill="#8a5e0c" opacity="0.3"/>
+                <polygon points="60,60 20,75 38,82" fill="#8a5e0c" opacity="0.3"/>
+                <!-- Center -->
+                <circle cx="60" cy="60" r="8" fill="#dfc870" stroke="#8a5e0c" stroke-width="1.5"/>
+                <circle cx="60" cy="60" r="4" fill="#6a1c04"/>
+                <!-- Cardinal letters -->
+                <text x="60" y="6" text-anchor="middle" fill="#6a1c04" font-family="Georgia,serif" font-size="11" font-weight="bold">N</text>
+                <text x="60" y="118" text-anchor="middle" fill="#5a3008" font-family="Georgia,serif" font-size="9">S</text>
+                <text x="116" y="64" text-anchor="middle" fill="#5a3008" font-family="Georgia,serif" font-size="9">E</text>
+                <text x="4" y="64" text-anchor="middle" fill="#5a3008" font-family="Georgia,serif" font-size="9">W</text>
+            </svg>
+
+            <div class="op-logpose">
+                <span class="op-logpose-label">Log Pose</span>
+                ${islands.map(isl => `<div class="op-logpose-dot" title="${isl.name}" onclick="event.stopPropagation();navigate('${isl.section}')"></div>`).join('')}
+            </div>
+        </div>`;
+
+    requestAnimationFrame(() => {
+        startOceanCanvas();
+        // JS-driven hover so canvas z-layering doesn't block CSS :hover
+        document.querySelectorAll('.op-island-pin').forEach(pin => {
+            const tt = pin.querySelector('.op-island-tooltip');
+            if (!tt) return;
+            pin.addEventListener('mouseenter', () => {
+                tt.style.opacity = '1';
+                tt.style.transform = 'translateX(-50%) translateY(0)';
+                tt.style.pointerEvents = 'all';
+                // scale-up island body
+                const body = pin.querySelector('.op-island-body');
+                if (body) body.style.transform = 'scale(1.22) translateY(-4px)';
+            });
+            pin.addEventListener('mouseleave', () => {
+                tt.style.opacity = '0';
+                tt.style.transform = 'translateX(-50%) translateY(6px)';
+                tt.style.pointerEvents = 'none';
+                const body = pin.querySelector('.op-island-body');
+                if (body) body.style.transform = '';
+            });
+        });
+    });
 }
 
 // ── Finances ──
@@ -4033,7 +4859,8 @@ const loaders = {
     fitness: loadFitness,
     learning: loadLearning,
     books: loadBooks,
-    habits: loadHabits
+    habits: loadHabits,
+    triathlon: loadTriathlon
 };
 
 // ── Reset Learning (delete everything) ──
@@ -4179,6 +5006,847 @@ async function deleteBook(id) {
     if (!confirm('Remove this book?')) return;
     await api('books/' + id, 'DELETE');
     loadBooks();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TRIATHLON JOURNEY — Sprint Triathlon Training OS
+// ══════════════════════════════════════════════════════════════
+
+const TRI_DATA = {
+  program: {
+    title: 'Couch to Sprint', subtitle: '12-week progressive plan',
+    weeks: 12, currentWeek: 7, raceDate: 'Jun 14, 2026', daysToRace: 58,
+  },
+  disciplines: [
+    {
+      id: 'swim', index: '01', name: 'Swim', distance: '750m', env: 'Open water / Pool', pace: '2:15 / 100m',
+      tagline: 'The great equalizer. Master breath, then everything else.',
+      summary: 'For most first-timers, swim is the scariest leg. We start in the pool — quiet, controlled — then graduate to open water in week 8.',
+      stats: [{ label: 'Target time', value: '16:52', unit: 'min' }, { label: 'Stroke rate', value: '58', unit: 'spm' }, { label: 'Breath pattern', value: '3/3', unit: 'bilateral' }],
+      progress: 62,
+      keyWorkouts: [
+        { name: 'CSS Test', duration: '30 min', focus: 'Critical Swim Speed benchmark', effort: 85, tag: 'Threshold' },
+        { name: 'Bilateral ladder', duration: '45 min', focus: 'Breath every 3 / 5 / 7', effort: 70, tag: 'Technique' },
+        { name: 'Open-water sighting', duration: '40 min', focus: 'Head-up freestyle every 6 strokes', effort: 60, tag: 'Race-specific' },
+        { name: 'Recovery drill set', duration: '25 min', focus: 'Catch-up, fist swim, 6-kick switch', effort: 40, tag: 'Recovery' },
+      ],
+      gear: [
+        { name: 'Wetsuit', detail: 'Sleeveless, 3mm neoprene', tier: 'essential', price: '€180' },
+        { name: 'Goggles', detail: 'Clear + mirrored pair', tier: 'essential', price: '€35' },
+        { name: 'Swim cap', detail: 'Silicone, race-provided', tier: 'essential', price: '€0' },
+        { name: 'Pull buoy', detail: 'For form drills', tier: 'training', price: '€18' },
+        { name: 'Tempo trainer', detail: 'Beeps for stroke cadence', tier: 'optional', price: '€35' },
+        { name: 'Anti-fog spray', detail: 'One small tube lasts a season', tier: 'optional', price: '€8' },
+      ],
+      tips: ['Exhale underwater — fully. Most panic starts with held breath.', 'Practice sighting every 6 strokes in the pool before open water.', 'Your wetsuit makes you float. Trust it.'],
+    },
+    {
+      id: 'bike', index: '02', name: 'Bike', distance: '20km', env: 'Road, closed or open', pace: '32 km/h',
+      tagline: 'Where races are won. Save the legs, spend the watts wisely.',
+      summary: 'The longest segment by time. Get aero, get comfortable, and do NOT empty the tank — you still have 5km to run.',
+      stats: [{ label: 'Target time', value: '37:30', unit: 'min' }, { label: 'Cadence', value: '88', unit: 'rpm' }, { label: 'Power zone', value: 'Z3', unit: 'tempo' }],
+      progress: 48,
+      keyWorkouts: [
+        { name: 'FTP Test (20min)', duration: '60 min', focus: 'Find your functional threshold power', effort: 95, tag: 'Threshold' },
+        { name: 'Sweet-spot intervals', duration: '75 min', focus: '4×8min @ 88-94% FTP', effort: 80, tag: 'Endurance' },
+        { name: 'Brick: bike + run', duration: '90 min', focus: '60min ride → 20min run off the bike', effort: 75, tag: 'Race-specific' },
+        { name: 'Long steady Z2', duration: '120 min', focus: 'Flat coffee ride, conversational', effort: 50, tag: 'Endurance' },
+      ],
+      gear: [
+        { name: 'Road bike', detail: 'Any road bike with drop bars — no tri bike needed', tier: 'essential', price: '€900+' },
+        { name: 'Helmet', detail: 'CPSC certified, replace every 5 years', tier: 'essential', price: '€65' },
+        { name: 'Cycling shoes + cleats', detail: 'SPD-SL or Look Keo', tier: 'essential', price: '€120' },
+        { name: 'Bib shorts', detail: 'One pair, high chamois quality', tier: 'essential', price: '€80' },
+        { name: 'Bottle cages ×2', detail: 'Front & down tube', tier: 'essential', price: '€20' },
+        { name: 'Clip-on aero bars', detail: 'Free speed if comfortable', tier: 'optional', price: '€75' },
+        { name: 'Bike computer', detail: 'For pacing via power/HR', tier: 'training', price: '€150' },
+      ],
+      tips: ['Stay in Z3 — not Z4. Your run depends on it.', 'Drink 500ml per hour. Start before you\'re thirsty.', 'Practice mounting and dismounting with shoes clipped to pedals.'],
+    },
+    {
+      id: 'run', index: '03', name: 'Run', distance: '5km', env: 'Road or trail', pace: '5:30 / km',
+      tagline: 'Legs like concrete. Keep moving anyway.',
+      summary: 'Only 5km — but off a 20km bike, the first kilometer feels impossible. Brick workouts are your secret weapon.',
+      stats: [{ label: 'Target time', value: '27:30', unit: 'min' }, { label: 'Cadence', value: '178', unit: 'spm' }, { label: 'Effort', value: 'Z3-Z4', unit: 'tempo' }],
+      progress: 71,
+      keyWorkouts: [
+        { name: '5k Time Trial', duration: '35 min', focus: 'Benchmark current fitness', effort: 92, tag: 'Threshold' },
+        { name: 'Brick: off-the-bike', duration: '30 min', focus: '2km easy right after any ride', effort: 70, tag: 'Race-specific' },
+        { name: 'Hill repeats', duration: '40 min', focus: '8×90s uphill, jog down', effort: 85, tag: 'Strength' },
+        { name: 'Easy long run', duration: '60 min', focus: 'Z2 only, full conversation pace', effort: 45, tag: 'Endurance' },
+      ],
+      gear: [
+        { name: 'Running shoes', detail: 'Neutral or stability — fitted at a run shop', tier: 'essential', price: '€130' },
+        { name: 'Elastic laces', detail: 'For fast transitions', tier: 'essential', price: '€6' },
+        { name: 'Tri suit', detail: 'Worn all 3 legs — swim, bike, run', tier: 'essential', price: '€160' },
+        { name: 'Race belt', detail: 'Holds number; no pinning to suit', tier: 'essential', price: '€12' },
+        { name: 'Running cap / visor', detail: 'Sun + sweat management', tier: 'optional', price: '€22' },
+        { name: 'GPS watch', detail: 'Track pace mid-race', tier: 'training', price: '€250' },
+      ],
+      tips: ['First km off the bike: short, quick steps. Don\'t push pace.', 'Pour water ON you at aid stations, not just IN you.', 'When legs lock up, it\'s the bike. Run through it — it clears.'],
+    },
+  ],
+  race: {
+    name: 'Valencia Sprint Triathlon', date: 'Saturday, June 14, 2026',
+    location: 'Playa de la Malvarrosa', temp: '21°C water / 26°C air', waveStart: '07:40',
+    timeline: [
+      { t: '04:30', event: 'Wake up', detail: 'Oats, banana, coffee. No new foods.' },
+      { t: '05:30', event: 'Leave for venue', detail: 'Tri suit on under warm layers.' },
+      { t: '06:00', event: 'Check in + body marking', detail: 'Bring timing chip, helmet, bib.' },
+      { t: '06:15', event: 'Rack bike, set T1/T2', detail: 'Follow your transition map exactly.' },
+      { t: '06:45', event: 'Warm-up swim', detail: '200m easy. Get the gasp out of the way.' },
+      { t: '07:30', event: 'Wave assembly', detail: 'Seeded by predicted swim time.' },
+      { t: '07:40', event: 'GO — Swim (750m)', detail: 'Start wide, sight every 6 strokes.' },
+      { t: '07:58', event: 'T1 — Swim to Bike', detail: 'Goggles off, wetsuit off, helmet FIRST.' },
+      { t: '08:37', event: 'Bike done (20km)', detail: 'Unclip early. Walk, don\'t run, the rack.' },
+      { t: '08:40', event: 'T2 — Bike to Run', detail: 'Shoes on, cap on, belt around waist.' },
+      { t: '09:10', event: 'FINISH (~1h 30m)', detail: 'Medal. Banana. Tears optional.' },
+    ],
+  },
+  transitions: {
+    t1: {
+      name: 'T1', from: 'Swim', to: 'Bike', target: '1:30',
+      steps: ['Goggles + cap off — stuff in wetsuit sleeve', 'Wetsuit down to waist while running to rack', 'Step out of wetsuit — use one hand on bike for balance', 'Helmet ON and buckled BEFORE you touch the bike', 'Sunglasses on', 'Run bike to mount line, mount past the line'],
+    },
+    t2: {
+      name: 'T2', from: 'Bike', to: 'Run', target: '0:45',
+      steps: ['Dismount BEFORE the dismount line', 'Run with bike to your rack spot', 'Rack bike by saddle or bars', 'Helmet off — only after bike is racked', 'Run shoes on (elastic laces = no tying)', 'Grab race belt + cap, go'],
+    },
+  },
+  weekPlan: [
+    { day: 'Mon', type: 'rest',  label: 'Rest',          duration: '',    detail: 'Mobility only' },
+    { day: 'Tue', type: 'swim',  label: 'Swim technique', duration: '45m', detail: 'Bilateral ladder' },
+    { day: 'Wed', type: 'bike',  label: 'Sweet spot',     duration: '75m', detail: '4×8min @ 90% FTP' },
+    { day: 'Thu', type: 'run',   label: 'Easy run',       duration: '40m', detail: 'Z2 + strides' },
+    { day: 'Fri', type: 'swim',  label: 'Open water',     duration: '60m', detail: 'Sighting practice' },
+    { day: 'Sat', type: 'brick', label: 'Brick',          duration: '2h',  detail: 'Bike 60 → Run 20' },
+    { day: 'Sun', type: 'run',   label: 'Long run',       duration: '55m', detail: 'Z2 conversational' },
+  ],
+};
+
+// ── Triathlon State ──
+const TRI = {
+  view: 'home',
+  disciplineTab: 'overview',
+  doneWorkouts: new Set([0, 1, 2]),
+  gearChecked: { swim: new Set(), bike: new Set(), run: new Set() },
+  activeTransition: 't1',
+  simRunning: false,
+  simStep: 0,
+  simTimer: null,
+  activeTimelineEvent: 5,
+};
+
+function loadTriathlon() { triRender(); }
+
+function triNav(v) {
+  TRI.view = v;
+  TRI.disciplineTab = 'overview';
+  triClearSim();
+  triRender();
+}
+
+function triRender() {
+  const el = document.getElementById('tri-shell');
+  if (!el) return;
+  const { view } = TRI;
+  const d = TRI_DATA;
+  el.innerHTML = triNavHTML(d) + '<div class="tri-content">' + (
+    view === 'home' ? triHomeHTML(d) :
+    (view === 'swim' || view === 'bike' || view === 'run') ? triDisciplineHTML(view, d) :
+    view === 'race' ? triRaceDayHTML(d) : ''
+  ) + '</div>';
+  triAttachListeners();
+}
+
+// ── Nav ──
+function triNavHTML(d) {
+  const views = [
+    { id: 'home', label: 'Journey' },
+    { id: 'swim', label: '01 · Swim' },
+    { id: 'bike', label: '02 · Bike' },
+    { id: 'run',  label: '03 · Run' },
+    { id: 'race', label: 'Race Day' },
+  ];
+  return `<nav class="tri-topnav">
+    <div class="tri-topnav-inner">
+      <div class="tri-logo">
+        <div class="tri-logo-box"><div class="tri-logo-inner"></div></div>
+        <div class="tri-logo-text">
+          <div class="tri-logo-title">TRI/OS</div>
+          <div class="tri-logo-sub">v1.0 — SPRINT</div>
+        </div>
+      </div>
+      <div class="tri-nav-buttons">
+        ${views.map(v => `<button class="tri-nav-btn${TRI.view === v.id ? ' active' : ''}" onclick="triNav('${v.id}')">${v.label}</button>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="text-align:right;">
+          <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">Race day</div>
+          <div class="tri-mono" style="font-size:12px;color:#e8f1ff;letter-spacing:0.5px;">${d.program.raceDate}</div>
+        </div>
+        <div class="tri-days-box">
+          <div class="tri-days-num">${String(d.program.daysToRace).padStart(2,'0')}</div>
+          <div class="tri-days-label">DAYS</div>
+        </div>
+      </div>
+    </div>
+  </nav>`;
+}
+
+// ── Home ──
+function triHomeHTML(d) {
+  const overall = Math.round(d.disciplines.reduce((s, x) => s + x.progress, 0) / d.disciplines.length);
+  return `
+    <!-- Hero -->
+    <section style="margin-bottom:80px;padding-bottom:40px;border-bottom:1px solid #1c3257;">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:60px;align-items:end;">
+        <div>
+          <div class="tri-eyebrow">Week ${d.program.currentWeek} of ${d.program.weeks} · On track</div>
+          <h1 class="tri-h1">
+            Three sports.<br>
+            <span style="color:#00d4ff;font-style:italic;">One finish line.</span>
+          </h1>
+          <p style="font-size:17px;color:#8ba3c7;max-width:560px;line-height:1.6;margin-top:20px;">
+            You've never raced a triathlon. In ${d.program.daysToRace} days, you will. This is your operating system
+            for the next two months — built for first-timers chasing a Sprint finish.
+          </p>
+        </div>
+        <div style="text-align:right;min-width:160px;">
+          <div class="tri-mono" style="font-size:11px;letter-spacing:2px;color:#4a6285;margin-bottom:10px;">OVERALL READINESS</div>
+          <div class="tri-mono" style="font-size:90px;color:#00d4ff;line-height:1;letter-spacing:-3px;">
+            ${overall}<span style="font-size:44px;color:#4a6285;">%</span>
+          </div>
+          <div class="tri-progress-bar" style="margin-top:14px;">
+            <div class="tri-progress-fill" style="width:${overall}%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Journey Map -->
+    <section style="margin-bottom:80px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:40px;">
+        <div>
+          <div class="tri-eyebrow">The journey</div>
+          <h2 class="tri-h2">Three disciplines, in order.</h2>
+        </div>
+        <div class="tri-mono" style="font-size:11px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">CLICK TO ENTER</div>
+      </div>
+      ${triJourneyMapSVG(d)}
+    </section>
+
+    <!-- Week + Today -->
+    <section style="display:grid;grid-template-columns:1.3fr 1fr;gap:40px;margin-bottom:80px;">
+      ${triWeekPlannerHTML(d)}
+      ${triTodayFocusHTML(d)}
+    </section>
+
+    <!-- Race Countdown -->
+    <section>
+      ${triRaceCountdownHTML(d)}
+    </section>
+  `;
+}
+
+function triJourneyMapSVG(d) {
+  const W = 1200, H = 260;
+  const stops = [
+    { ...d.disciplines[0], x: 110, y: 170 },
+    { ...d.disciplines[1], x: W * 0.38, y: 75 },
+    { ...d.disciplines[2], x: W * 0.68, y: 170 },
+    { id: 'race', name: 'Finish', x: W - 100, y: 95, progress: null, index: 'FIN' },
+  ];
+  const path = `M ${stops[0].x} ${stops[0].y} C ${stops[0].x+130} ${stops[0].y-35}, ${stops[1].x-90} ${stops[1].y+20}, ${stops[1].x} ${stops[1].y} S ${stops[2].x-90} ${stops[2].y-30}, ${stops[2].x} ${stops[2].y} S ${stops[3].x-90} ${stops[3].y+20}, ${stops[3].x} ${stops[3].y}`;
+  const stopsHTML = stops.map(s => {
+    const isRace = s.id === 'race';
+    const color = isRace ? '#ffb84a' : '#00d4ff';
+    const navId = isRace ? 'race' : s.id;
+    return `
+      <g style="cursor:pointer;" onclick="triNav('${navId}')">
+        <circle cx="${s.x}" cy="${s.y}" r="26" fill="${isRace ? 'rgba(255,184,74,0.08)' : 'rgba(0,212,255,0.08)'}"/>
+        <circle cx="${s.x}" cy="${s.y}" r="22" fill="none" stroke="${color}" stroke-width="1"/>
+        <circle cx="${s.x}" cy="${s.y}" r="14" fill="#0a1628" stroke="${color}" stroke-width="1"/>
+        <text x="${s.x}" y="${s.y+4}" text-anchor="middle" font-size="9" fill="${color}" font-family="JetBrains Mono,monospace" letter-spacing="1">${s.index}</text>
+        <text x="${s.x}" y="${s.y+52}" text-anchor="middle" font-size="11" fill="#e8f1ff" font-family="JetBrains Mono,monospace" letter-spacing="2">${s.name.toUpperCase()}</text>
+        ${!isRace ? `
+          <rect x="${s.x-28}" y="${s.y+62}" width="56" height="2" fill="#1c3257"/>
+          <rect x="${s.x-28}" y="${s.y+62}" width="${56 * s.progress / 100}" height="2" fill="#00d4ff"/>
+          <text x="${s.x}" y="${s.y+80}" text-anchor="middle" font-size="8" fill="#4a6285" font-family="JetBrains Mono,monospace" letter-spacing="1.5">${s.progress}% READY</text>
+        ` : ''}
+      </g>`;
+  }).join('');
+  const labels = [
+    { x: (stops[0].x + stops[1].x) / 2, y: 36, label: '750 M' },
+    { x: (stops[1].x + stops[2].x) / 2, y: 36, label: '20 KM' },
+    { x: (stops[2].x + stops[3].x) / 2, y: 36, label: '5 KM' },
+  ];
+  return `<div style="position:relative;width:100%;">
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">
+      <defs>
+        <pattern id="tri-grid-sub" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1c3257" stroke-width="0.5" opacity="0.6"/>
+        </pattern>
+      </defs>
+      <rect width="${W}" height="${H}" fill="url(#tri-grid-sub)"/>
+      <line x1="44" y1="${H-36}" x2="${W-44}" y2="${H-36}" stroke="#2d4875" stroke-dasharray="2 4"/>
+      <text x="44" y="${H-18}" font-size="9" fill="#4a6285" font-family="JetBrains Mono,monospace" letter-spacing="1.5">START · 0 KM</text>
+      <text x="${W-44}" y="${H-18}" font-size="9" fill="#4a6285" font-family="JetBrains Mono,monospace" letter-spacing="1.5" text-anchor="end">FINISH · 25.75 KM</text>
+      <path d="${path}" fill="none" stroke="#00d4ff" stroke-width="1" opacity="0.15" stroke-dasharray="4 4"/>
+      <path d="${path}" fill="none" stroke="#00d4ff" stroke-width="2" opacity="0.9"
+        stroke-dasharray="2000" stroke-dashoffset="2000"
+        style="animation: triDrawLine 1.8s cubic-bezier(0.2,0.9,0.2,1) forwards;"/>
+      ${labels.map(l => `
+        <text x="${l.x}" y="${l.y}" font-size="10" fill="#00d4ff" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="2">${l.label}</text>
+        <line x1="${l.x-18}" y1="${l.y+5}" x2="${l.x+18}" y2="${l.y+5}" stroke="#00d4ff" opacity="0.4"/>
+      `).join('')}
+      ${stopsHTML}
+    </svg>
+  </div>`;
+}
+
+function triWeekPlannerHTML(d) {
+  const sportColor = { rest: '#4a6285', swim: '#00d4ff', bike: '#00d4ff', run: '#00d4ff', brick: '#ffb84a' };
+  return `<div>
+    <div class="tri-eyebrow">This week · Week 07</div>
+    <h2 class="tri-h2" style="font-size:28px;margin-bottom:24px;">Seven days. Five workouts. Two rests.</h2>
+    <div style="display:flex;border:1px solid #1c3257;">
+      ${d.weekPlan.map((day, i) => {
+        const isDone = TRI.doneWorkouts.has(i);
+        const isToday = i === 3;
+        const color = sportColor[day.type];
+        return `<button onclick="triToggleDay(${i})" style="
+          flex:1;padding:16px 10px 14px;border-left:${i===0?'none':'1px solid #1c3257'};
+          background:${isToday?'rgba(0,212,255,0.06)':'transparent'};
+          text-align:left;position:relative;cursor:pointer;border-top:none;border-right:none;border-bottom:none;
+          color:#e8f1ff;transition:background 0.2s;"
+          onmouseenter="if(${!isToday})this.style.background='rgba(255,255,255,0.02)'"
+          onmouseleave="if(${!isToday})this.style.background='${isToday?'rgba(0,212,255,0.06)':'transparent'}'">
+          ${isToday ? `<div style="position:absolute;top:0;left:0;right:0;height:2px;background:#00d4ff;"></div>` : ''}
+          <div class="tri-mono" style="font-size:9px;letter-spacing:2px;color:${isToday?'#00d4ff':'#4a6285'};text-transform:uppercase;">${day.day}${isToday?' · NOW':''}</div>
+          <div style="margin:12px 0 6px;">
+            <div style="width:18px;height:18px;border:1px solid ${isDone?color:'#2d4875'};background:${isDone?color:'transparent'};display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+              ${isDone ? `<span style="color:#0a1628;font-size:11px;font-weight:700;">✓</span>` : ''}
+            </div>
+          </div>
+          <div style="font-size:12px;color:#e8f1ff;font-weight:500;line-height:1.3;">${day.label}</div>
+          <div class="tri-mono" style="font-size:9px;color:#4a6285;margin-top:3px;">${day.duration}</div>
+        </button>`;
+      }).join('')}
+    </div>
+    <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:1.5px;margin-top:12px;text-transform:uppercase;">
+      Click any day to toggle · ${TRI.doneWorkouts.size}/7 complete
+    </div>
+  </div>`;
+}
+
+function triTodayFocusHTML(d) {
+  return `<div class="tri-card" style="padding:28px;">
+    <div class="tri-card-accent-top"></div>
+    <div class="tri-eyebrow">Today · Thursday</div>
+    <h3 style="font-family:Georgia,serif;font-size:22px;font-weight:400;margin-top:10px;letter-spacing:-0.3px;">Easy run with strides.</h3>
+    <div class="tri-mono" style="font-size:10px;color:#8ba3c7;letter-spacing:1px;margin-top:4px;">40 MIN · Z2 · CONVERSATIONAL</div>
+    <div style="margin-top:28px;display:flex;flex-direction:column;gap:14px;">
+      ${[['0:00 – 5:00','Easy jog warm-up'],['5:00 – 35:00','Steady Z2 (HR 130–145)'],['35:00 – 40:00','6× 20s strides, jog recovery']].map(([t,l]) => `
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="tri-mono" style="font-size:10px;color:#00d4ff;letter-spacing:1px;min-width:82px;">${t}</div>
+          <div style="flex:1;height:1px;background:#1c3257;"></div>
+          <div style="font-size:12px;color:#8ba3c7;flex-shrink:0;">${l}</div>
+        </div>`).join('')}
+    </div>
+    <button class="tri-btn tri-btn-primary" style="margin-top:28px;width:100%;justify-content:center;">
+      ▶ Start workout
+    </button>
+  </div>`;
+}
+
+function triRaceCountdownHTML(d) {
+  return `<div class="tri-card" style="padding:48px;overflow:hidden;">
+    <div style="position:absolute;top:-80px;right:-80px;width:300px;height:300px;border:1px solid #00d4ff;border-radius:50%;opacity:0.08;pointer-events:none;"></div>
+    <div style="position:absolute;top:-40px;right:-40px;width:220px;height:220px;border:1px solid #00d4ff;border-radius:50%;opacity:0.15;pointer-events:none;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;">
+      <div>
+        <div class="tri-eyebrow tri-eyebrow-warn">The finish line</div>
+        <h2 class="tri-h2" style="margin-top:14px;">${d.race.name}.</h2>
+        <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:24px;">
+          ${[['Date',d.race.date],['Location',d.race.location],['Conditions',d.race.temp],['Wave start',d.race.waveStart]].map(([l,v]) => `
+            <div>
+              <div class="tri-mono" style="font-size:9px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">${l}</div>
+              <div class="tri-mono" style="font-size:12px;color:#e8f1ff;margin-top:3px;">${v}</div>
+            </div>`).join('')}
+        </div>
+        <button class="tri-btn tri-btn-outline-warn" style="margin-top:36px;" onclick="triNav('race')">
+          Open race-day simulator →
+        </button>
+      </div>
+      <div style="text-align:center;">
+        <div class="tri-mono" style="font-size:10px;letter-spacing:3px;color:#ffb84a;text-transform:uppercase;margin-bottom:10px;">T–MINUS</div>
+        <div style="font-family:Georgia,serif;font-size:clamp(80px,12vw,160px);line-height:1;color:#e8f1ff;letter-spacing:-6px;font-style:italic;">${d.program.daysToRace}</div>
+        <div class="tri-mono" style="font-size:11px;letter-spacing:3px;color:#8ba3c7;text-transform:uppercase;margin-top:8px;">DAYS · 8 WEEKS · 55 WORKOUTS</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Discipline ──
+function triDisciplineHTML(id, d) {
+  const disc = d.disciplines.find(x => x.id === id);
+  const tab = TRI.disciplineTab;
+  const nextId = id === 'swim' ? 'bike' : id === 'bike' ? 'run' : 'race';
+  const prevId = id === 'run' ? 'bike' : id === 'bike' ? 'swim' : null;
+  return `
+    <!-- Breadcrumb -->
+    <div class="tri-breadcrumb">
+      <button class="tri-back-btn" onclick="triNav('home')">← Journey</button>
+      <span class="tri-mono" style="color:#4a6285;font-size:11px;">/</span>
+      <span class="tri-mono" style="font-size:11px;letter-spacing:1.5px;color:#00d4ff;text-transform:uppercase;">${disc.index} · ${disc.name}</span>
+    </div>
+
+    <!-- Masthead -->
+    <section style="margin-bottom:40px;padding-bottom:36px;border-bottom:1px solid #1c3257;">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:72px;align-items:end;">
+        <div>
+          <div class="tri-eyebrow">${disc.index} · ${disc.distance} · ${disc.env}</div>
+          <h1 class="tri-h1" style="font-size:clamp(48px,7vw,90px);margin-top:18px;">${disc.name}</h1>
+          <p style="font-size:15px;color:#8ba3c7;max-width:480px;line-height:1.6;margin-top:16px;">${disc.summary}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          ${disc.stats.map((s, i) => `<div class="tri-stat-tile${i===0?' accent':''}">
+            <div class="tri-stat-label">${s.label}</div>
+            <div style="display:flex;align-items:baseline;margin-top:8px;">
+              <div class="tri-stat-value">${s.value}</div>
+              <span class="tri-stat-unit">${s.unit}</span>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <!-- Progress -->
+      <div style="margin-top:32px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">Training readiness</div>
+          <div class="tri-mono" style="font-size:10px;color:#00d4ff;letter-spacing:1px;">${disc.progress}%</div>
+        </div>
+        <div class="tri-progress-bar">
+          <div class="tri-progress-fill" style="width:${disc.progress}%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sub-nav tabs -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;">
+      <div class="tri-tab-bar">
+        ${['overview','workouts','gear','tips'].map(t => `
+          <button class="tri-tab-btn${tab===t?' active':''}" onclick="triSetTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</button>
+        `).join('')}
+      </div>
+      <div style="display:flex;gap:8px;">
+        ${prevId ? `<button class="tri-btn tri-btn-ghost" style="padding:10px 16px;font-size:10px;" onclick="triNav('${prevId}')">← ${prevId.charAt(0).toUpperCase()+prevId.slice(1)}</button>` : ''}
+        <button class="tri-btn tri-btn-outline" style="padding:10px 16px;font-size:10px;" onclick="triNav('${nextId}')">${nextId==='race'?'Race Day →':nextId.charAt(0).toUpperCase()+nextId.slice(1)+' →'}</button>
+      </div>
+    </div>
+
+    <!-- Tab content -->
+    ${tab === 'overview' ? triDisciplineOverview(disc, id) : ''}
+    ${tab === 'workouts' ? triDisciplineWorkouts(disc) : ''}
+    ${tab === 'gear' ? triDisciplineGear(disc, id) : ''}
+    ${tab === 'tips' ? triDisciplineTips(disc) : ''}
+  `;
+}
+
+function triDisciplineOverview(d, id) {
+  const mapContent = id === 'swim' ? triSwimMap() : id === 'bike' ? triBikeChart() : triRunZones();
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;">
+    <div>
+      <div class="tri-eyebrow" style="margin-bottom:24px;">About this leg</div>
+      <p style="font-size:15px;color:#8ba3c7;line-height:1.7;margin-bottom:28px;">${d.summary}</p>
+      <div style="padding:24px;border:1px solid #1c3257;background:rgba(0,212,255,0.04);">
+        <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:16px;">Tagline</div>
+        <div style="font-family:Georgia,serif;font-size:22px;color:#e8f1ff;font-style:italic;line-height:1.4;">"${d.tagline}"</div>
+      </div>
+    </div>
+    <div class="tri-card" style="padding:0;overflow:hidden;">
+      <div class="tri-card-accent-top"></div>
+      ${mapContent}
+    </div>
+  </div>`;
+}
+
+function triSwimMap() {
+  return `<div style="padding:28px;">
+    <div class="tri-eyebrow" style="margin-bottom:20px;">Course overview</div>
+    <svg viewBox="0 0 340 220" style="width:100%;height:auto;display:block;">
+      <rect width="340" height="220" fill="#0e1d33"/>
+      <!-- Water -->
+      <rect x="20" y="20" width="300" height="160" rx="4" fill="rgba(0,212,255,0.08)" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4 4"/>
+      <!-- Buoys -->
+      <circle cx="60" cy="50" r="8" fill="none" stroke="#ffb84a" stroke-width="2"/>
+      <text x="60" y="54" text-anchor="middle" font-size="8" fill="#ffb84a" font-family="JetBrains Mono,monospace">T1</text>
+      <circle cx="280" cy="50" r="8" fill="none" stroke="#ffb84a" stroke-width="2"/>
+      <circle cx="280" cy="150" r="8" fill="none" stroke="#00d4ff" stroke-width="2"/>
+      <circle cx="60" cy="150" r="8" fill="none" stroke="#00d4ff" stroke-width="2"/>
+      <!-- Path -->
+      <path d="M 60 50 L 280 50 L 280 150 L 60 150 L 60 50" fill="none" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.7"/>
+      <text x="170" y="115" text-anchor="middle" font-size="10" fill="#4a6285" font-family="JetBrains Mono,monospace">750 m rectangular course</text>
+      <text x="170" y="205" text-anchor="middle" font-size="9" fill="#4a6285" font-family="JetBrains Mono,monospace" letter-spacing="1.5">OPEN WATER / POOL TRAINING</text>
+    </svg>
+  </div>`;
+}
+
+function triBikeChart() {
+  const heights = [30,45,60,80,55,90,70,65,50,40,35,55,75,88,60];
+  const W = 340, H = 140, n = heights.length, bw = (W-48)/(n*1.4);
+  return `<div style="padding:28px;">
+    <div class="tri-eyebrow" style="margin-bottom:20px;">Elevation profile</div>
+    <svg viewBox="0 0 ${W} ${H+40}" style="width:100%;height:auto;display:block;">
+      <rect width="${W}" height="${H+40}" fill="#0e1d33"/>
+      <path d="${heights.map((h,i)=>{const x=24+i*(W-48)/n;const y=H-h;return (i===0?'M':'L')+x+' '+y;}).join(' ')} L ${24+(n-1)*(W-48)/n} ${H} L 24 ${H} Z"
+        fill="rgba(0,212,255,0.15)" stroke="#00d4ff" stroke-width="1.5"/>
+      <text x="${W/2}" y="${H+32}" text-anchor="middle" font-size="9" fill="#4a6285" font-family="JetBrains Mono,monospace" letter-spacing="1.5">20 KM · ROLLING · AVG 32 KM/H</text>
+      <text x="24" y="${H-heights[0]+14}" font-size="8" fill="#00d4ff" font-family="JetBrains Mono,monospace">↑ 280m</text>
+    </svg>
+  </div>`;
+}
+
+function triRunZones() {
+  const zones = [['Z1','Easy',15,'#4aff9d'],['Z2','Aerobic',30,'#00d4ff'],['Z3','Tempo',35,'#ffb84a'],['Z4','Threshold',15,'#ff4a6e'],['Z5','VO2max',5,'#ff2a4a']];
+  return `<div style="padding:28px;">
+    <div class="tri-eyebrow" style="margin-bottom:20px;">Heart rate zones</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+      ${zones.map(([z,l,pct,c])=>`
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="tri-mono" style="font-size:9px;color:${c};width:20px;">${z}</div>
+          <div style="flex:1;background:#1c3257;height:8px;position:relative;">
+            <div style="position:absolute;inset:0;right:${100-pct}%;background:${c};opacity:0.8;"></div>
+          </div>
+          <div class="tri-mono" style="font-size:9px;color:#4a6285;width:60px;">${l}</div>
+          <div class="tri-mono" style="font-size:9px;color:${c};width:28px;">${pct}%</div>
+        </div>`).join('')}
+    </div>
+    <div class="tri-mono" style="font-size:9px;color:#4a6285;margin-top:20px;letter-spacing:1.5px;text-transform:uppercase;">TARGET: Z3–Z4 DURING RACE</div>
+  </div>`;
+}
+
+function triDisciplineWorkouts(d) {
+  return `<div style="display:flex;flex-direction:column;gap:2px;">
+    ${d.keyWorkouts.map((w, i) => {
+      const tagKey = w.tag.toLowerCase().replace(/[^a-z]/g,'');
+      const bars = 12, filled = Math.round(w.effort/100*bars);
+      const effortBars = Array.from({length:bars}).map((_,j) => {
+        const color = j < filled ? (j<4?'#4aff9d':j<8?'#00d4ff':j<10?'#ffb84a':'#ff4a6e') : '#2d4875';
+        return `<div style="width:3px;height:${6+j*1.2}px;background:${color};"></div>`;
+      }).join('');
+      return `<div style="padding:22px 24px;border:1px solid #1c3257;border-top:${i===0?'1px solid #1c3257':'none'};display:flex;gap:20px;align-items:center;transition:background 0.2s;"
+        onmouseenter="this.style.background='rgba(0,212,255,0.04)'" onmouseleave="this.style.background='transparent'">
+        <div class="tri-mono" style="font-size:28px;color:#2d4875;min-width:28px;">0${i+1}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <div style="font-size:15px;font-weight:600;color:#e8f1ff;">${w.name}</div>
+            <span class="tri-tag tri-tag-${tagKey}">${w.tag}</span>
+          </div>
+          <div style="font-size:13px;color:#8ba3c7;">${w.focus}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div class="tri-mono" style="font-size:11px;color:#4a6285;margin-bottom:8px;">${w.duration}</div>
+          <div style="display:flex;gap:2px;align-items:flex-end;justify-content:flex-end;">${effortBars}</div>
+          <div class="tri-mono" style="font-size:9px;color:#4a6285;margin-top:4px;letter-spacing:1px;">EFFORT ${w.effort}%</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function triDisciplineGear(d, id) {
+  const tiers = ['essential', 'training', 'optional'];
+  const tierLabel = { essential: '✦ Essential', training: '◈ Training', optional: '◇ Optional' };
+  const checked = TRI.gearChecked[id];
+  return `<div style="display:flex;flex-direction:column;gap:24px;">
+    ${tiers.map(tier => {
+      const items = d.gear.filter(g => g.tier === tier);
+      if (!items.length) return '';
+      return `<div>
+        <div class="tri-eyebrow" style="margin-bottom:16px;color:${tier==='essential'?'#00d4ff':tier==='training'?'#4aff9d':'#4a6285'};">${tierLabel[tier]}</div>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          ${items.map((g, i) => {
+            const idx = d.gear.indexOf(g);
+            const isChecked = checked.has(idx);
+            return `<div class="tri-gear-tier-${tier}" style="padding:16px 20px;border:1px solid;border-top:${i===0?'1px solid':'none'};display:flex;align-items:center;gap:16px;cursor:pointer;"
+              onclick="triToggleGear('${id}', ${idx})">
+              <div style="width:22px;height:22px;border:1px solid ${tier==='essential'?'#00d4ff':tier==='training'?'#4aff9d':'#2d4875'};background:${isChecked?(tier==='essential'?'#00d4ff':tier==='training'?'#4aff9d':'#4a6285'):'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;">
+                ${isChecked ? `<span style="color:#0a1628;font-size:12px;font-weight:700;">✓</span>` : ''}
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:600;color:${isChecked?'#4a6285':'#e8f1ff'};${isChecked?'text-decoration:line-through;':''}">${g.name}</div>
+                <div style="font-size:12px;color:#4a6285;margin-top:2px;">${g.detail}</div>
+              </div>
+              <div class="tri-mono" style="font-size:12px;color:${tier==='essential'?'#00d4ff':tier==='training'?'#4aff9d':'#4a6285'};flex-shrink:0;">${g.price}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+    <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">
+      ${d.gear.filter((_,i) => checked.has(i)).length}/${d.gear.length} items packed
+    </div>
+  </div>`;
+}
+
+function triDisciplineTips(d) {
+  return `<div style="display:flex;flex-direction:column;gap:16px;">
+    ${d.tips.map((tip, i) => `
+      <div style="padding:28px 32px;border:1px solid #1c3257;border-left:3px solid #00d4ff;background:rgba(0,212,255,0.03);position:relative;">
+        <div class="tri-mono" style="font-size:48px;color:#1c3257;position:absolute;top:16px;right:20px;line-height:1;">0${i+1}</div>
+        <div style="font-size:16px;color:#e8f1ff;line-height:1.6;max-width:640px;">${tip}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+// ── Race Day ──
+function triRaceDayHTML(d) {
+  const trans = d.transitions[TRI.activeTransition];
+  const active = d.race.timeline[TRI.activeTimelineEvent];
+  return `
+    <!-- Breadcrumb -->
+    <div class="tri-breadcrumb">
+      <button class="tri-back-btn" onclick="triNav('home')">← Journey</button>
+      <span class="tri-mono" style="color:#4a6285;font-size:11px;">/</span>
+      <span class="tri-mono" style="font-size:11px;letter-spacing:1.5px;color:#ffb84a;text-transform:uppercase;">RACE · FIN</span>
+    </div>
+
+    <!-- Masthead -->
+    <section style="margin-bottom:56px;padding-bottom:40px;border-bottom:1px solid #1c3257;">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:72px;align-items:end;">
+        <div>
+          <div class="tri-eyebrow tri-eyebrow-warn">${d.program.daysToRace} days from today</div>
+          <h1 class="tri-h1">Race day<span style="color:#ffb84a;font-style:italic;">.</span></h1>
+          <p style="font-size:16px;color:#8ba3c7;max-width:520px;line-height:1.6;margin-top:20px;">
+            Every decision for the next two months rolls up to one morning. Here's what it looks like,
+            minute by minute — from 4:30 wake-up to the finish line.
+          </p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;">
+          ${[['Total duration','~1h 30m'],['Wake to start','3h 10m'],['Swim','18:00'],['Bike','37:30'],['Run','27:30'],['T1 + T2','2:15']].map(([l,v])=>`
+            <div style="padding:14px 18px;border:1px solid #1c3257;">
+              <div class="tri-mono" style="font-size:9px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">${l}</div>
+              <div class="tri-mono" style="font-size:18px;color:#e8f1ff;margin-top:5px;">${v}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <section style="margin-bottom:80px;">
+      <div class="tri-eyebrow tri-eyebrow-warn">Minute-by-minute</div>
+      <h2 class="tri-h2" style="margin-bottom:40px;">Your entire morning, on one timeline.</h2>
+      <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:40px;">
+        <div>
+          ${d.race.timeline.map((e,i) => {
+            const isActive = i === TRI.activeTimelineEvent;
+            const isPast = i < TRI.activeTimelineEvent;
+            const isRaceEvent = /GO|FINISH|T1|T2|Bike done/.test(e.event);
+            return `<button class="tri-timeline-item${isActive?' active':''}" onclick="triSetTimeline(${i})">
+              <div class="tri-mono" style="font-size:11px;color:${isActive?'#ffb84a':isPast?'#4a6285':'#8ba3c7'};letter-spacing:1px;min-width:48px;">${e.t}</div>
+              <div style="flex:1;font-size:13px;color:${isActive?'#e8f1ff':isPast?'#4a6285':'#8ba3c7'};font-weight:${isActive||isRaceEvent?600:400};text-align:left;">${e.event}</div>
+              ${isRaceEvent&&!isActive?`<div style="width:6px;height:6px;border-radius:50%;background:#ffb84a;flex-shrink:0;"></div>`:''}
+            </button>`;
+          }).join('')}
+        </div>
+        <div class="tri-card" style="padding:40px;animation:triPageIn 300ms;" id="tri-timeline-detail">
+          <div class="tri-card-accent-top tri-card-accent-top-warn"></div>
+          <div class="tri-mono" style="font-size:10px;color:#ffb84a;letter-spacing:3px;margin-bottom:18px;">${active.t} · EVENT ${String(TRI.activeTimelineEvent+1).padStart(2,'0')}</div>
+          <h3 style="font-family:Georgia,serif;font-size:36px;font-weight:400;letter-spacing:-0.8px;">${active.event}</h3>
+          <div style="margin-top:20px;font-size:16px;color:#8ba3c7;line-height:1.6;">${active.detail}</div>
+          <div style="margin-top:36px;padding-top:22px;border-top:1px solid #1c3257;display:flex;gap:10px;">
+            <button class="tri-btn tri-btn-ghost" style="padding:10px 16px;font-size:10px;${TRI.activeTimelineEvent===0?'opacity:0.3;cursor:default;':''}" onclick="triSetTimeline(${Math.max(0,TRI.activeTimelineEvent-1)})">← Prev</button>
+            <button class="tri-btn tri-btn-outline-warn" style="padding:10px 16px;font-size:10px;${TRI.activeTimelineEvent===d.race.timeline.length-1?'opacity:0.3;cursor:default;':''}" onclick="triSetTimeline(${Math.min(d.race.timeline.length-1,TRI.activeTimelineEvent+1)})">Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transition Simulator -->
+    <section>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;flex-wrap:wrap;gap:16px;">
+        <div>
+          <div class="tri-eyebrow">T1 · T2 · simulator</div>
+          <h2 class="tri-h2">The fourth discipline: transitions.</h2>
+        </div>
+        <div class="tri-tab-bar">
+          <button class="tri-tab-btn${TRI.activeTransition==='t1'?' active':''}" onclick="triSetTransition('t1')">T1 · Swim → Bike</button>
+          <button class="tri-tab-btn${TRI.activeTransition==='t2'?' active':''}" onclick="triSetTransition('t2')">T2 · Bike → Run</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;">
+        <!-- Steps -->
+        <div class="tri-card" style="padding:28px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;">
+            <div>
+              <div class="tri-mono" style="font-size:9px;color:#4a6285;letter-spacing:2px;text-transform:uppercase;">Target time</div>
+              <div class="tri-mono" style="font-size:40px;color:#00d4ff;letter-spacing:-0.5px;margin-top:4px;">${trans.target}</div>
+            </div>
+            <button class="tri-btn${TRI.simRunning?' tri-btn-ghost':' tri-btn-primary'}" id="tri-sim-btn" onclick="triStartSim()" ${TRI.simRunning?'disabled':''} style="padding:12px 20px;font-size:10px;">
+              ${TRI.simRunning?'Running…':'▶ Run simulation'}
+            </button>
+          </div>
+          <div id="tri-sim-steps">
+            ${trans.steps.map((step, i) => {
+              const isDone = TRI.simRunning && i < TRI.simStep;
+              const isCurrent = TRI.simRunning && i === TRI.simStep;
+              return `<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #1c3257;${TRI.simRunning&&!isDone&&!isCurrent?'opacity:0.35;':''};transition:opacity 0.3s,background 0.3s;${isCurrent?'background:rgba(0,212,255,0.08);padding-left:10px;':''}">
+                <div style="width:24px;height:24px;flex-shrink:0;border:1px solid ${isDone||isCurrent?'#00d4ff':'#2d4875'};background:${isDone?'#00d4ff':'transparent'};display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+                  ${isDone?`<span style="color:#0a1628;font-size:11px;font-weight:700;">✓</span>`:
+                    `<span class="tri-mono" style="font-size:9px;color:${isCurrent?'#00d4ff':'#4a6285'};">${i+1}</span>`}
+                </div>
+                <div style="flex:1;font-size:13px;color:${isCurrent?'#e8f1ff':'#8ba3c7'};line-height:1.4;">${step}</div>
+                ${isCurrent?`<div class="tri-mono" style="font-size:9px;color:#00d4ff;letter-spacing:1.5px;">NOW</div>`:''}
+              </div>`;
+            }).join('')}
+          </div>
+          <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:1.5px;margin-top:16px;">
+            STEP ${TRI.simRunning?Math.min(TRI.simStep+1,trans.steps.length):'—'}/${trans.steps.length}
+          </div>
+        </div>
+        <!-- Visual map -->
+        ${triTransitionMapSVG(TRI.activeTransition, trans)}
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div style="margin-top:80px;padding-top:36px;border-top:1px solid #1c3257;text-align:center;">
+      <div style="font-family:Georgia,serif;font-size:clamp(32px,5vw,60px);font-weight:400;letter-spacing:-1px;font-style:italic;">"The only way out is through."</div>
+      <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:2px;margin-top:20px;text-transform:uppercase;">${d.program.daysToRace} days · 55 workouts · One finish line</div>
+    </div>
+  `;
+}
+
+function triTransitionMapSVG(transId, t) {
+  const isT1 = transId === 't1';
+  const step = TRI.simRunning ? Math.min(TRI.simStep, t.steps.length) : -1;
+  const gearVisible = isT1 ? {
+    helmet: step < 4, bike: step < 6, goggles: step < 1, wetsuit: step < 3, sunglasses: step < 5
+  } : {
+    bike: step < 3, helmet: step < 4, runShoes: step < 5, beltCap: step < 6
+  };
+  return `<div class="tri-card" style="padding:28px;min-height:440px;display:flex;flex-direction:column;">
+    <div class="tri-card-accent-top"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+      <div class="tri-eyebrow">${t.name} · overhead view</div>
+      <div class="tri-mono" style="font-size:9px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">RACK · LANE 12</div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+      <svg viewBox="0 0 380 380" style="width:100%;max-width:380px;height:auto;">
+        <defs>
+          <pattern id="tri-ground" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1c3257" stroke-width="0.5" opacity="0.6"/>
+          </pattern>
+        </defs>
+        <rect width="380" height="380" fill="#0e1d33"/>
+        <rect width="380" height="380" fill="url(#tri-ground)" opacity="0.5"/>
+        <!-- Rack -->
+        <line x1="40" y1="150" x2="340" y2="150" stroke="#2d4875" stroke-width="3"/>
+        <text x="190" y="136" text-anchor="middle" font-size="9" fill="#4a6285" font-family="JetBrains Mono,monospace" letter-spacing="1.5">BIKE RACK</text>
+        <!-- Approach -->
+        <path d="${isT1?'M 60 360 L 190 280 L 190 210':'M 320 360 L 190 280 L 190 210'}" fill="none" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>
+        <text x="${isT1?60:320}" y="376" font-size="9" fill="#00d4ff" font-family="JetBrains Mono,monospace" letter-spacing="1" text-anchor="${isT1?'start':'end'}">${isT1?'← FROM SWIM':'← FROM BIKE'}</text>
+        <!-- Towel -->
+        <rect x="150" y="180" width="80" height="56" fill="none" stroke="#2d4875" stroke-dasharray="3 3"/>
+        <text x="190" y="212" text-anchor="middle" font-size="8" fill="#4a6285" font-family="JetBrains Mono,monospace" letter-spacing="1">YOUR TOWEL</text>
+        <!-- Helmet -->
+        ${triGearRect(168, 143, 40, 18, 'HELMET', '#ffb84a', gearVisible.helmet, step===(isT1?4:4))}
+        <!-- Bike icon -->
+        <g opacity="${gearVisible.bike?1:0.2}" transform="translate(210,133)">
+          <circle cx="0" cy="18" r="9" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+          <circle cx="28" cy="18" r="9" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+          <path d="M 0 18 L 9 5 L 22 13 L 28 18 M 9 5 L 18 5" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+          <text x="14" y="42" text-anchor="middle" font-size="8" fill="#00d4ff" font-family="JetBrains Mono,monospace" letter-spacing="1">BIKE</text>
+        </g>
+        <!-- Run shoes -->
+        ${!isT1 ? triGearRect(160,200,44,18,'RUN SHOES','#4aff9d',gearVisible.runShoes,step===5):''}
+        <!-- Belt+cap -->
+        ${!isT1 ? triGearRect(214,200,44,18,'CAP+BELT','#4aff9d',gearVisible.beltCap,step===6):''}
+        <!-- Sunglasses (T1) -->
+        ${isT1 ? triGearRect(160,228,40,18,'SHADES','#8ba3c7',gearVisible.sunglasses,step===5):''}
+        <!-- Athlete dot -->
+        ${TRI.simRunning&&step>0&&step<6?`<circle cx="190" cy="260" r="6" fill="#00d4ff" style="animation:triPulse 1s infinite;"/>`:''}
+        <!-- Exit -->
+        <path d="${isT1?'M 190 92 L 190 52 L 320 52':'M 190 92 L 190 52 L 60 52'}" fill="none" stroke="#2d4875" stroke-width="1.5"/>
+        <text x="${isT1?320:60}" y="42" font-size="9" fill="#00d4ff" font-family="JetBrains Mono,monospace" letter-spacing="1" text-anchor="${isT1?'end':'start'}">${isT1?'TO BIKE →':'TO RUN →'}</text>
+      </svg>
+    </div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid #1c3257;display:flex;justify-content:space-between;">
+      <div class="tri-mono" style="font-size:9px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">${t.from} → ${t.to}</div>
+      <div class="tri-mono" style="font-size:9px;color:#00d4ff;letter-spacing:1.5px;">STEP ${TRI.simRunning?Math.min(TRI.simStep+1,t.steps.length):'—'}/${t.steps.length}</div>
+    </div>
+  </div>`;
+}
+
+function triGearRect(x, y, w, h, label, color, visible, highlight) {
+  if (!visible) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${color}" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.25"/>`;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${color}" opacity="${highlight?0.3:0.15}" stroke="${color}" stroke-width="${highlight?1.5:1}"/>
+    <text x="${x+w/2}" y="${y+h/2+3}" text-anchor="middle" font-size="7" fill="${color}" font-family="JetBrains Mono,monospace" letter-spacing="1">${label}</text>`;
+}
+
+// ── Sim ──
+function triStartSim() {
+  if (TRI.simRunning) return;
+  TRI.simStep = 0;
+  TRI.simRunning = true;
+  triRender();
+  triTickSim();
+}
+
+function triTickSim() {
+  const trans = TRI_DATA.transitions[TRI.activeTransition];
+  if (TRI.simStep >= trans.steps.length) {
+    TRI.simRunning = false;
+    triRender();
+    return;
+  }
+  TRI.simTimer = setTimeout(() => {
+    TRI.simStep++;
+    triRender();
+    triTickSim();
+  }, 1400);
+}
+
+function triClearSim() {
+  if (TRI.simTimer) { clearTimeout(TRI.simTimer); TRI.simTimer = null; }
+  TRI.simRunning = false;
+  TRI.simStep = 0;
+}
+
+// ── Event Listeners / Actions ──
+function triAttachListeners() {
+  // All interactivity handled via inline onclick/onmouseenter attrs above
+}
+
+function triToggleDay(i) {
+  const n = new Set(TRI.doneWorkouts);
+  n.has(i) ? n.delete(i) : n.add(i);
+  TRI.doneWorkouts = n;
+  triRender();
+}
+
+function triToggleGear(disciplineId, idx) {
+  const s = new Set(TRI.gearChecked[disciplineId]);
+  s.has(idx) ? s.delete(idx) : s.add(idx);
+  TRI.gearChecked[disciplineId] = s;
+  triRender();
+}
+
+function triSetTab(tab) {
+  TRI.disciplineTab = tab;
+  triRender();
+}
+
+function triSetTimeline(i) {
+  TRI.activeTimelineEvent = i;
+  triRender();
+}
+
+function triSetTransition(t) {
+  TRI.activeTransition = t;
+  triClearSim();
+  triRender();
 }
 
 // ── Init ──
