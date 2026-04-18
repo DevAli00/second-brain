@@ -213,6 +213,106 @@ class HabitEntry(db.Model):
     date = db.Column(db.String(10), nullable=False)  # YYYY-MM-DD
     __table_args__ = (db.UniqueConstraint('habit_id', 'date', name='uq_habit_date'),)
 
+# ── Triathlon Models ────────────────────────────────────────────────────────
+
+class TriProgram(db.Model):
+    __tablename__ = 'tri_program'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), default='Couch to Sprint')
+    weeks = db.Column(db.Integer, default=12)
+    current_week = db.Column(db.Integer, default=1)
+    race_date = db.Column(db.String(20), default='2026-06-14')
+    race_name = db.Column(db.String(200), default='Sprint Triathlon')
+    race_location = db.Column(db.String(200), default='')
+    race_temp = db.Column(db.String(100), default='')
+    wave_start = db.Column(db.String(10), default='07:40')
+
+class TriDiscipline(db.Model):
+    __tablename__ = 'tri_discipline'
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(20), nullable=False)
+    index = db.Column(db.String(5), default='01')
+    name = db.Column(db.String(50), nullable=False)
+    distance = db.Column(db.String(30), default='')
+    env = db.Column(db.String(100), default='')
+    pace = db.Column(db.String(50), default='')
+    tagline = db.Column(db.String(300), default='')
+    summary = db.Column(db.Text, default='')
+    progress = db.Column(db.Integer, default=0)
+    stat1_label = db.Column(db.String(50), default='Target time')
+    stat1_value = db.Column(db.String(20), default='')
+    stat1_unit = db.Column(db.String(20), default='min')
+    stat2_label = db.Column(db.String(50), default='')
+    stat2_value = db.Column(db.String(20), default='')
+    stat2_unit = db.Column(db.String(20), default='')
+    stat3_label = db.Column(db.String(50), default='')
+    stat3_value = db.Column(db.String(20), default='')
+    stat3_unit = db.Column(db.String(20), default='')
+
+class TriWorkout(db.Model):
+    __tablename__ = 'tri_workout'
+    id = db.Column(db.Integer, primary_key=True)
+    discipline = db.Column(db.String(20), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    duration = db.Column(db.String(50), default='')
+    focus = db.Column(db.String(300), default='')
+    effort = db.Column(db.Integer, default=70)
+    tag = db.Column(db.String(50), default='')
+    sort_order = db.Column(db.Integer, default=0)
+
+class TriGear(db.Model):
+    __tablename__ = 'tri_gear'
+    id = db.Column(db.Integer, primary_key=True)
+    discipline = db.Column(db.String(20), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    detail = db.Column(db.String(300), default='')
+    tier = db.Column(db.String(20), default='essential')
+    price = db.Column(db.String(20), default='')
+    checked = db.Column(db.Boolean, default=False)
+    sort_order = db.Column(db.Integer, default=0)
+
+class TriWeekDay(db.Model):
+    __tablename__ = 'tri_week_day'
+    id = db.Column(db.Integer, primary_key=True)
+    day_index = db.Column(db.Integer, nullable=False)
+    day = db.Column(db.String(5), default='Mon')
+    type = db.Column(db.String(20), default='rest')
+    label = db.Column(db.String(100), default='')
+    duration = db.Column(db.String(20), default='')
+    detail = db.Column(db.String(200), default='')
+    done = db.Column(db.Boolean, default=False)
+
+class TriTip(db.Model):
+    __tablename__ = 'tri_tip'
+    id = db.Column(db.Integer, primary_key=True)
+    discipline = db.Column(db.String(20), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    sort_order = db.Column(db.Integer, default=0)
+
+class TriRaceEvent(db.Model):
+    __tablename__ = 'tri_race_event'
+    id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.String(10), nullable=False)
+    event = db.Column(db.String(200), nullable=False)
+    detail = db.Column(db.String(300), default='')
+    sort_order = db.Column(db.Integer, default=0)
+
+class TriTransition(db.Model):
+    __tablename__ = 'tri_transition'
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(5), nullable=False)
+    name = db.Column(db.String(5), default='T1')
+    from_leg = db.Column(db.String(20), default='Swim')
+    to_leg = db.Column(db.String(20), default='Bike')
+    target = db.Column(db.String(10), default='1:30')
+
+class TriTransitionStep(db.Model):
+    __tablename__ = 'tri_transition_step'
+    id = db.Column(db.Integer, primary_key=True)
+    transition_slug = db.Column(db.String(5), nullable=False)
+    text = db.Column(db.String(300), nullable=False)
+    sort_order = db.Column(db.Integer, default=0)
+
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 def to_dict(obj, fields):
@@ -1107,6 +1207,214 @@ def delete_book(bid):
     db.session.commit()
     return '', 204
 
+# ── Triathlon ──────────────────────────────────────────────────────────────────
+
+def tri_days_to_race(race_date_str):
+    from datetime import date as dt_date
+    try:
+        rd = dt_date.fromisoformat(race_date_str)
+        return max(0, (rd - dt_date.today()).days)
+    except:
+        return 0
+
+def tri_full_data():
+    prog = TriProgram.query.first()
+    disciplines = []
+    for slug in ['swim', 'bike', 'run']:
+        d = TriDiscipline.query.filter_by(slug=slug).first()
+        if not d: continue
+        workouts = TriWorkout.query.filter_by(discipline=slug).order_by(TriWorkout.sort_order).all()
+        gear = TriGear.query.filter_by(discipline=slug).order_by(TriGear.sort_order).all()
+        tips = TriTip.query.filter_by(discipline=slug).order_by(TriTip.sort_order).all()
+        disciplines.append({
+            'id': d.id, 'slug': d.slug, 'index': d.index, 'name': d.name,
+            'distance': d.distance, 'env': d.env, 'pace': d.pace,
+            'tagline': d.tagline, 'summary': d.summary, 'progress': d.progress,
+            'stats': [
+                {'label': d.stat1_label, 'value': d.stat1_value, 'unit': d.stat1_unit},
+                {'label': d.stat2_label, 'value': d.stat2_value, 'unit': d.stat2_unit},
+                {'label': d.stat3_label, 'value': d.stat3_value, 'unit': d.stat3_unit},
+            ],
+            'keyWorkouts': [{'id': w.id, 'name': w.name, 'duration': w.duration, 'focus': w.focus, 'effort': w.effort, 'tag': w.tag} for w in workouts],
+            'gear': [{'id': g.id, 'name': g.name, 'detail': g.detail, 'tier': g.tier, 'price': g.price, 'checked': g.checked} for g in gear],
+            'tips': [{'id': t.id, 'text': t.text} for t in tips],
+        })
+
+    week_days = TriWeekDay.query.order_by(TriWeekDay.day_index).all()
+    events = TriRaceEvent.query.order_by(TriRaceEvent.sort_order).all()
+    transitions = {}
+    for slug in ['t1', 't2']:
+        tr = TriTransition.query.filter_by(slug=slug).first()
+        steps = TriTransitionStep.query.filter_by(transition_slug=slug).order_by(TriTransitionStep.sort_order).all()
+        if tr:
+            transitions[slug] = {
+                'name': tr.name, 'from': tr.from_leg, 'to': tr.to_leg, 'target': tr.target,
+                'steps': [s.text for s in steps],
+                'stepIds': [s.id for s in steps],
+            }
+
+    days_to_race = tri_days_to_race(prog.race_date) if prog else 0
+
+    return {
+        'program': {
+            'title': prog.title, 'weeks': prog.weeks, 'currentWeek': prog.current_week,
+            'raceDate': prog.race_date, 'daysToRace': days_to_race,
+        } if prog else {},
+        'disciplines': disciplines,
+        'weekPlan': [{'id': d.id, 'day': d.day, 'day_index': d.day_index, 'type': d.type, 'label': d.label, 'duration': d.duration, 'detail': d.detail, 'done': d.done} for d in week_days],
+        'race': {
+            'name': prog.race_name if prog else '', 'date': prog.race_date if prog else '',
+            'location': prog.race_location if prog else '', 'temp': prog.race_temp if prog else '',
+            'waveStart': prog.wave_start if prog else '',
+            'timeline': [{'id': e.id, 't': e.time, 'event': e.event, 'detail': e.detail} for e in events],
+        },
+        'transitions': transitions,
+    }
+
+@app.route('/api/triathlon/data')
+def get_tri_data():
+    return jsonify(tri_full_data())
+
+@app.route('/api/triathlon/program', methods=['GET', 'PUT'])
+def tri_program():
+    prog = TriProgram.query.first()
+    if request.method == 'GET':
+        if not prog: return jsonify({})
+        return jsonify({'title': prog.title, 'weeks': prog.weeks, 'currentWeek': prog.current_week,
+                        'raceDate': prog.race_date, 'raceName': prog.race_name,
+                        'raceLocation': prog.race_location, 'raceTemp': prog.race_temp,
+                        'waveStart': prog.wave_start})
+    d = request.json
+    if not prog:
+        prog = TriProgram(); db.session.add(prog)
+    if 'title' in d: prog.title = d['title']
+    if 'weeks' in d: prog.weeks = int(d['weeks'])
+    if 'currentWeek' in d: prog.current_week = int(d['currentWeek'])
+    if 'raceDate' in d: prog.race_date = d['raceDate']
+    if 'raceName' in d: prog.race_name = d['raceName']
+    if 'raceLocation' in d: prog.race_location = d['raceLocation']
+    if 'raceTemp' in d: prog.race_temp = d['raceTemp']
+    if 'waveStart' in d: prog.wave_start = d['waveStart']
+    db.session.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/triathlon/discipline/<slug>', methods=['PUT'])
+def tri_update_discipline(slug):
+    d_row = TriDiscipline.query.filter_by(slug=slug).first_or_404()
+    d = request.json
+    for field in ['distance','env','pace','tagline','summary','progress',
+                  'stat1_label','stat1_value','stat1_unit',
+                  'stat2_label','stat2_value','stat2_unit',
+                  'stat3_label','stat3_value','stat3_unit']:
+        if field in d:
+            val = int(d[field]) if field == 'progress' else d[field]
+            setattr(d_row, field, val)
+    db.session.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/triathlon/week', methods=['GET'])
+def tri_get_week():
+    days = TriWeekDay.query.order_by(TriWeekDay.day_index).all()
+    return jsonify([{'id': d.id, 'day': d.day, 'day_index': d.day_index, 'type': d.type,
+                     'label': d.label, 'duration': d.duration, 'detail': d.detail, 'done': d.done} for d in days])
+
+@app.route('/api/triathlon/week/<int:day_id>', methods=['PUT'])
+def tri_update_week_day(day_id):
+    day = TriWeekDay.query.get_or_404(day_id)
+    d = request.json
+    for field in ['type','label','duration','detail','done','day']:
+        if field in d:
+            setattr(day, field, bool(d[field]) if field == 'done' else d[field])
+    db.session.commit()
+    return jsonify({'ok': True, 'done': day.done})
+
+@app.route('/api/triathlon/gear', methods=['POST'])
+def tri_add_gear():
+    d = request.json
+    g = TriGear(discipline=d['discipline'], name=d['name'], detail=d.get('detail',''),
+                tier=d.get('tier','essential'), price=d.get('price',''))
+    db.session.add(g); db.session.commit()
+    return jsonify({'id': g.id})
+
+@app.route('/api/triathlon/gear/<int:gear_id>', methods=['PUT', 'DELETE'])
+def tri_gear(gear_id):
+    g = TriGear.query.get_or_404(gear_id)
+    if request.method == 'DELETE':
+        db.session.delete(g); db.session.commit(); return '', 204
+    d = request.json
+    for field in ['name','detail','tier','price','checked']:
+        if field in d:
+            setattr(g, field, bool(d[field]) if field == 'checked' else d[field])
+    db.session.commit()
+    return jsonify({'ok': True, 'checked': g.checked})
+
+@app.route('/api/triathlon/workouts', methods=['POST'])
+def tri_add_workout():
+    d = request.json
+    w = TriWorkout(discipline=d['discipline'], name=d['name'], duration=d.get('duration',''),
+                   focus=d.get('focus',''), effort=int(d.get('effort', 70)), tag=d.get('tag',''))
+    db.session.add(w); db.session.commit()
+    return jsonify({'id': w.id})
+
+@app.route('/api/triathlon/workouts/<int:wid>', methods=['PUT', 'DELETE'])
+def tri_workout(wid):
+    w = TriWorkout.query.get_or_404(wid)
+    if request.method == 'DELETE':
+        db.session.delete(w); db.session.commit(); return '', 204
+    d = request.json
+    for field in ['name','duration','focus','tag']:
+        if field in d: setattr(w, field, d[field])
+    if 'effort' in d: w.effort = int(d['effort'])
+    db.session.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/triathlon/tips', methods=['POST'])
+def tri_add_tip():
+    d = request.json
+    t = TriTip(discipline=d['discipline'], text=d['text'])
+    db.session.add(t); db.session.commit()
+    return jsonify({'id': t.id})
+
+@app.route('/api/triathlon/tips/<int:tid>', methods=['PUT', 'DELETE'])
+def tri_tip(tid):
+    t = TriTip.query.get_or_404(tid)
+    if request.method == 'DELETE':
+        db.session.delete(t); db.session.commit(); return '', 204
+    if 'text' in request.json: t.text = request.json['text']
+    db.session.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/triathlon/timeline', methods=['POST'])
+def tri_add_event():
+    d = request.json
+    max_order = db.session.query(db.func.max(TriRaceEvent.sort_order)).scalar() or 0
+    e = TriRaceEvent(time=d['time'], event=d['event'], detail=d.get('detail',''), sort_order=max_order+1)
+    db.session.add(e); db.session.commit()
+    return jsonify({'id': e.id})
+
+@app.route('/api/triathlon/timeline/<int:eid>', methods=['PUT', 'DELETE'])
+def tri_event(eid):
+    e = TriRaceEvent.query.get_or_404(eid)
+    if request.method == 'DELETE':
+        db.session.delete(e); db.session.commit(); return '', 204
+    d = request.json
+    for field in ['time','event','detail']:
+        if field in d: setattr(e, field, d[field])
+    db.session.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/triathlon/transitions/<slug>', methods=['PUT'])
+def tri_update_transition(slug):
+    tr = TriTransition.query.filter_by(slug=slug).first_or_404()
+    d = request.json
+    if 'target' in d: tr.target = d['target']
+    if 'steps' in d:
+        TriTransitionStep.query.filter_by(transition_slug=slug).delete()
+        for i, text in enumerate(d['steps']):
+            db.session.add(TriTransitionStep(transition_slug=slug, text=text, sort_order=i))
+    db.session.commit()
+    return jsonify({'ok': True})
+
 # ── Habits ───────────────────────────────────────────────────────────────────
 
 def _habit_streak(entries_sorted: list[str]) -> int:
@@ -1508,6 +1816,153 @@ def seed_learning_plan():
         db.session.add(LearningTask(week_id=wid, category=cat, description=desc))
     db.session.commit()
 
+def seed_triathlon():
+    if TriProgram.query.count() > 0:
+        return
+
+    prog = TriProgram(
+        title='Couch to Sprint', weeks=12, current_week=7,
+        race_date='2026-06-14', race_name='Valencia Sprint Triathlon',
+        race_location='Playa de la Malvarrosa', race_temp='21°C water / 26°C air',
+        wave_start='07:40'
+    )
+    db.session.add(prog)
+
+    disciplines = [
+        dict(slug='swim', index='01', name='Swim', distance='750m', env='Open water / Pool',
+             pace='2:15 / 100m', tagline='The great equalizer. Master breath, then everything else.',
+             summary='For most first-timers, swim is the scariest leg. We start in the pool — quiet, controlled — then graduate to open water in week 8.',
+             progress=62,
+             stat1_label='Target time', stat1_value='16:52', stat1_unit='min',
+             stat2_label='Stroke rate', stat2_value='58', stat2_unit='spm',
+             stat3_label='Breath pattern', stat3_value='3/3', stat3_unit='bilateral'),
+        dict(slug='bike', index='02', name='Bike', distance='20km', env='Road, closed or open',
+             pace='32 km/h', tagline='Where races are won. Save the legs, spend the watts wisely.',
+             summary='The longest segment by time. Get aero, get comfortable, and do NOT empty the tank — you still have 5km to run.',
+             progress=48,
+             stat1_label='Target time', stat1_value='37:30', stat1_unit='min',
+             stat2_label='Cadence', stat2_value='88', stat2_unit='rpm',
+             stat3_label='Power zone', stat3_value='Z3', stat3_unit='tempo'),
+        dict(slug='run', index='03', name='Run', distance='5km', env='Road or trail',
+             pace='5:30 / km', tagline='Legs like concrete. Keep moving anyway.',
+             summary='Only 5km — but off a 20km bike, the first kilometer feels impossible. Brick workouts are your secret weapon.',
+             progress=71,
+             stat1_label='Target time', stat1_value='27:30', stat1_unit='min',
+             stat2_label='Cadence', stat2_value='178', stat2_unit='spm',
+             stat3_label='Effort', stat3_value='Z3-Z4', stat3_unit='tempo'),
+    ]
+    for d in disciplines:
+        db.session.add(TriDiscipline(**d))
+
+    workouts = [
+        ('swim', 'CSS Test', '30 min', 'Critical Swim Speed benchmark', 85, 'Threshold', 0),
+        ('swim', 'Bilateral ladder', '45 min', 'Breath every 3 / 5 / 7', 70, 'Technique', 1),
+        ('swim', 'Open-water sighting', '40 min', 'Head-up freestyle every 6 strokes', 60, 'Race-specific', 2),
+        ('swim', 'Recovery drill set', '25 min', 'Catch-up, fist swim, 6-kick switch', 40, 'Recovery', 3),
+        ('bike', 'FTP Test (20min)', '60 min', 'Find your functional threshold power', 95, 'Threshold', 0),
+        ('bike', 'Sweet-spot intervals', '75 min', '4×8min @ 88-94% FTP', 80, 'Endurance', 1),
+        ('bike', 'Brick: bike + run', '90 min', '60min ride → 20min run off the bike', 75, 'Race-specific', 2),
+        ('bike', 'Long steady Z2', '120 min', 'Flat coffee ride, conversational', 50, 'Endurance', 3),
+        ('run', '5k Time Trial', '35 min', 'Benchmark current fitness', 92, 'Threshold', 0),
+        ('run', 'Brick: off-the-bike', '30 min', '2km easy right after any ride', 70, 'Race-specific', 1),
+        ('run', 'Hill repeats', '40 min', '8×90s uphill, jog down', 85, 'Strength', 2),
+        ('run', 'Easy long run', '60 min', 'Z2 only, full conversation pace', 45, 'Endurance', 3),
+    ]
+    for w in workouts:
+        db.session.add(TriWorkout(discipline=w[0], name=w[1], duration=w[2], focus=w[3], effort=w[4], tag=w[5], sort_order=w[6]))
+
+    gear = [
+        ('swim', 'Wetsuit', 'Sleeveless, 3mm neoprene', 'essential', '€180', 0),
+        ('swim', 'Goggles', 'Clear + mirrored pair', 'essential', '€35', 1),
+        ('swim', 'Swim cap', 'Silicone, race-provided', 'essential', '€0', 2),
+        ('swim', 'Pull buoy', 'For form drills', 'training', '€18', 3),
+        ('swim', 'Tempo trainer', 'Beeps for stroke cadence', 'optional', '€35', 4),
+        ('swim', 'Anti-fog spray', 'One small tube lasts a season', 'optional', '€8', 5),
+        ('bike', 'Road bike', 'Any road bike with drop bars — no tri bike needed', 'essential', '€900+', 0),
+        ('bike', 'Helmet', 'CPSC certified, replace every 5 years', 'essential', '€65', 1),
+        ('bike', 'Cycling shoes + cleats', 'SPD-SL or Look Keo', 'essential', '€120', 2),
+        ('bike', 'Bib shorts', 'One pair, high chamois quality', 'essential', '€80', 3),
+        ('bike', 'Bottle cages ×2', 'Front & down tube', 'essential', '€20', 4),
+        ('bike', 'Clip-on aero bars', 'Free speed if comfortable', 'optional', '€75', 5),
+        ('bike', 'Bike computer', 'For pacing via power/HR', 'training', '€150', 6),
+        ('run', 'Running shoes', 'Neutral or stability — fitted at a run shop', 'essential', '€130', 0),
+        ('run', 'Elastic laces', 'For fast transitions', 'essential', '€6', 1),
+        ('run', 'Tri suit', 'Worn all 3 legs — swim, bike, run', 'essential', '€160', 2),
+        ('run', 'Race belt', 'Holds number; no pinning to suit', 'essential', '€12', 3),
+        ('run', 'Running cap / visor', 'Sun + sweat management', 'optional', '€22', 4),
+        ('run', 'GPS watch', 'Track pace mid-race', 'training', '€250', 5),
+    ]
+    for g in gear:
+        db.session.add(TriGear(discipline=g[0], name=g[1], detail=g[2], tier=g[3], price=g[4], sort_order=g[5]))
+
+    week_days = [
+        (0, 'Mon', 'rest',  'Rest',           '',    'Mobility only'),
+        (1, 'Tue', 'swim',  'Swim technique', '45m', 'Bilateral ladder'),
+        (2, 'Wed', 'bike',  'Sweet spot',     '75m', '4×8min @ 90% FTP'),
+        (3, 'Thu', 'run',   'Easy run',       '40m', 'Z2 + strides'),
+        (4, 'Fri', 'swim',  'Open water',     '60m', 'Sighting practice'),
+        (5, 'Sat', 'brick', 'Brick',          '2h',  'Bike 60 → Run 20'),
+        (6, 'Sun', 'run',   'Long run',       '55m', 'Z2 conversational'),
+    ]
+    for i, day, type_, label, dur, detail in week_days:
+        db.session.add(TriWeekDay(day_index=i, day=day, type=type_, label=label, duration=dur, detail=detail, done=(i<3)))
+
+    tips = [
+        ('swim', 'Exhale underwater — fully. Most panic starts with held breath.', 0),
+        ('swim', 'Practice sighting every 6 strokes in the pool before open water.', 1),
+        ('swim', 'Your wetsuit makes you float. Trust it.', 2),
+        ('bike', 'Stay in Z3 — not Z4. Your run depends on it.', 0),
+        ('bike', 'Drink 500ml per hour. Start before you\'re thirsty.', 1),
+        ('bike', 'Practice mounting and dismounting with shoes clipped to pedals.', 2),
+        ('run', 'First km off the bike: short, quick steps. Don\'t push pace.', 0),
+        ('run', 'Pour water ON you at aid stations, not just IN you.', 1),
+        ('run', 'When legs lock up, it\'s the bike. Run through it — it clears.', 2),
+    ]
+    for t in tips:
+        db.session.add(TriTip(discipline=t[0], text=t[1], sort_order=t[2]))
+
+    events = [
+        ('04:30', 'Wake up', 'Oats, banana, coffee. No new foods.', 0),
+        ('05:30', 'Leave for venue', 'Tri suit on under warm layers.', 1),
+        ('06:00', 'Check in + body marking', 'Bring timing chip, helmet, bib.', 2),
+        ('06:15', 'Rack bike, set T1/T2', 'Follow your transition map exactly.', 3),
+        ('06:45', 'Warm-up swim', '200m easy. Get the gasp out of the way.', 4),
+        ('07:30', 'Wave assembly', 'Seeded by predicted swim time.', 5),
+        ('07:40', 'GO — Swim (750m)', 'Start wide, sight every 6 strokes.', 6),
+        ('07:58', 'T1 — Swim to Bike', 'Goggles off, wetsuit off, helmet FIRST.', 7),
+        ('08:37', 'Bike done (20km)', 'Unclip early. Walk, don\'t run, the rack.', 8),
+        ('08:40', 'T2 — Bike to Run', 'Shoes on, cap on, belt around waist.', 9),
+        ('09:10', 'FINISH (~1h 30m)', 'Medal. Banana. Tears optional.', 10),
+    ]
+    for e in events:
+        db.session.add(TriRaceEvent(time=e[0], event=e[1], detail=e[2], sort_order=e[3]))
+
+    db.session.add(TriTransition(slug='t1', name='T1', from_leg='Swim', to_leg='Bike', target='1:30'))
+    db.session.add(TriTransition(slug='t2', name='T2', from_leg='Bike', to_leg='Run', target='0:45'))
+
+    t1_steps = [
+        'Goggles + cap off — stuff in wetsuit sleeve',
+        'Wetsuit down to waist while running to rack',
+        'Step out of wetsuit — use one hand on bike for balance',
+        'Helmet ON and buckled BEFORE you touch the bike',
+        'Sunglasses on',
+        'Run bike to mount line, mount past the line',
+    ]
+    t2_steps = [
+        'Dismount BEFORE the dismount line',
+        'Run with bike to your rack spot',
+        'Rack bike by saddle or bars',
+        'Helmet off — only after bike is racked',
+        'Run shoes on (elastic laces = no tying)',
+        'Grab race belt + cap, go',
+    ]
+    for i, s in enumerate(t1_steps):
+        db.session.add(TriTransitionStep(transition_slug='t1', text=s, sort_order=i))
+    for i, s in enumerate(t2_steps):
+        db.session.add(TriTransitionStep(transition_slug='t2', text=s, sort_order=i))
+
+    db.session.commit()
+
 def seed_books():
     if Book.query.count() > 0:
         return
@@ -1562,4 +2017,5 @@ if __name__ == '__main__':
         run_migrations()
         seed_quran()
         seed_books()
+        seed_triathlon()
     app.run(debug=True, port=5555, host='0.0.0.0')

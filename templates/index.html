@@ -5012,123 +5012,12 @@ async function deleteBook(id) {
 //  TRIATHLON JOURNEY — Sprint Triathlon Training OS
 // ══════════════════════════════════════════════════════════════
 
-const TRI_DATA = {
-  program: {
-    title: 'Couch to Sprint', subtitle: '12-week progressive plan',
-    weeks: 12, currentWeek: 7, raceDate: 'Jun 14, 2026', daysToRace: 58,
-  },
-  disciplines: [
-    {
-      id: 'swim', index: '01', name: 'Swim', distance: '750m', env: 'Open water / Pool', pace: '2:15 / 100m',
-      tagline: 'The great equalizer. Master breath, then everything else.',
-      summary: 'For most first-timers, swim is the scariest leg. We start in the pool — quiet, controlled — then graduate to open water in week 8.',
-      stats: [{ label: 'Target time', value: '16:52', unit: 'min' }, { label: 'Stroke rate', value: '58', unit: 'spm' }, { label: 'Breath pattern', value: '3/3', unit: 'bilateral' }],
-      progress: 62,
-      keyWorkouts: [
-        { name: 'CSS Test', duration: '30 min', focus: 'Critical Swim Speed benchmark', effort: 85, tag: 'Threshold' },
-        { name: 'Bilateral ladder', duration: '45 min', focus: 'Breath every 3 / 5 / 7', effort: 70, tag: 'Technique' },
-        { name: 'Open-water sighting', duration: '40 min', focus: 'Head-up freestyle every 6 strokes', effort: 60, tag: 'Race-specific' },
-        { name: 'Recovery drill set', duration: '25 min', focus: 'Catch-up, fist swim, 6-kick switch', effort: 40, tag: 'Recovery' },
-      ],
-      gear: [
-        { name: 'Wetsuit', detail: 'Sleeveless, 3mm neoprene', tier: 'essential', price: '€180' },
-        { name: 'Goggles', detail: 'Clear + mirrored pair', tier: 'essential', price: '€35' },
-        { name: 'Swim cap', detail: 'Silicone, race-provided', tier: 'essential', price: '€0' },
-        { name: 'Pull buoy', detail: 'For form drills', tier: 'training', price: '€18' },
-        { name: 'Tempo trainer', detail: 'Beeps for stroke cadence', tier: 'optional', price: '€35' },
-        { name: 'Anti-fog spray', detail: 'One small tube lasts a season', tier: 'optional', price: '€8' },
-      ],
-      tips: ['Exhale underwater — fully. Most panic starts with held breath.', 'Practice sighting every 6 strokes in the pool before open water.', 'Your wetsuit makes you float. Trust it.'],
-    },
-    {
-      id: 'bike', index: '02', name: 'Bike', distance: '20km', env: 'Road, closed or open', pace: '32 km/h',
-      tagline: 'Where races are won. Save the legs, spend the watts wisely.',
-      summary: 'The longest segment by time. Get aero, get comfortable, and do NOT empty the tank — you still have 5km to run.',
-      stats: [{ label: 'Target time', value: '37:30', unit: 'min' }, { label: 'Cadence', value: '88', unit: 'rpm' }, { label: 'Power zone', value: 'Z3', unit: 'tempo' }],
-      progress: 48,
-      keyWorkouts: [
-        { name: 'FTP Test (20min)', duration: '60 min', focus: 'Find your functional threshold power', effort: 95, tag: 'Threshold' },
-        { name: 'Sweet-spot intervals', duration: '75 min', focus: '4×8min @ 88-94% FTP', effort: 80, tag: 'Endurance' },
-        { name: 'Brick: bike + run', duration: '90 min', focus: '60min ride → 20min run off the bike', effort: 75, tag: 'Race-specific' },
-        { name: 'Long steady Z2', duration: '120 min', focus: 'Flat coffee ride, conversational', effort: 50, tag: 'Endurance' },
-      ],
-      gear: [
-        { name: 'Road bike', detail: 'Any road bike with drop bars — no tri bike needed', tier: 'essential', price: '€900+' },
-        { name: 'Helmet', detail: 'CPSC certified, replace every 5 years', tier: 'essential', price: '€65' },
-        { name: 'Cycling shoes + cleats', detail: 'SPD-SL or Look Keo', tier: 'essential', price: '€120' },
-        { name: 'Bib shorts', detail: 'One pair, high chamois quality', tier: 'essential', price: '€80' },
-        { name: 'Bottle cages ×2', detail: 'Front & down tube', tier: 'essential', price: '€20' },
-        { name: 'Clip-on aero bars', detail: 'Free speed if comfortable', tier: 'optional', price: '€75' },
-        { name: 'Bike computer', detail: 'For pacing via power/HR', tier: 'training', price: '€150' },
-      ],
-      tips: ['Stay in Z3 — not Z4. Your run depends on it.', 'Drink 500ml per hour. Start before you\'re thirsty.', 'Practice mounting and dismounting with shoes clipped to pedals.'],
-    },
-    {
-      id: 'run', index: '03', name: 'Run', distance: '5km', env: 'Road or trail', pace: '5:30 / km',
-      tagline: 'Legs like concrete. Keep moving anyway.',
-      summary: 'Only 5km — but off a 20km bike, the first kilometer feels impossible. Brick workouts are your secret weapon.',
-      stats: [{ label: 'Target time', value: '27:30', unit: 'min' }, { label: 'Cadence', value: '178', unit: 'spm' }, { label: 'Effort', value: 'Z3-Z4', unit: 'tempo' }],
-      progress: 71,
-      keyWorkouts: [
-        { name: '5k Time Trial', duration: '35 min', focus: 'Benchmark current fitness', effort: 92, tag: 'Threshold' },
-        { name: 'Brick: off-the-bike', duration: '30 min', focus: '2km easy right after any ride', effort: 70, tag: 'Race-specific' },
-        { name: 'Hill repeats', duration: '40 min', focus: '8×90s uphill, jog down', effort: 85, tag: 'Strength' },
-        { name: 'Easy long run', duration: '60 min', focus: 'Z2 only, full conversation pace', effort: 45, tag: 'Endurance' },
-      ],
-      gear: [
-        { name: 'Running shoes', detail: 'Neutral or stability — fitted at a run shop', tier: 'essential', price: '€130' },
-        { name: 'Elastic laces', detail: 'For fast transitions', tier: 'essential', price: '€6' },
-        { name: 'Tri suit', detail: 'Worn all 3 legs — swim, bike, run', tier: 'essential', price: '€160' },
-        { name: 'Race belt', detail: 'Holds number; no pinning to suit', tier: 'essential', price: '€12' },
-        { name: 'Running cap / visor', detail: 'Sun + sweat management', tier: 'optional', price: '€22' },
-        { name: 'GPS watch', detail: 'Track pace mid-race', tier: 'training', price: '€250' },
-      ],
-      tips: ['First km off the bike: short, quick steps. Don\'t push pace.', 'Pour water ON you at aid stations, not just IN you.', 'When legs lock up, it\'s the bike. Run through it — it clears.'],
-    },
-  ],
-  race: {
-    name: 'Valencia Sprint Triathlon', date: 'Saturday, June 14, 2026',
-    location: 'Playa de la Malvarrosa', temp: '21°C water / 26°C air', waveStart: '07:40',
-    timeline: [
-      { t: '04:30', event: 'Wake up', detail: 'Oats, banana, coffee. No new foods.' },
-      { t: '05:30', event: 'Leave for venue', detail: 'Tri suit on under warm layers.' },
-      { t: '06:00', event: 'Check in + body marking', detail: 'Bring timing chip, helmet, bib.' },
-      { t: '06:15', event: 'Rack bike, set T1/T2', detail: 'Follow your transition map exactly.' },
-      { t: '06:45', event: 'Warm-up swim', detail: '200m easy. Get the gasp out of the way.' },
-      { t: '07:30', event: 'Wave assembly', detail: 'Seeded by predicted swim time.' },
-      { t: '07:40', event: 'GO — Swim (750m)', detail: 'Start wide, sight every 6 strokes.' },
-      { t: '07:58', event: 'T1 — Swim to Bike', detail: 'Goggles off, wetsuit off, helmet FIRST.' },
-      { t: '08:37', event: 'Bike done (20km)', detail: 'Unclip early. Walk, don\'t run, the rack.' },
-      { t: '08:40', event: 'T2 — Bike to Run', detail: 'Shoes on, cap on, belt around waist.' },
-      { t: '09:10', event: 'FINISH (~1h 30m)', detail: 'Medal. Banana. Tears optional.' },
-    ],
-  },
-  transitions: {
-    t1: {
-      name: 'T1', from: 'Swim', to: 'Bike', target: '1:30',
-      steps: ['Goggles + cap off — stuff in wetsuit sleeve', 'Wetsuit down to waist while running to rack', 'Step out of wetsuit — use one hand on bike for balance', 'Helmet ON and buckled BEFORE you touch the bike', 'Sunglasses on', 'Run bike to mount line, mount past the line'],
-    },
-    t2: {
-      name: 'T2', from: 'Bike', to: 'Run', target: '0:45',
-      steps: ['Dismount BEFORE the dismount line', 'Run with bike to your rack spot', 'Rack bike by saddle or bars', 'Helmet off — only after bike is racked', 'Run shoes on (elastic laces = no tying)', 'Grab race belt + cap, go'],
-    },
-  },
-  weekPlan: [
-    { day: 'Mon', type: 'rest',  label: 'Rest',          duration: '',    detail: 'Mobility only' },
-    { day: 'Tue', type: 'swim',  label: 'Swim technique', duration: '45m', detail: 'Bilateral ladder' },
-    { day: 'Wed', type: 'bike',  label: 'Sweet spot',     duration: '75m', detail: '4×8min @ 90% FTP' },
-    { day: 'Thu', type: 'run',   label: 'Easy run',       duration: '40m', detail: 'Z2 + strides' },
-    { day: 'Fri', type: 'swim',  label: 'Open water',     duration: '60m', detail: 'Sighting practice' },
-    { day: 'Sat', type: 'brick', label: 'Brick',          duration: '2h',  detail: 'Bike 60 → Run 20' },
-    { day: 'Sun', type: 'run',   label: 'Long run',       duration: '55m', detail: 'Z2 conversational' },
-  ],
-};
-
 // ── Triathlon State ──
+let TRI_DATA = {};
 const TRI = {
   view: 'home',
   disciplineTab: 'overview',
-  doneWorkouts: new Set([0, 1, 2]),
+  doneWorkouts: new Set(),
   gearChecked: { swim: new Set(), bike: new Set(), run: new Set() },
   activeTransition: 't1',
   simRunning: false,
@@ -5137,7 +5026,18 @@ const TRI = {
   activeTimelineEvent: 5,
 };
 
-function loadTriathlon() { triRender(); }
+async function loadTriathlon() {
+    const el = document.getElementById('tri-shell');
+    if (!el) return;
+    el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:300px;color:#4a6285;font-family:JetBrains Mono,monospace;font-size:12px;letter-spacing:2px;">LOADING TRI/OS…</div>';
+    try {
+        const data = await api('triathlon/data');
+        window.TRI_DATA = data;
+        triRender();
+    } catch(e) {
+        el.innerHTML = '<div style="padding:40px;color:#ff4a6e;font-family:JetBrains Mono,monospace;">Failed to load triathlon data</div>';
+    }
+}
 
 function triNav(v) {
   TRI.view = v;
@@ -5311,12 +5211,12 @@ function triWeekPlannerHTML(d) {
     <div class="tri-eyebrow">This week · Week 07</div>
     <h2 class="tri-h2" style="font-size:28px;margin-bottom:24px;">Seven days. Five workouts. Two rests.</h2>
     <div style="display:flex;border:1px solid #1c3257;">
-      ${d.weekPlan.map((day, i) => {
-        const isDone = TRI.doneWorkouts.has(i);
-        const isToday = i === 3;
+      ${d.weekPlan.map((day) => {
+        const isDone = day.done;
+        const isToday = day.day_index === 3;
         const color = sportColor[day.type];
-        return `<button onclick="triToggleDay(${i})" style="
-          flex:1;padding:16px 10px 14px;border-left:${i===0?'none':'1px solid #1c3257'};
+        return `<button onclick="triToggleDay(${day.id}, ${day.day_index})" style="
+          flex:1;padding:16px 10px 14px;border-left:${day.day_index===0?'none':'1px solid #1c3257'};
           background:${isToday?'rgba(0,212,255,0.06)':'transparent'};
           text-align:left;position:relative;cursor:pointer;border-top:none;border-right:none;border-bottom:none;
           color:#e8f1ff;transition:background 0.2s;"
@@ -5335,7 +5235,7 @@ function triWeekPlannerHTML(d) {
       }).join('')}
     </div>
     <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:1.5px;margin-top:12px;text-transform:uppercase;">
-      Click any day to toggle · ${TRI.doneWorkouts.size}/7 complete
+      Click any day to toggle · ${d.weekPlan.filter(d => d.done).length}/7 complete
     </div>
   </div>`;
 }
@@ -5558,7 +5458,6 @@ function triDisciplineWorkouts(d) {
 function triDisciplineGear(d, id) {
   const tiers = ['essential', 'training', 'optional'];
   const tierLabel = { essential: '✦ Essential', training: '◈ Training', optional: '◇ Optional' };
-  const checked = TRI.gearChecked[id];
   return `<div style="display:flex;flex-direction:column;gap:24px;">
     ${tiers.map(tier => {
       const items = d.gear.filter(g => g.tier === tier);
@@ -5567,10 +5466,9 @@ function triDisciplineGear(d, id) {
         <div class="tri-eyebrow" style="margin-bottom:16px;color:${tier==='essential'?'#00d4ff':tier==='training'?'#4aff9d':'#4a6285'};">${tierLabel[tier]}</div>
         <div style="display:flex;flex-direction:column;gap:2px;">
           ${items.map((g, i) => {
-            const idx = d.gear.indexOf(g);
-            const isChecked = checked.has(idx);
+            const isChecked = g.checked;
             return `<div class="tri-gear-tier-${tier}" style="padding:16px 20px;border:1px solid;border-top:${i===0?'1px solid':'none'};display:flex;align-items:center;gap:16px;cursor:pointer;"
-              onclick="triToggleGear('${id}', ${idx})">
+              onclick="triToggleGear(${g.id}, '${id}')">
               <div style="width:22px;height:22px;border:1px solid ${tier==='essential'?'#00d4ff':tier==='training'?'#4aff9d':'#2d4875'};background:${isChecked?(tier==='essential'?'#00d4ff':tier==='training'?'#4aff9d':'#4a6285'):'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;">
                 ${isChecked ? `<span style="color:#0a1628;font-size:12px;font-weight:700;">✓</span>` : ''}
               </div>
@@ -5585,7 +5483,7 @@ function triDisciplineGear(d, id) {
       </div>`;
     }).join('')}
     <div class="tri-mono" style="font-size:10px;color:#4a6285;letter-spacing:1.5px;text-transform:uppercase;">
-      ${d.gear.filter((_,i) => checked.has(i)).length}/${d.gear.length} items packed
+      ${d.gear.filter(g => g.checked).length}/${d.gear.length} items packed
     </div>
   </div>`;
 }
@@ -5595,7 +5493,7 @@ function triDisciplineTips(d) {
     ${d.tips.map((tip, i) => `
       <div style="padding:28px 32px;border:1px solid #1c3257;border-left:3px solid #00d4ff;background:rgba(0,212,255,0.03);position:relative;">
         <div class="tri-mono" style="font-size:48px;color:#1c3257;position:absolute;top:16px;right:20px;line-height:1;">0${i+1}</div>
-        <div style="font-size:16px;color:#e8f1ff;line-height:1.6;max-width:640px;">${tip}</div>
+        <div style="font-size:16px;color:#e8f1ff;line-height:1.6;max-width:640px;">${tip.text || tip}</div>
       </div>`).join('')}
   </div>`;
 }
@@ -5819,18 +5717,37 @@ function triAttachListeners() {
   // All interactivity handled via inline onclick/onmouseenter attrs above
 }
 
-function triToggleDay(i) {
-  const n = new Set(TRI.doneWorkouts);
-  n.has(i) ? n.delete(i) : n.add(i);
-  TRI.doneWorkouts = n;
-  triRender();
+async function triToggleDay(dayId, dayIndex) {
+    const isDone = TRI.doneWorkouts.has(dayIndex);
+    const newDone = !isDone;
+    // Optimistic update
+    const n = new Set(TRI.doneWorkouts);
+    newDone ? n.add(dayIndex) : n.delete(dayIndex);
+    TRI.doneWorkouts = n;
+    triRender();
+    try {
+        await api('triathlon/week/' + dayId, 'PUT', { done: newDone });
+        window.TRI_DATA.weekPlan[dayIndex].done = newDone;
+    } catch(e) {
+        newDone ? n.delete(dayIndex) : n.add(dayIndex);
+        TRI.doneWorkouts = n;
+        triRender();
+    }
 }
 
-function triToggleGear(disciplineId, idx) {
-  const s = new Set(TRI.gearChecked[disciplineId]);
-  s.has(idx) ? s.delete(idx) : s.add(idx);
-  TRI.gearChecked[disciplineId] = s;
-  triRender();
+async function triToggleGear(gearId, disciplineSlug) {
+    const disc = window.TRI_DATA.disciplines.find(d => d.slug === disciplineSlug);
+    if (!disc) return;
+    const gear = disc.gear.find(g => g.id === gearId);
+    if (!gear) return;
+    gear.checked = !gear.checked;
+    triRender();
+    try {
+        await api('triathlon/gear/' + gearId, 'PUT', { checked: gear.checked });
+    } catch(e) {
+        gear.checked = !gear.checked;
+        triRender();
+    }
 }
 
 function triSetTab(tab) {
@@ -5847,6 +5764,348 @@ function triSetTransition(t) {
   TRI.activeTransition = t;
   triClearSim();
   triRender();
+}
+
+// ── Triathlon Modals ──
+
+function triOpenProgramModal() {
+    const p = window.TRI_DATA.program;
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">⚙ Program Settings</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Title</label><input class="form-input" id="tri-prog-title" value="${p.title||''}"></div>
+            <div><label class="form-label">Weeks total</label><input class="form-input" type="number" id="tri-prog-weeks" value="${p.weeks||12}"></div>
+            <div><label class="form-label">Current week</label><input class="form-input" type="number" id="tri-prog-cur-week" value="${p.currentWeek||1}"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveProgramModal()">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveProgramModal() {
+    const body = {
+        title: document.getElementById('tri-prog-title').value,
+        weeks: document.getElementById('tri-prog-weeks').value,
+        currentWeek: document.getElementById('tri-prog-cur-week').value,
+    };
+    await api('triathlon/program', 'PUT', body);
+    closeModal();
+    await loadTriathlon();
+}
+
+function triOpenRaceModal() {
+    const p = window.TRI_DATA.program;
+    const r = window.TRI_DATA.race;
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">✎ Race Details</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Race name</label><input class="form-input" id="tri-race-name" value="${r.name||''}"></div>
+            <div><label class="form-label">Date (YYYY-MM-DD)</label><input class="form-input" id="tri-race-date" value="${p.raceDate||''}"></div>
+            <div><label class="form-label">Location</label><input class="form-input" id="tri-race-loc" value="${r.location||''}"></div>
+            <div><label class="form-label">Conditions</label><input class="form-input" id="tri-race-temp" value="${r.temp||''}"></div>
+            <div><label class="form-label">Wave start</label><input class="form-input" id="tri-race-wave" value="${r.waveStart||'07:40'}"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveRaceModal()">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveRaceModal() {
+    const body = {
+        raceName: document.getElementById('tri-race-name').value,
+        raceDate: document.getElementById('tri-race-date').value,
+        raceLocation: document.getElementById('tri-race-loc').value,
+        raceTemp: document.getElementById('tri-race-temp').value,
+        waveStart: document.getElementById('tri-race-wave').value,
+    };
+    await api('triathlon/program', 'PUT', body);
+    closeModal();
+    await loadTriathlon();
+}
+
+function triOpenDisciplineModal(slug) {
+    const disc = window.TRI_DATA.disciplines.find(d => d.slug === slug);
+    if (!disc) return;
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">✎ Edit ${disc.name}</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Progress %</label><input class="form-input" type="number" min="0" max="100" id="tri-disc-progress" value="${disc.progress}"></div>
+            <div><label class="form-label">Distance</label><input class="form-input" id="tri-disc-distance" value="${disc.distance}"></div>
+            <div><label class="form-label">Pace</label><input class="form-input" id="tri-disc-pace" value="${disc.pace}"></div>
+            <div><label class="form-label">Tagline</label><input class="form-input" id="tri-disc-tagline" value="${disc.tagline}"></div>
+            <div><label class="form-label">Summary</label><textarea class="form-input" id="tri-disc-summary" rows="3">${disc.summary}</textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                <div><label class="form-label">Stat 1 label</label><input class="form-input" id="tri-s1l" value="${disc.stats[0].label}"></div>
+                <div><label class="form-label">Stat 1 value</label><input class="form-input" id="tri-s1v" value="${disc.stats[0].value}"></div>
+                <div><label class="form-label">Stat 1 unit</label><input class="form-input" id="tri-s1u" value="${disc.stats[0].unit}"></div>
+                <div><label class="form-label">Stat 2 label</label><input class="form-input" id="tri-s2l" value="${disc.stats[1].label}"></div>
+                <div><label class="form-label">Stat 2 value</label><input class="form-input" id="tri-s2v" value="${disc.stats[1].value}"></div>
+                <div><label class="form-label">Stat 2 unit</label><input class="form-input" id="tri-s2u" value="${disc.stats[1].unit}"></div>
+                <div><label class="form-label">Stat 3 label</label><input class="form-input" id="tri-s3l" value="${disc.stats[2].label}"></div>
+                <div><label class="form-label">Stat 3 value</label><input class="form-input" id="tri-s3v" value="${disc.stats[2].value}"></div>
+                <div><label class="form-label">Stat 3 unit</label><input class="form-input" id="tri-s3u" value="${disc.stats[2].unit}"></div>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveDisciplineModal('${slug}')">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveDisciplineModal(slug) {
+    const body = {
+        progress: document.getElementById('tri-disc-progress').value,
+        distance: document.getElementById('tri-disc-distance').value,
+        pace: document.getElementById('tri-disc-pace').value,
+        tagline: document.getElementById('tri-disc-tagline').value,
+        summary: document.getElementById('tri-disc-summary').value,
+        stat1_label: document.getElementById('tri-s1l').value,
+        stat1_value: document.getElementById('tri-s1v').value,
+        stat1_unit: document.getElementById('tri-s1u').value,
+        stat2_label: document.getElementById('tri-s2l').value,
+        stat2_value: document.getElementById('tri-s2v').value,
+        stat2_unit: document.getElementById('tri-s2u').value,
+        stat3_label: document.getElementById('tri-s3l').value,
+        stat3_value: document.getElementById('tri-s3v').value,
+        stat3_unit: document.getElementById('tri-s3u').value,
+    };
+    await api('triathlon/discipline/' + slug, 'PUT', body);
+    closeModal();
+    await loadTriathlon();
+    triNav(TRI.view);
+}
+
+function triOpenWorkoutModal(discipline, workout=null) {
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">${workout ? '✎ Edit' : '＋ Add'} Workout</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Name</label><input class="form-input" id="tri-wkt-name" value="${workout?.name||''}"></div>
+            <div><label class="form-label">Duration</label><input class="form-input" id="tri-wkt-dur" value="${workout?.duration||''}"></div>
+            <div><label class="form-label">Focus / description</label><input class="form-input" id="tri-wkt-focus" value="${workout?.focus||''}"></div>
+            <div><label class="form-label">Effort % (0–100)</label><input class="form-input" type="number" min="0" max="100" id="tri-wkt-effort" value="${workout?.effort||70}"></div>
+            <div><label class="form-label">Tag</label>
+                <select class="form-input" id="tri-wkt-tag">
+                    ${['Threshold','Technique','Endurance','Recovery','Race-specific','Strength'].map(t=>`<option value="${t}" ${workout?.tag===t?'selected':''}>${t}</option>`).join('')}
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            ${workout ? `<button class="btn" style="background:#c0392b;border-color:#c0392b;color:#fff;" onclick="triDeleteWorkout(${workout.id}, '${discipline}')">Delete</button>` : ''}
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveWorkoutModal('${discipline}', ${workout ? workout.id : 'null'})">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveWorkoutModal(discipline, id) {
+    const body = {
+        discipline,
+        name: document.getElementById('tri-wkt-name').value,
+        duration: document.getElementById('tri-wkt-dur').value,
+        focus: document.getElementById('tri-wkt-focus').value,
+        effort: document.getElementById('tri-wkt-effort').value,
+        tag: document.getElementById('tri-wkt-tag').value,
+    };
+    if (id && id !== 'null') await api('triathlon/workouts/' + id, 'PUT', body);
+    else await api('triathlon/workouts', 'POST', body);
+    closeModal();
+    await loadTriathlon();
+    triNav(TRI.view);
+}
+
+async function triDeleteWorkout(id, discipline) {
+    if (!confirm('Delete this workout?')) return;
+    await api('triathlon/workouts/' + id, 'DELETE');
+    closeModal();
+    await loadTriathlon();
+    triNav(TRI.view);
+}
+
+function triOpenGearModal(discipline, gear=null) {
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">${gear ? '✎ Edit' : '＋ Add'} Gear</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Item name</label><input class="form-input" id="tri-gear-name" value="${gear?.name||''}"></div>
+            <div><label class="form-label">Detail</label><input class="form-input" id="tri-gear-detail" value="${gear?.detail||''}"></div>
+            <div><label class="form-label">Tier</label>
+                <select class="form-input" id="tri-gear-tier">
+                    ${['essential','training','optional'].map(t=>`<option value="${t}" ${gear?.tier===t?'selected':''}>${t}</option>`).join('')}
+                </select>
+            </div>
+            <div><label class="form-label">Price</label><input class="form-input" id="tri-gear-price" value="${gear?.price||''}"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            ${gear ? `<button class="btn" style="background:#c0392b;border-color:#c0392b;color:#fff;" onclick="triDeleteGear(${gear.id}, '${discipline}')">Delete</button>` : ''}
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveGearModal('${discipline}', ${gear ? gear.id : 'null'})">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveGearModal(discipline, id) {
+    const body = {
+        discipline,
+        name: document.getElementById('tri-gear-name').value,
+        detail: document.getElementById('tri-gear-detail').value,
+        tier: document.getElementById('tri-gear-tier').value,
+        price: document.getElementById('tri-gear-price').value,
+    };
+    if (id && id !== 'null') await api('triathlon/gear/' + id, 'PUT', body);
+    else await api('triathlon/gear', 'POST', body);
+    closeModal();
+    await loadTriathlon();
+    triNav(TRI.view);
+}
+
+async function triDeleteGear(id, discipline) {
+    if (!confirm('Delete this gear item?')) return;
+    await api('triathlon/gear/' + id, 'DELETE');
+    closeModal();
+    await loadTriathlon();
+    triNav(TRI.view);
+}
+
+function triOpenTipModal(discipline, tip=null) {
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">${tip ? '✎ Edit' : '＋ Add'} Tip</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Tip text</label><textarea class="form-input" id="tri-tip-text" rows="4">${tip?.text||''}</textarea></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            ${tip ? `<button class="btn" style="background:#c0392b;border-color:#c0392b;color:#fff;" onclick="triDeleteTip(${tip.id}, '${discipline}')">Delete</button>` : ''}
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveTipModal('${discipline}', ${tip ? tip.id : 'null'})">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveTipModal(discipline, id) {
+    const body = { discipline, text: document.getElementById('tri-tip-text').value };
+    if (id && id !== 'null') await api('triathlon/tips/' + id, 'PUT', body);
+    else await api('triathlon/tips', 'POST', body);
+    closeModal();
+    await loadTriathlon();
+    triNav(TRI.view);
+}
+
+async function triDeleteTip(id, discipline) {
+    if (!confirm('Delete this tip?')) return;
+    await api('triathlon/tips/' + id, 'DELETE');
+    closeModal();
+    await loadTriathlon();
+    triNav(TRI.view);
+}
+
+function triOpenTimelineModal(event=null) {
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">${event ? '✎ Edit' : '＋ Add'} Timeline Event</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Time (HH:MM)</label><input class="form-input" id="tri-ev-time" value="${event?.t||''}"></div>
+            <div><label class="form-label">Event name</label><input class="form-input" id="tri-ev-name" value="${event?.event||''}"></div>
+            <div><label class="form-label">Detail</label><input class="form-input" id="tri-ev-detail" value="${event?.detail||''}"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            ${event ? `<button class="btn" style="background:#c0392b;border-color:#c0392b;color:#fff;" onclick="triDeleteEvent(${event.id})">Delete</button>` : ''}
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveTimelineModal(${event ? event.id : 'null'})">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveTimelineModal(id) {
+    const body = {
+        time: document.getElementById('tri-ev-time').value,
+        event: document.getElementById('tri-ev-name').value,
+        detail: document.getElementById('tri-ev-detail').value,
+    };
+    if (id && id !== 'null') await api('triathlon/timeline/' + id, 'PUT', body);
+    else await api('triathlon/timeline', 'POST', body);
+    closeModal();
+    await loadTriathlon();
+    triNav('race');
+}
+
+async function triDeleteEvent(id) {
+    if (!confirm('Delete this event?')) return;
+    await api('triathlon/timeline/' + id, 'DELETE');
+    closeModal();
+    await loadTriathlon();
+    triNav('race');
+}
+
+function triOpenTransitionModal(slug) {
+    const trans = window.TRI_DATA.transitions[slug];
+    if (!trans) return;
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">✎ Edit ${trans.name} — ${trans.from} → ${trans.to}</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Target time (m:ss)</label><input class="form-input" id="tri-trans-target" value="${trans.target}"></div>
+            <div>
+                <label class="form-label">Steps (one per line)</label>
+                <textarea class="form-input" id="tri-trans-steps" rows="8">${trans.steps.join('\n')}</textarea>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveTransitionModal('${slug}')">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveTransitionModal(slug) {
+    const steps = document.getElementById('tri-trans-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const body = { target: document.getElementById('tri-trans-target').value, steps };
+    await api('triathlon/transitions/' + slug, 'PUT', body);
+    closeModal();
+    await loadTriathlon();
+    triNav('race');
+}
+
+function triOpenWeekDayModal(day) {
+    const el = document.getElementById('modal-content');
+    el.innerHTML = `
+        <div class="page-title" style="margin-bottom:16px;">✎ Edit ${day.day} Workout</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label class="form-label">Type</label>
+                <select class="form-input" id="tri-wd-type">
+                    ${['rest','swim','bike','run','brick'].map(t=>`<option value="${t}" ${day.type===t?'selected':''}>${t}</option>`).join('')}
+                </select>
+            </div>
+            <div><label class="form-label">Label</label><input class="form-input" id="tri-wd-label" value="${day.label}"></div>
+            <div><label class="form-label">Duration</label><input class="form-input" id="tri-wd-dur" value="${day.duration}"></div>
+            <div><label class="form-label">Detail</label><input class="form-input" id="tri-wd-detail" value="${day.detail}"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+            <button class="btn" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-accent" onclick="triSaveWeekDayModal(${day.id})">Save</button>
+        </div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function triSaveWeekDayModal(id) {
+    const body = {
+        type: document.getElementById('tri-wd-type').value,
+        label: document.getElementById('tri-wd-label').value,
+        duration: document.getElementById('tri-wd-dur').value,
+        detail: document.getElementById('tri-wd-detail').value,
+    };
+    await api('triathlon/week/' + id, 'PUT', body);
+    closeModal();
+    await loadTriathlon();
+    triNav(TRI.view);
 }
 
 // ── Init ──
